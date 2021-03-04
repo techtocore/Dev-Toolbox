@@ -1,0 +1,23 @@
+footer {
+    position: fixed;
+    text-align: center;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    padding-top: 10px;
+    background-color: #343a40;
+    color: rgb(173, 181, 189);
+}
+
+.navbar-style {
+    background-color: #343a40;
+}
+
+.footer-link {
+    color: rgb(173, 181, 189);
+    text-decoration: none;
+}
+
+.footer-link:hover {
+    color: azure;
+  }
