@@ -1,7 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~bootstrap/scss/bootstrap';
+@import "~bootstrap-icons/font/bootstrap-icons";
 
 body {
     font-size: .875rem;
     color: azure;
+}
+
+.custom-btn {
+    color: #fff !important;
+    background-color: #017cad !important;
+    line-height: 28px !important;
+    padding-left: 25px !important;
+    padding-right: 25px !important;
+    border-radius: 2rem !important;
+    font-size: inherit !important;
+}
+
+.margin-top-15px {
+    margin-top: 15px !important;
+}
+
+.margin-top-10px {
+    margin-top: 10px !important;
+}
+.padding-bottom-60px {
+    padding-bottom: 60px !important;
 }
