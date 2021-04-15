@@ -5,22 +5,22 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="base64-input bg-light"> </textarea>
+                <textarea class="base64-input bg-light" [(ngModel)]="toEncode"> </textarea>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-12 text-center">
                 <br>
-                <button class="btn custom-btn margin-top-15px">
+                <button class="btn custom-btn margin-top-15px" (click)="encode()">
                     Encode
                     <i class="bi bi-arrow-right"></i>
                 </button>
-                <button class="btn custom-btn margin-top-15px">
+                <button class="btn custom-btn margin-top-15px" (click)="decode()">
                     <i class="bi bi-arrow-left"></i>
                     Decode
                 </button>
                 <br>
             </div>
             <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="base64-input bg-light"> </textarea>
+                <textarea class="base64-input bg-light" [(ngModel)]="toDecode"> </textarea>
             </div>
         </div>
     </div>

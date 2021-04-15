@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-
 @Component({
   selector: 'app-base64',
   templateUrl: './base64.component.html',
@@ -7,9 +6,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class Base64Component implements OnInit {
 
+  toEncode: string = '';
+  toDecode: string = '';
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  encode() {
+    var encodedData = btoa(this.toEncode);
+    this.toDecode = encodedData;
+  }
+
+  decode() {
+    var decodedData = atob(this.toDecode);
+    this.toEncode = decodedData;
   }
 
 }
