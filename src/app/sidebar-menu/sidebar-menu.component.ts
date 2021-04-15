@@ -8,8 +8,28 @@ import { Component, OnInit } from '@angular/core';
 export class SidebarMenuComponent implements OnInit {
 
   constructor() { }
+  menuData = [
+    {
+      "text": "Home"
+    },
+    {
+      "items": [
+        {
+          "text": "Base64 Encode/Decode",
+        },
+        {
+          "text": "FireAMP/Threatgrid",
+        }
+      ],
+      "text": "Miscellaneous Tools",
+    }
+  ]
 
   ngOnInit(): void {
+  }
+
+  onCustomTreeSelection(value) {
+    console.log(value);
   }
 
 }

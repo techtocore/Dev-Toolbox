@@ -1,0 +1,12 @@
+<ul class="nav flex-column">
+    <li class="list-item nav-item" *ngFor="let itm of processedData; let i=index;">
+        <span (click)="toggleOpen(i); emitEvent(i);" class="nav-link tree-item"> 
+            <span *ngIf="checkExpand(i) && data[i].items" class="icon-tree-expand list-arrows"> </span>
+            <span *ngIf="checkClose(i) && data[i].items" class="icon-tree-close list-arrows"> </span>
+            {{itm}} 
+        </span>
+        <div *ngIf="isOpen[i]">
+            <app-json-tree [data]="data[i].items" (leafSelected)="onTreeSelection($event)"></app-json-tree>
+        </div>
+    </li>
+</ul>

@@ -1,0 +1,33 @@
+ul {
+  list-style: none;
+  padding-left: 15px;
+}
+
+.list-item {
+  cursor: pointer;
+}
+
+.tree-item {
+  color: #333;
+}
+
+.tree-item:hover {
+  color: #227bb1;
+}
+
+.list-arrows {
+  padding-right: 5px;
+  margin-left: -10px;
+  font-size: smaller;
+  vertical-align: baseline;
+}
+
+.icon-tree-expand:before {
+  content: "\E058";
+  font-size: xx-small;
+}
+
+.icon-tree-close:before {
+  content: "\E053";
+  font-size: xx-small;
+}
