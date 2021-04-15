@@ -10,7 +10,19 @@ export class SidebarMenuComponent implements OnInit {
   constructor() { }
   menuData = [
     {
-      "text": "Home"
+      "text": "Home",
+      "icon": "bi bi-house"
+    },
+    {
+      "items": [
+        {
+          "text": "Base64 Encode/Decode",
+        },
+        {
+          "text": "FireAMP/Threatgrid",
+        }
+      ],
+      "text": "Cryptography",
     },
     {
       "items": [
