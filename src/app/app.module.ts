@@ -9,7 +9,7 @@ import { SidebarMenuComponent } from './sidebar-menu/sidebar-menu.component';
 import { HomeComponent } from './home/home.component';
 import { Base64Component } from './base64/base64.component';
 import { JsonTreeComponent } from './json-tree/json-tree.component';
-
+import { UtilityService } from './services/utility.service'
 
 @NgModule({
   declarations: [
@@ -24,7 +24,9 @@ import { JsonTreeComponent } from './json-tree/json-tree.component';
     AppRoutingModule,
     FormsModule
   ],
-  providers: [],
+  providers: [
+    UtilityService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

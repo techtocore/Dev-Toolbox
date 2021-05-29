@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { UtilityService } from '../services/utility.service'
 @Component({
   selector: 'app-base64',
   templateUrl: './base64.component.html',
@@ -8,9 +9,11 @@ export class Base64Component implements OnInit {
 
   toEncode: string = '';
   toDecode: string = '';
-  constructor() { }
+  isMobile;
+  constructor(public utilityService: UtilityService) { }
 
   ngOnInit(): void {
+    this.isMobile = this.utilityService.getIsMobile();
   }
 
   encode() {
