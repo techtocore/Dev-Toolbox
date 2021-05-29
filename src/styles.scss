@@ -1,33 +1,45 @@
 /* You can add global styles to this file, and also import other style files */
-@import '~bootstrap/scss/bootstrap';
+@import "~bootstrap/scss/bootstrap";
 @import "~bootstrap-icons/font/bootstrap-icons";
 
 body {
-    font-size: .875rem;
-    color: azure;
+  font-size: 0.875rem;
+  color: azure;
 }
 
 .custom-btn {
-    color: #fff !important;
-    background-color: #017cad !important;
-    line-height: 28px !important;
-    padding-left: 25px !important;
-    padding-right: 25px !important;
-    border-radius: 2rem !important;
-    font-size: inherit !important;
+  color: #fff !important;
+  background-color: #017cad !important;
+  line-height: 28px !important;
+  padding-left: 25px !important;
+  padding-right: 25px !important;
+  border-radius: 2rem !important;
+  font-size: inherit !important;
 }
 
 .margin-top-15px {
-    margin-top: 15px !important;
+  margin-top: 15px !important;
 }
 
 .margin-top-10px {
-    margin-top: 10px !important;
+  margin-top: 10px !important;
 }
 .padding-bottom-60px {
-    padding-bottom: 60px !important;
+  padding-bottom: 60px !important;
 }
 
 .bg-light-custom {
-    background-color: #eef2f7 !important;
+  background-color: #eef2f7 !important;
+}
+
+.bg-dark-custom {
+  background-color: #343a40 !important;
+}
+
+.padding-30px {
+  padding: 30px;
+}
+
+.padding-right-75px {
+  padding-right: 75px !important;
 }

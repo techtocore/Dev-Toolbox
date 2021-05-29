@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class UtilityService {
 
-  isMobile: Boolean = false;
+  isMobile: boolean = false;
   constructor() { }
 
   getIsMobile() {

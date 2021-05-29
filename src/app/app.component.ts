@@ -9,6 +9,7 @@ import { UtilityService } from './services/utility.service'
 export class AppComponent {
 
   title = 'dev-toolbox';
+  isMobile = false;
 
   constructor(public utilityService: UtilityService) { }
 
@@ -16,6 +17,7 @@ export class AppComponent {
     if (window.innerWidth < 658) {
       this.utilityService.setIsMobile(true);
     }
+    this.isMobile = this.utilityService.getIsMobile();
   }
 
 }
