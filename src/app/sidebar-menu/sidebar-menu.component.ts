@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-sidebar-menu',
   templateUrl: './sidebar-menu.component.html',
@@ -7,16 +7,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SidebarMenuComponent implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
   menuData = [
     {
       "text": "Home",
-      "icon": "bi bi-house"
+      "icon": "bi bi-house",
+      "link": "/"
     },
     {
       "items": [
         {
           "text": "Base64 Encode/Decode",
+          "link": "/base64"
         },
         {
           "text": "FireAMP/Threatgrid",
@@ -42,6 +44,7 @@ export class SidebarMenuComponent implements OnInit {
 
   onCustomTreeSelection(value) {
     console.log(value);
+    this.router.navigate([value]);
   }
 
 }

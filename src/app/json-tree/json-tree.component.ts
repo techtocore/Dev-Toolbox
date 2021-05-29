@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-json-tree',
@@ -8,7 +9,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 })
 export class JsonTreeComponent implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   @Input() data: any;
   @Output() leafSelected = new EventEmitter<string>();
@@ -25,14 +26,16 @@ export class JsonTreeComponent implements OnInit {
       return;
     }
     data.forEach(element => {
-      console.log(element.text);
-      this.processedData.push(element.text);
+      // console.log(element.text);
+      this.processedData.push(element['text']);
     });
   }
 
   emitEvent(ind) {
     if (!this.data[ind].items) {
-      this.leafSelected.emit(this.data[ind].text);
+      if (this.data[ind]['link']) {
+        this.leafSelected.emit(this.data[ind]['link']);
+      }
       if (!this.selectedItems[ind]) {
         this.selectedItems[ind] = true;
       } else {
@@ -66,11 +69,23 @@ export class JsonTreeComponent implements OnInit {
     }
     return false;
   }
+
   checkClose(ind) {
     if (!this.isOpen[ind]) {
       this.isOpen[ind] = false;
     }
     if (this.data[ind].items && this.isOpen[ind] === true) {
+      return true;
+    }
+    return false;
+  }
+
+  checkIfActive(item) {
+    if (!item['link']) {
+      return false;
+    }
+    let currentLink = this.router.url;
+    if (currentLink === item['link']) {
       return true;
     }
     return false;

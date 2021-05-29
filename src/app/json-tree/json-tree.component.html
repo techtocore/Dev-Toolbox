@@ -1,10 +1,11 @@
 <ul class="nav flex-column">
     <li class="list-item nav-item" *ngFor="let itm of processedData; let i=index;">
-        <span (click)="toggleOpen(i); emitEvent(i);" class="nav-link tree-item"> 
+        <span (click)="toggleOpen(i); emitEvent(i);" class="nav-link tree-item"
+            [ngClass]="{'text-bold': checkIfActive(data[i])}">
             <span *ngIf="!data[i].items" [ngClass]="data[i].icon" class="list-arrows"> </span>
             <span *ngIf="checkExpand(i) && data[i].items" class="bi bi-plus-circle list-arrows"> </span>
             <span *ngIf="checkClose(i) && data[i].items" class="bi bi-dash-circle list-arrows"> </span>
-            {{itm}} 
+            {{itm}}
         </span>
         <div *ngIf="isOpen[i]">
             <app-json-tree [data]="data[i].items" (leafSelected)="onTreeSelection($event)"></app-json-tree>
