@@ -21,7 +21,8 @@ export class SidebarMenuComponent implements OnInit {
           "link": "/base64"
         },
         {
-          "text": "FireAMP/Threatgrid",
+          "text": "URL Encode/Decode",
+          "link": "/urlEncode"
         }
       ],
       "text": "Cryptography",

@@ -7,17 +7,20 @@ import { AppComponent } from './app.component';
 import "bootstrap";
 import { SidebarMenuComponent } from './sidebar-menu/sidebar-menu.component';
 import { HomeComponent } from './home/home.component';
-import { Base64Component } from './base64/base64.component';
 import { JsonTreeComponent } from './json-tree/json-tree.component';
 import { UtilityService } from './services/utility.service'
+
+import { Base64Component } from './base64/base64.component';
+import { UrlEncodeComponent } from './url-encode/url-encode.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SidebarMenuComponent,
-    Base64Component,
     HomeComponent,
-    JsonTreeComponent
+    JsonTreeComponent,
+    Base64Component,
+    UrlEncodeComponent
   ],
   imports: [
     BrowserModule,
