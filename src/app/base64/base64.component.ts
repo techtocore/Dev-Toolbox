@@ -1,29 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import { UtilityService } from '../services/utility.service'
+
 @Component({
   selector: 'app-base64',
   templateUrl: './base64.component.html',
   styleUrls: ['./base64.component.scss']
 })
+
 export class Base64Component implements OnInit {
 
-  toEncode: string = '';
-  toDecode: string = '';
-  isMobile;
-  constructor(public utilityService: UtilityService) { }
+  context = {
+    'title': 'Base64 Encoding / Decoding',
+    'btn1': 'Encode',
+    'btn2': 'Decode',
+    'txt1': '',
+    'txt2': ''
+  }
+  constructor() { }
 
   ngOnInit(): void {
-    this.isMobile = this.utilityService.getIsMobile();
   }
 
-  encode() {
-    var encodedData = btoa(this.toEncode);
-    this.toDecode = encodedData;
+  encode(txt) {
+    var encodedData = btoa(txt);
+    this.context['txt2'] = encodedData;
   }
 
-  decode() {
-    var decodedData = atob(this.toDecode);
-    this.toEncode = decodedData;
+  decode(txt) {
+    var decodedData = atob(txt);
+    this.context['txt1'] = decodedData;
   }
 
 }

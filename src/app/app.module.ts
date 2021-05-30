@@ -13,6 +13,7 @@ import { UtilityService } from './services/utility.service'
 import { Base64Component } from './base64/base64.component';
 import { UrlEncodeComponent } from './url-encode/url-encode.component';
 import { JsonFormatterComponent } from './json-formatter/json-formatter.component';
+import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { JsonFormatterComponent } from './json-formatter/json-formatter.componen
     JsonTreeComponent,
     Base64Component,
     UrlEncodeComponent,
-    JsonFormatterComponent
+    JsonFormatterComponent,
+    TwoWayIoComponent
   ],
   imports: [
     BrowserModule,

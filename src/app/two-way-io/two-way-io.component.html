@@ -1,0 +1,28 @@
+<div>
+    <br />
+    <h2> {{ context['title'] }} </h2>
+    <br />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-5 col-md-4 col-sm-12">
+                <textarea class="data-input bg-light-custom" [(ngModel)]="context.txt1"> </textarea>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
+                <br>
+                <button class="btn custom-btn margin-top-15px" (click)="process()">
+                    {{ context['btn1'] }}
+                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
+                </button>
+                <button class="btn custom-btn margin-top-15px" (click)="reverse()">
+                    <i class="bi" [ngClass]="{'bi-arrow-left': !isMobile, 'bi-arrow-up': isMobile}"></i>
+                    {{ context['btn2'] }}
+                </button>
+                <br>
+                <br>
+            </div>
+            <div class="col-lg-5 col-md-4 col-sm-12">
+                <textarea class="data-input bg-light-custom" [(ngModel)]="context.txt2"> </textarea>
+            </div>
+        </div>
+    </div>
+</div>
