@@ -15,6 +15,21 @@ body {
   padding-right: 25px !important;
   border-radius: 2rem !important;
   font-size: inherit !important;
+  margin: 10px;
+}
+
+.data-input {
+  width: 100%;
+  border: 1px solid #ccc;
+  resize: vertical;
+  margin: 0 0 8px;
+  padding: 4px;
+  display: block;
+  overflow: auto;
+  word-break: break-all;
+  box-sizing: border-box;
+  min-height: 40vh;
+  white-space: break-spaces;
 }
 
 .margin-top-15px {

@@ -1,6 +1,6 @@
 <div>
     <br />
-    <h2>URL Encoding / Decoding</h2>
+    <h2>JSON Viewer</h2>
     <br />
     <div class="container-fluid">
         <div class="row">
@@ -10,18 +10,13 @@
             <div class="col-lg-2 col-md-4 col-sm-12 text-center">
                 <br>
                 <button class="btn custom-btn margin-top-15px" (click)="encode()">
-                    Encode
+                    Format
                     <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
                 </button>
-                <button class="btn custom-btn margin-top-15px" (click)="decode()">
-                    <i class="bi" [ngClass]="{'bi-arrow-left': !isMobile, 'bi-arrow-up': isMobile}"></i>
-                    Decode
-                </button>
-                <br>
                 <br>
             </div>
             <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="data-input bg-light-custom" [(ngModel)]="toDecode"> </textarea>
+                <pre class="data-input bg-light-custom">{{toDecode | json}}</pre>
             </div>
         </div>
     </div>

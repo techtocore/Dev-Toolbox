@@ -30,10 +30,8 @@ export class SidebarMenuComponent implements OnInit {
     {
       "items": [
         {
-          "text": "Base64 Encode/Decode",
-        },
-        {
-          "text": "FireAMP/Threatgrid",
+          "text": "JSON Formatter",
+          "link": "/jsonFormatter"
         }
       ],
       "text": "Miscellaneous Tools",

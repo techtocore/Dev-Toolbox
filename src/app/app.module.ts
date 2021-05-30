@@ -12,6 +12,7 @@ import { UtilityService } from './services/utility.service'
 
 import { Base64Component } from './base64/base64.component';
 import { UrlEncodeComponent } from './url-encode/url-encode.component';
+import { JsonFormatterComponent } from './json-formatter/json-formatter.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { UrlEncodeComponent } from './url-encode/url-encode.component';
     HomeComponent,
     JsonTreeComponent,
     Base64Component,
-    UrlEncodeComponent
+    UrlEncodeComponent,
+    JsonFormatterComponent
   ],
   imports: [
     BrowserModule,
