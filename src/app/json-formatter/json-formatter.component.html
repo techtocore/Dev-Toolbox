@@ -9,7 +9,7 @@
             </div>
             <div class="col-lg-2 col-md-4 col-sm-12 text-center">
                 <br>
-                <button class="btn custom-btn margin-top-15px" (click)="encode()">
+                <button class="btn custom-btn btn-margin" (click)="encode()">
                     Format
                     <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
                 </button>
@@ -17,6 +17,10 @@
             </div>
             <div class="col-lg-5 col-md-4 col-sm-12">
                 <pre class="data-input bg-light-custom">{{toDecode | json}}</pre>
+                <button class="btn custom-btn float-right" (click)="saveAsFile()">
+                    Save
+                    <i class="bi bi-download padding-left-5px"></i>
+                </button>
             </div>
         </div>
     </div>

@@ -26,4 +26,14 @@ export class TwoWayIoComponent implements OnInit {
   reverse() {
     this.reverseEvent.next(this.context['txt2']);
   }
+
+  saveAsFile(txt, flag) {
+    let filename = this.context['filename'];
+    if (flag === 0) {
+      filename = filename + '_input';
+    } else {
+      filename = filename + '_output';
+    }
+    this.utilityService.downloadFile(txt, 'text/plain', filename);
+  }
 }

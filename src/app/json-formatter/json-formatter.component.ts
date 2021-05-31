@@ -27,4 +27,9 @@ export class JsonFormatterComponent implements OnInit {
     }
   }
 
+  saveAsFile() {
+    let filename = 'data';
+    this.utilityService.downloadFile(JSON.stringify(this.toDecode, undefined, 4), 'application/json', filename);
+  }
+
 }

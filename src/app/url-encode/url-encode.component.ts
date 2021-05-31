@@ -13,7 +13,8 @@ export class UrlEncodeComponent implements OnInit {
     'btn1': 'Encode',
     'btn2': 'Decode',
     'txt1': '',
-    'txt2': ''
+    'txt2': '',
+    'filename': 'urlEncode'
   }
   constructor() { }
 

@@ -13,7 +13,8 @@ export class Base64Component implements OnInit {
     'btn1': 'Encode',
     'btn2': 'Decode',
     'txt1': '',
-    'txt2': ''
+    'txt2': '',
+    'filename': 'base64'
   }
   constructor() { }
 
