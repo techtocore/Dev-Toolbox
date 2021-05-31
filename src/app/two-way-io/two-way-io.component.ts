@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
 import { UtilityService } from '../services/utility.service'
 
 @Component({
@@ -11,8 +11,15 @@ export class TwoWayIoComponent implements OnInit {
   @Input('context') context: any = {};
   @Output() processEvent = new EventEmitter<any>();
   @Output() reverseEvent = new EventEmitter<any>();
-
+  @ViewChild('FileSelectInputDialog', { static: true }) private FileSelectInputDialog: any;
   isMobile;
+  currentBtn = 0;
+
+  public OpenAddFilesDialog() {
+    const e: HTMLElement = this.FileSelectInputDialog.nativeElement;
+    e.click();
+  }
+
   constructor(public utilityService: UtilityService) { }
 
   ngOnInit(): void {
@@ -35,5 +42,14 @@ export class TwoWayIoComponent implements OnInit {
       filename = filename + '_output';
     }
     this.utilityService.downloadFile(txt, 'text/plain', filename);
+  }
+
+  async handleFileInput(files: FileList) {
+    let content = await this.utilityService.readTextFile(files[0]);
+    if (this.currentBtn === 0) {
+      this.context['txt1'] = content;
+    } else {
+      this.context['txt2'] = content;
+    }
   }
 }
