@@ -21,26 +21,36 @@ export class CertInfoComponent implements OnInit {
     this.isMobile = this.utilityService.getIsMobile();
   }
 
-  async decode() {
+
+  decode() {
     const cert = this.encodedCert.trim();
-    let parsedCert = Forge.pki.certificateFromPem(cert);
+    this.certInfo = {};
 
-    this.certInfo.issuer = {};
-    parsedCert?.issuer?.attributes?.forEach(element => {
-      this.certInfo.issuer[element.name] = element.value
-    });
+    try {
+      let parsedCert = Forge.pki.certificateFromPem(cert);
 
-    this.certInfo.subject = {};
-    parsedCert?.subject?.attributes?.forEach(element => {
-      this.certInfo.subject[element.name] = element.value
-    });
+      this.certInfo.issuer = {};
+      parsedCert?.issuer?.attributes?.forEach(element => {
+        this.certInfo.issuer[element.name] = element.value
+      });
 
-    this.certInfo.serialNumber = parsedCert?.serialNumber;
-    this.certInfo.validFrom = parsedCert?.validity?.notBefore;
-    this.certInfo.validTill = parsedCert?.validity?.notAfter;
-    this.certInfo.signatureOid = parsedCert?.signatureOid;
-    this.certInfo.signAlgorithmOid = parsedCert?.siginfo?.algorithmOid;
-    this.certInfo.signParameters = parsedCert?.siginfo?.parameters
+      this.certInfo.subject = {};
+      parsedCert?.subject?.attributes?.forEach(element => {
+        this.certInfo.subject[element.name] = element.value
+      });
+
+      this.certInfo.serialNumber = parsedCert?.serialNumber;
+      this.certInfo.validFrom = parsedCert?.validity?.notBefore;
+      this.certInfo.validTill = parsedCert?.validity?.notAfter;
+      this.certInfo.signatureOid = parsedCert?.signatureOid;
+      this.certInfo.signAlgorithmOid = parsedCert?.siginfo?.algorithmOid;
+      this.certInfo.signParameters = parsedCert?.siginfo?.parameters
+
+    }
+    catch (err: any) {
+      this.certInfo.message = 'Error Parsing Certificate';
+      this.certInfo.error = err.message
+    }
 
   }
 
