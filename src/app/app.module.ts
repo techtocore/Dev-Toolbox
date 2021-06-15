@@ -14,6 +14,7 @@ import { Base64Component } from './base64/base64.component';
 import { UrlEncodeComponent } from './url-encode/url-encode.component';
 import { JsonFormatterComponent } from './json-formatter/json-formatter.component';
 import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
+import { CertInfoComponent } from './cert-info/cert-info.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
     Base64Component,
     UrlEncodeComponent,
     JsonFormatterComponent,
-    TwoWayIoComponent
+    TwoWayIoComponent,
+    CertInfoComponent
   ],
   imports: [
     BrowserModule,

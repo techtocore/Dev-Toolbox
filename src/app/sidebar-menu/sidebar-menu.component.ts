@@ -30,6 +30,15 @@ export class SidebarMenuComponent implements OnInit {
     {
       "items": [
         {
+          "text": "Certificate Information",
+          "link": "/certinfo"
+        }
+      ],
+      "text": "Cert Tools"
+    },
+    {
+      "items": [
+        {
           "text": "JSON Formatter",
           "link": "/jsonFormatter"
         }
