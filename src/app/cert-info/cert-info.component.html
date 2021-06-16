@@ -1,0 +1,27 @@
+<div>
+    <br />
+    <h2> {{ context['title'] }} </h2>
+    <br />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-5 col-md-4 col-sm-12">
+                <textarea class="data-input bg-light-custom" [(ngModel)]="encodedCert"> </textarea>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
+                <br>
+                <button class="btn custom-btn btn-margin" (click)="decode()">
+                    Cert Info
+                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
+                </button>
+                <br>
+            </div>
+            <div class="col-lg-5 col-md-4 col-sm-12">
+                <pre class="data-input bg-light-custom">{{certInfo | json }}</pre>
+                <button class="btn custom-btn float-right" (click)="saveAsFile()">
+                    Save
+                    <i class="bi bi-download padding-left-5px"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
