@@ -10,3 +10,6 @@ The frontend code was generated with [Angular CLI](https://github.com/angular/an
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+### Contributors
+
+![GitHub Contributors Image](https://contrib.rocks/image?repo=techtocore/Dev-Toolbox)
