@@ -24,8 +24,9 @@ export class CertInfoComponent implements OnInit {
 
   decode() {
     const cert = this.encodedCert.trim();
-    this.certInfo = {};
+    const md = Forge.md.sha1.create();
 
+    this.certInfo = {};
     try {
       let parsedCert = Forge.pki.certificateFromPem(cert);
 
@@ -46,6 +47,8 @@ export class CertInfoComponent implements OnInit {
       this.certInfo.signAlgorithmOid = parsedCert?.siginfo?.algorithmOid;
       this.certInfo.signParameters = parsedCert?.siginfo?.parameters
 
+      md.update(Forge.asn1.toDer(Forge.pki.certificateToAsn1(parsedCert)).getBytes());
+      this.certInfo.thumbprint = md.digest().toHex()
     }
     catch (err: any) {
       this.certInfo.message = 'Error Parsing Certificate';
