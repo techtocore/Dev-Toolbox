@@ -23,18 +23,13 @@ export class SidebarMenuComponent implements OnInit {
         {
           "text": "URL Encode/Decode",
           "link": "/urlEncode"
-        }
-      ],
-      "text": "Cryptography",
-    },
-    {
-      "items": [
+        },
         {
           "text": "Certificate Information",
           "link": "/certinfo"
         }
       ],
-      "text": "Cert Tools"
+      "text": "Cryptography",
     },
     {
       "items": [
