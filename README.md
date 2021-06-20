@@ -12,4 +12,6 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ### Contributors
 
-![GitHub Contributors Image](https://contrib.rocks/image?repo=techtocore/Dev-Toolbox)
+<a href = "https://github.com/techtocore/Dev-Toolbox/graphs/contributors">
+<img src = "https://contrib.rocks/image?repo = techtocore/Dev-Toolbox"/>
+</a>
