@@ -34,6 +34,15 @@ export class SidebarMenuComponent implements OnInit {
     {
       "items": [
         {
+          "text": "Markdown Editor",
+          "link": "/markdown"
+        }
+      ],
+      "text": "Text Processing",
+    },
+    {
+      "items": [
+        {
           "text": "JSON Formatter",
           "link": "/jsonFormatter"
         }

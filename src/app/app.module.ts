@@ -15,6 +15,7 @@ import { UrlEncodeComponent } from './url-encode/url-encode.component';
 import { JsonFormatterComponent } from './json-formatter/json-formatter.component';
 import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
 import { CertInfoComponent } from './cert-info/cert-info.component';
+import { MarkdownComponent } from './markdown/markdown.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { CertInfoComponent } from './cert-info/cert-info.component';
     UrlEncodeComponent,
     JsonFormatterComponent,
     TwoWayIoComponent,
-    CertInfoComponent
+    CertInfoComponent,
+    MarkdownComponent
   ],
   imports: [
     BrowserModule,
