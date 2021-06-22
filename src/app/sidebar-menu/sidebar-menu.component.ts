@@ -36,6 +36,10 @@ export class SidebarMenuComponent implements OnInit {
         {
           "text": "Markdown Editor",
           "link": "/markdown"
+        },
+        {
+          "text": "Word Counter",
+          "link": "/wordCount"
         }
       ],
       "text": "Text Processing",

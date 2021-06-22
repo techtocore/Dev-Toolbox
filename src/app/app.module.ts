@@ -16,6 +16,7 @@ import { JsonFormatterComponent } from './json-formatter/json-formatter.componen
 import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
 import { CertInfoComponent } from './cert-info/cert-info.component';
 import { MarkdownComponent } from './markdown/markdown.component';
+import { WordCountComponent } from './word-count/word-count.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { MarkdownComponent } from './markdown/markdown.component';
     JsonFormatterComponent,
     TwoWayIoComponent,
     CertInfoComponent,
-    MarkdownComponent
+    MarkdownComponent,
+    WordCountComponent
   ],
   imports: [
     BrowserModule,

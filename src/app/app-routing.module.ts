@@ -6,6 +6,7 @@ import { UrlEncodeComponent } from './url-encode/url-encode.component';
 import { JsonFormatterComponent } from './json-formatter/json-formatter.component';
 import { CertInfoComponent } from './cert-info/cert-info.component';
 import { MarkdownComponent } from './markdown/markdown.component';
+import { WordCountComponent } from './word-count/word-count.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -13,7 +14,8 @@ const routes: Routes = [
   { path: 'urlEncode', component: UrlEncodeComponent },
   { path: 'jsonFormatter', component: JsonFormatterComponent },
   { path: 'certinfo', component: CertInfoComponent },
-  { path: 'markdown', component: MarkdownComponent }
+  { path: 'markdown', component: MarkdownComponent },
+  { path: 'wordCount', component: WordCountComponent }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
