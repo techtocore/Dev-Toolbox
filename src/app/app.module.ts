@@ -17,6 +17,7 @@ import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
 import { CertInfoComponent } from './cert-info/cert-info.component';
 import { MarkdownComponent } from './markdown/markdown.component';
 import { WordCountComponent } from './word-count/word-count.component';
+import { NumericSummaryComponent } from './numeric-summary/numeric-summary.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { WordCountComponent } from './word-count/word-count.component';
     TwoWayIoComponent,
     CertInfoComponent,
     MarkdownComponent,
-    WordCountComponent
+    WordCountComponent,
+    NumericSummaryComponent
   ],
   imports: [
     BrowserModule,

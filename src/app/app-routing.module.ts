@@ -7,6 +7,7 @@ import { JsonFormatterComponent } from './json-formatter/json-formatter.componen
 import { CertInfoComponent } from './cert-info/cert-info.component';
 import { MarkdownComponent } from './markdown/markdown.component';
 import { WordCountComponent } from './word-count/word-count.component';
+import { NumericSummaryComponent } from './numeric-summary/numeric-summary.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -15,7 +16,8 @@ const routes: Routes = [
   { path: 'jsonFormatter', component: JsonFormatterComponent },
   { path: 'certinfo', component: CertInfoComponent },
   { path: 'markdown', component: MarkdownComponent },
-  { path: 'wordCount', component: WordCountComponent }
+  { path: 'wordCount', component: WordCountComponent },
+  { path: 'numericSummary', component: NumericSummaryComponent }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

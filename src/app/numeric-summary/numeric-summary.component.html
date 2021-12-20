@@ -1,0 +1,49 @@
+<div>
+    <br />
+    <h2>1 Variable Numeric Summary</h2>
+    <br />
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-lg-5 col-md-4 col-sm-12">
+                <textarea class="data-input bg-light-custom" [(ngModel)]="inputTxt"> </textarea>
+            </div>
+
+            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
+                <br>
+                <button class="btn custom-btn btn-margin" (click)="process()">
+                    Calculate
+                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
+                </button>
+                <br>
+                <br>
+            </div>
+            <div class="col-lg-5 col-md-4 col-sm-12">
+                <br>
+                Count: {{count}}
+                <br>
+                Min: {{min}}
+                <br>
+                Max: {{max}}
+                <br>
+                Mode: {{mode}}
+                <br>
+                <br>
+                Mean: {{mean}}
+                <br>
+                Sample Standard Deviation: {{sd}}
+                <br>
+                <br>
+                Q1: {{q1}}
+                <br>
+                Median: {{median}}
+                <br>
+                Q3: {{q3}}
+                <br>
+                IQR: {{iqr}}
+                <br>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -51,7 +51,16 @@ export class SidebarMenuComponent implements OnInit {
           "link": "/jsonFormatter"
         }
       ],
-      "text": "Miscellaneous Tools",
+      "text": "Parsing & Formatting",
+    },
+    {
+      "items": [
+        {
+          "text": "Numeric Summary",
+          "link": "/numericSummary"
+        }
+      ],
+      "text": "Statistics",
     }
   ]
 

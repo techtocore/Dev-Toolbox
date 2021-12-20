@@ -4,7 +4,7 @@ This project is a collection of mini tools to aid software developers. More deta
 
 ## Development server
 
-The frontend code was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.1. Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+The frontend code was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.x. Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Build
 
