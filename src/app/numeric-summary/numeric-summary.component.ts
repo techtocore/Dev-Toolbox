@@ -14,7 +14,8 @@ export class NumericSummaryComponent implements OnInit {
   mean: number;
   median: number;
   mode: any;
-  sd: number;
+  sd1: number;
+  sd2: number;
   q1: number;
   min: number;
   q3: number;
@@ -57,13 +58,11 @@ export class NumericSummaryComponent implements OnInit {
       }
     }
 
-    return modes;
-  }
+    if (modes.length === array.length) {
+      return ['All elements have the same frequency of ' + maxFreq];
+    }
 
-  getStandardDeviation (array) {
-    const n = array.length
-    const mean = array.reduce((a, b) => a + b) / n
-    return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
+    return modes;
   }
 
   process(): void {
@@ -76,16 +75,26 @@ export class NumericSummaryComponent implements OnInit {
     }
     arr.sort();
     console.log(arr);
+
+    const average = (array) => array.reduce((a, b) => a + b) / array.length;
+    const standardDeviation = (arr, usePopulation = false) => {
+      const mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
+      return Math.sqrt(
+        arr.reduce((acc, val) => acc.concat((val - mean) ** 2), []).reduce((acc, val) => acc + val, 0) /
+          (arr.length - (usePopulation ? 0 : 1))
+      );
+    };
+
     this.count = arr.length;
     this.min = arr[0];
     this.max = arr[arr.length - 1];
-    const average = (array) => array.reduce((a, b) => a + b) / array.length;
     this.mean = average(arr);
     this.q1 = this.getPercentile(arr, 25);
     this.median = this.getPercentile(arr, 50);
     this.q3 = this.getPercentile(arr, 75);
     this.iqr = 1.5 * (this.q3 - this.q1);
     this.mode = this.getModes(arr).join(", ");
-    this.sd = this.getStandardDeviation(arr);
+    this.sd1 = standardDeviation(arr);
+    this.sd2 = standardDeviation(arr, true);
   }
 }
