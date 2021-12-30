@@ -27,16 +27,15 @@ export class NumericSummaryComponent implements OnInit {
     this.isMobile = this.utilityService.getIsMobile();
   }
 
-  getPercentile(data, percentile) {
-    let index = (percentile / 100) * data.length;
-    let result;
-    if (Math.floor(index) == index) {
-      result = (data[(index - 1)] + data[index]) / 2;
+  get50Percentile(data) {
+    var pos = ((data.length) - 1) * 0.5;
+    var base = Math.floor(pos);
+    var rest = pos - base;
+    if ((data[base + 1] !== undefined)) {
+      return data[base] + rest * (data[base + 1] - data[base]);
+    } else {
+      return data[base];
     }
-    else {
-      result = data[Math.floor(index)];
-    }
-    return result;
   }
 
   getModes(array) {
@@ -51,7 +50,6 @@ export class NumericSummaryComponent implements OnInit {
         maxFreq = frequency[array[i]];
       }
     }
-
     for (let k in frequency) {
       if (frequency[k] == maxFreq) {
         modes.push(k);
@@ -73,7 +71,7 @@ export class NumericSummaryComponent implements OnInit {
     } else {
       arr = this.inputTxt.split(" ").map(Number);
     }
-    arr.sort();
+    arr.sort((a, b) => a - b);
     console.log(arr);
 
     const average = (array) => array.reduce((a, b) => a + b) / array.length;
@@ -81,7 +79,7 @@ export class NumericSummaryComponent implements OnInit {
       const mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
       return Math.sqrt(
         arr.reduce((acc, val) => acc.concat((val - mean) ** 2), []).reduce((acc, val) => acc + val, 0) /
-          (arr.length - (usePopulation ? 0 : 1))
+        (arr.length - (usePopulation ? 0 : 1))
       );
     };
 
@@ -89,10 +87,12 @@ export class NumericSummaryComponent implements OnInit {
     this.min = arr[0];
     this.max = arr[arr.length - 1];
     this.mean = average(arr);
-    this.q1 = this.getPercentile(arr, 25);
-    this.median = this.getPercentile(arr, 50);
-    this.q3 = this.getPercentile(arr, 75);
-    this.iqr = 1.5 * (this.q3 - this.q1);
+    this.median = this.get50Percentile(arr);
+    let arr1 = arr.filter(a => a < this.median);
+    this.q1 = this.get50Percentile(arr1);
+    let arr3 = arr.filter(a => a > this.median);
+    this.q3 = this.get50Percentile(arr3);
+    this.iqr = this.q3 - this.q1;
     this.mode = this.getModes(arr).join(", ");
     this.sd1 = standardDeviation(arr);
     this.sd2 = standardDeviation(arr, true);
