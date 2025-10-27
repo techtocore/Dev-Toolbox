@@ -3,7 +3,8 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-url-encode',
   templateUrl: './url-encode.component.html',
-  styleUrls: ['./url-encode.component.scss']
+  styleUrls: ['./url-encode.component.scss'],
+  standalone: false
 })
 
 export class UrlEncodeComponent implements OnInit {

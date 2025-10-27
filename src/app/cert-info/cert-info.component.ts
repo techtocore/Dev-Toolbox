@@ -5,7 +5,8 @@ import * as Forge from 'node-forge'
 @Component({
   selector: 'app-cert-info',
   templateUrl: './cert-info.component.html',
-  styleUrls: ['./cert-info.component.scss']
+  styleUrls: ['./cert-info.component.scss'],
+  standalone: false
 })
 export class CertInfoComponent implements OnInit {
   context = {

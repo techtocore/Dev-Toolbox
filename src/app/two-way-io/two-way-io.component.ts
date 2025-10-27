@@ -4,7 +4,8 @@ import { UtilityService } from '../services/utility.service'
 @Component({
   selector: 'app-two-way-io',
   templateUrl: './two-way-io.component.html',
-  styleUrls: ['./two-way-io.component.scss']
+  styleUrls: ['./two-way-io.component.scss'],
+  standalone: false
 })
 export class TwoWayIoComponent implements OnInit {
 

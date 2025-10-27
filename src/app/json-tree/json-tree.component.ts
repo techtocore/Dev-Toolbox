@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-json-tree',
   templateUrl: './json-tree.component.html',
-  styleUrls: ['./json-tree.component.scss']
+  styleUrls: ['./json-tree.component.scss'],
+  standalone: false
 
 })
 export class JsonTreeComponent implements OnInit {

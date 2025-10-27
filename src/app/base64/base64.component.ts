@@ -3,7 +3,8 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-base64',
   templateUrl: './base64.component.html',
-  styleUrls: ['./base64.component.scss']
+  styleUrls: ['./base64.component.scss'],
+  standalone: false
 })
 
 export class Base64Component implements OnInit {

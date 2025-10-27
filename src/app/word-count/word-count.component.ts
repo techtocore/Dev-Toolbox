@@ -4,7 +4,8 @@ import { UtilityService } from '../services/utility.service'
 @Component({
   selector: 'app-word-count',
   templateUrl: './word-count.component.html',
-  styleUrls: ['./word-count.component.scss']
+  styleUrls: ['./word-count.component.scss'],
+  standalone: false
 })
 export class WordCountComponent implements OnInit {
 
