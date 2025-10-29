@@ -18,6 +18,10 @@ import { CertInfoComponent } from './cert-info/cert-info.component';
 import { MarkdownComponent } from './markdown/markdown.component';
 import { WordCountComponent } from './word-count/word-count.component';
 import { NumericSummaryComponent } from './numeric-summary/numeric-summary.component';
+import { HashGenerator } from './hash-generator/hash-generator';
+import { UuidGenerator } from './uuid-generator/uuid-generator';
+import { ColorConverter } from './color-converter/color-converter';
+import { TimestampConverter } from './timestamp-converter/timestamp-converter';
 
 @NgModule({
   declarations: [
@@ -32,7 +36,11 @@ import { NumericSummaryComponent } from './numeric-summary/numeric-summary.compo
     CertInfoComponent,
     MarkdownComponent,
     WordCountComponent,
-    NumericSummaryComponent
+    NumericSummaryComponent,
+    HashGenerator,
+    UuidGenerator,
+    ColorConverter,
+    TimestampConverter
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,33 @@
+.controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+
+    label {
+        margin: 0;
+    }
+
+    .count-input {
+        width: 100px;
+    }
+}
+
+.uuid-list {
+    .uuid-item {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+
+        input {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        button {
+            padding: 0.375rem 0.75rem;
+        }
+    }
+}

@@ -26,6 +26,10 @@ export class SidebarMenuComponent implements OnInit {
           "link": "/urlEncode"
         },
         {
+          "text": "Hash Generator",
+          "link": "/hashGenerator"
+        },
+        {
           "text": "Certificate Information",
           "link": "/certinfo"
         }
@@ -50,6 +54,10 @@ export class SidebarMenuComponent implements OnInit {
         {
           "text": "JSON Formatter",
           "link": "/jsonFormatter"
+        },
+        {
+          "text": "Timestamp Converter",
+          "link": "/timestampConverter"
         }
       ],
       "text": "Parsing & Formatting",
@@ -62,6 +70,19 @@ export class SidebarMenuComponent implements OnInit {
         }
       ],
       "text": "Statistics",
+    },
+    {
+      "items": [
+        {
+          "text": "UUID Generator",
+          "link": "/uuidGenerator"
+        },
+        {
+          "text": "Color Converter",
+          "link": "/colorConverter"
+        }
+      ],
+      "text": "Development Tools",
     }
   ]
 

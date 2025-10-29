@@ -1,0 +1,120 @@
+<div>
+    <br />
+    <h2>Timestamp Converter</h2>
+    <br />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6 col-md-12">
+                <h5>Input</h5>
+                
+                <div class="input-section">
+                    <label><strong>Unix Timestamp:</strong></label>
+                    <div class="input-with-button">
+                        <input type="text" class="form-control bg-light-custom" [(ngModel)]="unixInput" 
+                               (ngModelChange)="onUnixInputChange()" 
+                               placeholder="e.g., 1730217600 or 1730217600000" />
+                        <button class="btn btn-sm custom-btn" (click)="useCurrentTimestamp()" 
+                                title="Use current timestamp">
+                            <i class="bi bi-clock"></i> Now
+                        </button>
+                    </div>
+                    <small class="help-text">Supports seconds (10 digits) or milliseconds (13 digits)</small>
+                </div>
+
+                <div class="input-section">
+                    <label><strong>Date & Time:</strong></label>
+                    <input type="datetime-local" class="form-control bg-light-custom" [(ngModel)]="dateTimeInput" 
+                           (ngModelChange)="onDateTimeChange()" />
+                    <small class="help-text">Select a date and time in your local timezone</small>
+                </div>
+
+                <div class="input-section">
+                    <label><strong>ISO 8601 String:</strong></label>
+                    <input type="text" class="form-control bg-light-custom" [(ngModel)]="isoInput" 
+                           (ngModelChange)="onIsoInputChange()" 
+                           placeholder="e.g., 2024-10-29T12:00:00.000Z" />
+                    <small class="help-text">Enter ISO 8601 formatted date string</small>
+                </div>
+
+                <button class="btn custom-btn margin-top-10px" (click)="clear()">
+                    Clear All
+                </button>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <h5>Conversions</h5>
+                
+                <div *ngIf="hasValidInput; else emptyState">
+                    <div class="output-item">
+                        <label><strong>Unix (seconds):</strong></label>
+                        <div class="output-box">
+                            <input type="text" readonly [value]="unixSeconds" class="form-control" />
+                            <button class="btn btn-sm custom-btn" (click)="copyToClipboard(unixSeconds)" 
+                                    title="Copy to clipboard">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="output-item">
+                        <label><strong>Unix (milliseconds):</strong></label>
+                        <div class="output-box">
+                            <input type="text" readonly [value]="unixMilliseconds" class="form-control" />
+                            <button class="btn btn-sm custom-btn" (click)="copyToClipboard(unixMilliseconds)" 
+                                    title="Copy to clipboard">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="output-item">
+                        <label><strong>ISO 8601:</strong></label>
+                        <div class="output-box">
+                            <input type="text" readonly [value]="isoString" class="form-control" />
+                            <button class="btn btn-sm custom-btn" (click)="copyToClipboard(isoString)" 
+                                    title="Copy to clipboard">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="output-item">
+                        <label><strong>Local Time:</strong></label>
+                        <div class="output-box">
+                            <input type="text" readonly [value]="localTimeString" class="form-control" />
+                            <button class="btn btn-sm custom-btn" (click)="copyToClipboard(localTimeString)" 
+                                    title="Copy to clipboard">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="output-item">
+                        <label><strong>UTC Time:</strong></label>
+                        <div class="output-box">
+                            <input type="text" readonly [value]="utcTimeString" class="form-control" />
+                            <button class="btn btn-sm custom-btn" (click)="copyToClipboard(utcTimeString)" 
+                                    title="Copy to clipboard">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="output-item">
+                        <label><strong>Relative:</strong></label>
+                        <div class="output-box">
+                            <input type="text" readonly [value]="relativeTime" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <ng-template #emptyState>
+                    <div class="empty-state bg-light-custom">
+                        <i class="bi bi-clock-history"></i>
+                        <p>Enter a timestamp or date to convert</p>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

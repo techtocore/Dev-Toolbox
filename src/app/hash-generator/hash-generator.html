@@ -1,0 +1,65 @@
+<div>
+    <br />
+    <h2>Hash Generator</h2>
+    <br />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6 col-md-12">
+                <h5>Input Text</h5>
+                <textarea class="data-input bg-light-custom" [(ngModel)]="inputText" 
+                          (ngModelChange)="generateHashes()" 
+                          placeholder="Enter text to generate hashes..."></textarea>
+                <button class="btn custom-btn margin-top-10px" (click)="clear()">
+                    Clear
+                </button>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <h5>Generated Hashes</h5>
+                
+                <div class="hash-output">
+                    <label><strong>MD5:</strong></label>
+                    <div class="output-box">
+                        <input type="text" readonly [value]="md5Hash" class="form-control" />
+                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(md5Hash)" 
+                                [disabled]="!md5Hash" title="Copy to clipboard">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hash-output">
+                    <label><strong>SHA-1:</strong></label>
+                    <div class="output-box">
+                        <input type="text" readonly [value]="sha1Hash" class="form-control" />
+                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(sha1Hash)" 
+                                [disabled]="!sha1Hash" title="Copy to clipboard">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hash-output">
+                    <label><strong>SHA-256:</strong></label>
+                    <div class="output-box">
+                        <input type="text" readonly [value]="sha256Hash" class="form-control" />
+                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(sha256Hash)" 
+                                [disabled]="!sha256Hash" title="Copy to clipboard">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hash-output">
+                    <label><strong>SHA-512:</strong></label>
+                    <div class="output-box">
+                        <input type="text" readonly [value]="sha512Hash" class="form-control" />
+                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(sha512Hash)" 
+                                [disabled]="!sha512Hash" title="Copy to clipboard">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

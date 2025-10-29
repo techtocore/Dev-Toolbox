@@ -1,0 +1,23 @@
+.hash-output {
+    margin-bottom: 15px;
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .output-box {
+        display: flex;
+        gap: 10px;
+
+        input {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        button {
+            padding: 0.375rem 0.75rem;
+        }
+    }
+}

@@ -1,0 +1,76 @@
+<div>
+    <br />
+    <h2>Color Converter</h2>
+    <br />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 col-md-12">
+                <div class="color-section">
+                    <h5>HEX</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control" [(ngModel)]="hexInput" 
+                               (ngModelChange)="onHexChange()" placeholder="#000000" />
+                        <button class="btn custom-btn" (click)="copyToClipboard(hexInput)">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="color-section">
+                    <h5>RGB</h5>
+                    <div class="rgb-inputs">
+                        <div class="rgb-input">
+                            <label>R</label>
+                            <input type="number" class="form-control" [(ngModel)]="rgbR" 
+                                   (ngModelChange)="onRgbChange()" min="0" max="255" />
+                        </div>
+                        <div class="rgb-input">
+                            <label>G</label>
+                            <input type="number" class="form-control" [(ngModel)]="rgbG" 
+                                   (ngModelChange)="onRgbChange()" min="0" max="255" />
+                        </div>
+                        <div class="rgb-input">
+                            <label>B</label>
+                            <input type="number" class="form-control" [(ngModel)]="rgbB" 
+                                   (ngModelChange)="onRgbChange()" min="0" max="255" />
+                        </div>
+                        <button class="btn custom-btn" (click)="copyToClipboard('rgb(' + rgbR + ', ' + rgbG + ', ' + rgbB + ')')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="color-section">
+                    <h5>HSL</h5>
+                    <div class="hsl-inputs">
+                        <div class="hsl-input">
+                            <label>H (0-360)</label>
+                            <input type="number" class="form-control" [(ngModel)]="hslH" 
+                                   (ngModelChange)="onHslChange()" min="0" max="360" />
+                        </div>
+                        <div class="hsl-input">
+                            <label>S (0-100)</label>
+                            <input type="number" class="form-control" [(ngModel)]="hslS" 
+                                   (ngModelChange)="onHslChange()" min="0" max="100" />
+                        </div>
+                        <div class="hsl-input">
+                            <label>L (0-100)</label>
+                            <input type="number" class="form-control" [(ngModel)]="hslL" 
+                                   (ngModelChange)="onHslChange()" min="0" max="100" />
+                        </div>
+                        <button class="btn custom-btn" (click)="copyToClipboard('hsl(' + hslH + ', ' + hslS + '%, ' + hslL + '%)')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-12">
+                <h5>Preview</h5>
+                <div class="color-preview" [style.background-color]="getColorPreview()">
+                    <span class="preview-text">{{ hexInput }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
