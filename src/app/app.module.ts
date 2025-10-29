@@ -22,6 +22,9 @@ import { HashGenerator } from './hash-generator/hash-generator';
 import { UuidGenerator } from './uuid-generator/uuid-generator';
 import { ColorConverter } from './color-converter/color-converter';
 import { TimestampConverter } from './timestamp-converter/timestamp-converter';
+import { JwtDecoder } from './jwt-decoder/jwt-decoder';
+import { RegexTester } from './regex-tester/regex-tester';
+import { DiffChecker } from './diff-checker/diff-checker';
 
 @NgModule({
   declarations: [
@@ -40,7 +43,10 @@ import { TimestampConverter } from './timestamp-converter/timestamp-converter';
     HashGenerator,
     UuidGenerator,
     ColorConverter,
-    TimestampConverter
+    TimestampConverter,
+    JwtDecoder,
+    RegexTester,
+    DiffChecker
   ],
   imports: [
     BrowserModule,

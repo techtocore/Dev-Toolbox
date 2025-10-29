@@ -12,6 +12,9 @@ import { HashGenerator } from './hash-generator/hash-generator';
 import { UuidGenerator } from './uuid-generator/uuid-generator';
 import { ColorConverter } from './color-converter/color-converter';
 import { TimestampConverter } from './timestamp-converter/timestamp-converter';
+import { JwtDecoder } from './jwt-decoder/jwt-decoder';
+import { RegexTester } from './regex-tester/regex-tester';
+import { DiffChecker } from './diff-checker/diff-checker';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -25,7 +28,10 @@ const routes: Routes = [
   { path: 'numericSummary', component: NumericSummaryComponent },
   { path: 'uuidGenerator', component: UuidGenerator },
   { path: 'colorConverter', component: ColorConverter },
-  { path: 'timestampConverter', component: TimestampConverter }
+  { path: 'timestampConverter', component: TimestampConverter },
+  { path: 'jwtDecoder', component: JwtDecoder },
+  { path: 'regexTester', component: RegexTester },
+  { path: 'diffChecker', component: DiffChecker }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

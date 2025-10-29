@@ -1,0 +1,83 @@
+<div>
+    <br />
+    <h2>Diff Checker</h2>
+    <br />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-5 col-md-12">
+                <h5>Original Text</h5>
+                <textarea class="data-input bg-light-custom" [(ngModel)]="text1" 
+                          (ngModelChange)="compareTexts()" 
+                          placeholder="Paste original text here..."></textarea>
+            </div>
+
+            <div class="col-lg-2 col-md-12 text-center button-column">
+                <button class="btn custom-btn" (click)="compareTexts()">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Compare
+                </button>
+                <button class="btn custom-btn" (click)="clear()">
+                    Clear
+                </button>
+            </div>
+
+            <div class="col-lg-5 col-md-12">
+                <h5>Modified Text</h5>
+                <textarea class="data-input bg-light-custom" [(ngModel)]="text2" 
+                          (ngModelChange)="compareTexts()" 
+                          placeholder="Paste modified text here..."></textarea>
+            </div>
+        </div>
+
+        <div class="row margin-top-20px">
+            <div class="col-12">
+                <div class="stats-section">
+                    <h5>Difference Statistics</h5>
+                    <div class="stats-grid">
+                        <div class="stat-item added">
+                            <i class="bi bi-plus-circle"></i>
+                            <span class="stat-label">Added:</span>
+                            <span class="stat-value">{{ addedCount }}</span>
+                        </div>
+                        <div class="stat-item removed">
+                            <i class="bi bi-dash-circle"></i>
+                            <span class="stat-label">Removed:</span>
+                            <span class="stat-value">{{ removedCount }}</span>
+                        </div>
+                        <div class="stat-item unchanged">
+                            <i class="bi bi-check-circle"></i>
+                            <span class="stat-label">Unchanged:</span>
+                            <span class="stat-value">{{ unchangedCount }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="diffLines.length > 0" class="diff-section">
+                    <div class="diff-header">
+                        <h5>Comparison Result</h5>
+                        <button class="btn btn-sm custom-btn" (click)="copyDiff()">
+                            <i class="bi bi-clipboard"></i> Copy Diff
+                        </button>
+                    </div>
+                    
+                    <div class="diff-output">
+                        <div *ngFor="let line of diffLines" 
+                             [class]="'diff-line ' + line.type">
+                            <span class="line-numbers">
+                                <span class="line-num">{{ line.lineNumber1 || '' }}</span>
+                                <span class="line-num">{{ line.lineNumber2 || '' }}</span>
+                            </span>
+                            <span class="line-prefix">{{ line.type === 'added' ? '+' : line.type === 'removed' ? '-' : ' ' }}</span>
+                            <span class="line-content">{{ line.content || '(empty line)' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="diffLines.length === 0" class="empty-state bg-light-custom">
+                    <i class="bi bi-file-diff"></i>
+                    <p>Enter text in both fields to compare</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

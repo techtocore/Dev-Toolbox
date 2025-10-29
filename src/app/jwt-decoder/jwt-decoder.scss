@@ -1,0 +1,67 @@
+.output-section {
+    margin-bottom: 20px;
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .output-box {
+        position: relative;
+
+        .data-output {
+            margin: 0;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            color: black;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        input {
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+    }
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 4px;
+    
+    i {
+        font-size: 3rem;
+        opacity: 0.3;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    p {
+        color: #6c757d;
+        margin: 0;
+    }
+}
+
+.info-box {
+    padding: 10px 15px;
+    background-color: #e7f3ff;
+    border-left: 4px solid #2196F3;
+    border-radius: 4px;
+    margin-top: 15px;
+
+    i {
+        margin-right: 5px;
+        color: #2196F3;
+    }
+
+    small {
+        color: #555;
+    }
+}

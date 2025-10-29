@@ -8,11 +8,13 @@ A collection of web-based developer utilities. These tools help with common task
 - **Base64 Encode/Decode** - Convert text to/from Base64 encoding
 - **URL Encode/Decode** - Encode/decode URL parameters and strings
 - **Hash Generator** - Generate MD5, SHA-1, SHA-256, and SHA-512 hashes
+- **JWT Decoder** - Decode and inspect JWT tokens (header, payload, signature)
 - **Certificate Information** - Extract and view X.509 certificate details
 
 ### Text Processing
 - **Markdown Editor** - Live markdown preview and editing
 - **Word Counter** - Analyze text statistics (words, characters, lines)
+- **Diff Checker** - Compare two text blocks with side-by-side difference highlighting
 
 ### Data & Formatting
 - **JSON Formatter** - Validate and pretty-print JSON with syntax highlighting
@@ -21,7 +23,8 @@ A collection of web-based developer utilities. These tools help with common task
 
 ### Development Tools
 - **UUID Generator** - Generate multiple UUIDs (v4) at once
-- **Color Converter** - Convert between HEX, RGB, and HSL color formats with live preview
+- **Color Converter** - Convert between HEX, RGB, and HSL color formats with visual color picker
+- **Regex Tester** - Test regular expressions with live matching and highlighting
 
 ## 🚀 Getting Started
 

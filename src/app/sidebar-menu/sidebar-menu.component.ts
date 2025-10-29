@@ -30,6 +30,10 @@ export class SidebarMenuComponent implements OnInit {
           "link": "/hashGenerator"
         },
         {
+          "text": "JWT Decoder",
+          "link": "/jwtDecoder"
+        },
+        {
           "text": "Certificate Information",
           "link": "/certinfo"
         }
@@ -45,6 +49,10 @@ export class SidebarMenuComponent implements OnInit {
         {
           "text": "Word Counter",
           "link": "/wordCount"
+        },
+        {
+          "text": "Diff Checker",
+          "link": "/diffChecker"
         }
       ],
       "text": "Text Processing",
@@ -80,6 +88,10 @@ export class SidebarMenuComponent implements OnInit {
         {
           "text": "Color Converter",
           "link": "/colorConverter"
+        },
+        {
+          "text": "Regex Tester",
+          "link": "/regexTester"
         }
       ],
       "text": "Development Tools",
