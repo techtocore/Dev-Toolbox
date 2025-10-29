@@ -4,7 +4,22 @@
     <br />
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-8 col-md-12">
+            <div class="col-12">
+                <div class="color-section">
+                    <h5>Visual Color Picker</h5>
+                    <div class="color-picker-group">
+                        <input type="color" class="color-picker-input" [(ngModel)]="hexInput" 
+                               (ngModelChange)="onHexChange()" title="Pick a color" />
+                        <div class="color-picker-preview" [style.background-color]="hexInput">
+                            <span>{{ hexInput }}</span>
+                        </div>
+                        <button class="btn custom-btn" (click)="copyToClipboard(hexInput)">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                    <small class="help-text">Click the color box to open the visual color picker</small>
+                </div>
+
                 <div class="color-section">
                     <h5>HEX</h5>
                     <div class="input-group">
@@ -65,12 +80,6 @@
                 </div>
             </div>
 
-            <div class="col-lg-4 col-md-12">
-                <h5>Preview</h5>
-                <div class="color-preview" [style.background-color]="getColorPreview()">
-                    <span class="preview-text">{{ hexInput }}</span>
-                </div>
-            </div>
         </div>
     </div>
 </div>
