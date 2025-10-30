@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToolsService } from '../services/tools.service';
+import { JsonTreeComponent } from '../json-tree/json-tree.component';
+
 @Component({
   selector: 'app-sidebar-menu',
   templateUrl: './sidebar-menu.component.html',
@@ -7,103 +10,43 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class SidebarMenuComponent implements OnInit {
+  @ViewChild('jsonTreeComponent') jsonTree: JsonTreeComponent;
+  menuData: any[] = [];
 
-  constructor(private router: Router) { }
-  menuData = [
-    {
-      "text": "Home",
-      "icon": "bi bi-house",
-      "link": "/"
-    },
-    {
-      "items": [
-        {
-          "text": "Base64 Encode/Decode",
-          "link": "/base64"
-        },
-        {
-          "text": "URL Encode/Decode",
-          "link": "/urlEncode"
-        },
-        {
-          "text": "Hash Generator",
-          "link": "/hashGenerator"
-        },
-        {
-          "text": "JWT Decoder",
-          "link": "/jwtDecoder"
-        },
-        {
-          "text": "Certificate Information",
-          "link": "/certinfo"
-        }
-      ],
-      "text": "Cryptography",
-    },
-    {
-      "items": [
-        {
-          "text": "Markdown Editor",
-          "link": "/markdown"
-        },
-        {
-          "text": "Word Counter",
-          "link": "/wordCount"
-        },
-        {
-          "text": "Diff Checker",
-          "link": "/diffChecker"
-        }
-      ],
-      "text": "Text Processing",
-    },
-    {
-      "items": [
-        {
-          "text": "JSON Formatter",
-          "link": "/jsonFormatter"
-        },
-        {
-          "text": "Timestamp Converter",
-          "link": "/timestampConverter"
-        }
-      ],
-      "text": "Parsing & Formatting",
-    },
-    {
-      "items": [
-        {
-          "text": "Numeric Summary",
-          "link": "/numericSummary"
-        }
-      ],
-      "text": "Statistics",
-    },
-    {
-      "items": [
-        {
-          "text": "UUID Generator",
-          "link": "/uuidGenerator"
-        },
-        {
-          "text": "Color Converter",
-          "link": "/colorConverter"
-        },
-        {
-          "text": "Regex Tester",
-          "link": "/regexTester"
-        }
-      ],
-      "text": "Development Tools",
-    }
-  ]
+  constructor(
+    private router: Router,
+    private toolsService: ToolsService
+  ) { }
 
   ngOnInit(): void {
+    this.menuData = this.toolsService.getMenuData();
+    
+    // Listen for category expansion events from homepage
+    window.addEventListener('expandCategory', (event: CustomEvent) => {
+      this.expandCategory(event.detail.category);
+    });
   }
 
-  onCustomTreeSelection(value) {
+  onCustomTreeSelection(value: string) {
     console.log(value);
     this.router.navigate([value]);
   }
 
+  expandCategory(categoryName: string): void {
+    // Find the index of the category in menuData
+    const categoryIndex = this.menuData.findIndex(item => item.text === categoryName);
+    
+    if (categoryIndex !== -1 && this.jsonTree) {
+      // Open the category in the tree
+      this.jsonTree.isOpen[categoryIndex] = true;
+      
+      // Scroll sidebar to the category
+      setTimeout(() => {
+        const sidebarElement = document.getElementById('sidebarMenu');
+        if (sidebarElement) {
+          sidebarElement.scrollTop = 0;
+        }
+      }, 100);
+    }
+  }
 }
