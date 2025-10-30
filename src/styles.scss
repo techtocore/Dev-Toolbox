@@ -31,6 +31,27 @@ body {
   white-space: break-spaces;
 }
 
+@media (max-width: 768px) {
+  .data-input {
+    min-height: 30vh;
+    font-size: 0.9rem;
+  }
+
+  .custom-btn {
+    font-size: 0.9rem !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h5 {
+    font-size: 1.1rem;
+  }
+}
+
 .btn-margin {
   margin: 10px;
   margin-top: 15px !important;

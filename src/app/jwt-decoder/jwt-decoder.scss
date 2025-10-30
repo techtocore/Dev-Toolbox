@@ -65,3 +65,14 @@
         color: #555;
     }
 }
+
+@media (max-width: 768px) {
+    .output-section .output-box .data-output {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+
+    .info-box {
+        font-size: 0.85rem;
+    }
+}

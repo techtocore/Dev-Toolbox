@@ -145,3 +145,23 @@
         margin: 0;
     }
 }
+
+@media (max-width: 768px) {
+    .flags-section .flags-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .match-summary {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .matches-section .matches-list .match-item {
+        flex-wrap: wrap;
+
+        code {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+}

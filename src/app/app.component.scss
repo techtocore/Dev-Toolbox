@@ -9,6 +9,14 @@ footer {
   z-index: 101;
 }
 
+@media (max-width: 768px) {
+  footer {
+    font-size: 0.85rem;
+    height: 45px;
+    padding-top: 12px;
+  }
+}
+
 .footer-link {
   color: rgb(173, 181, 189);
   text-decoration: none;

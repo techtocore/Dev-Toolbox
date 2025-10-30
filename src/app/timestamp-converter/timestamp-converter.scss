@@ -68,3 +68,25 @@
         margin: 0;
     }
 }
+
+@media (max-width: 768px) {
+    .input-section .input-with-button {
+        flex-direction: column;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .output-item .output-box {
+        flex-direction: column;
+
+        input {
+            font-size: 0.85rem;
+        }
+
+        button {
+            width: 100%;
+        }
+    }
+}
