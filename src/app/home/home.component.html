@@ -13,7 +13,7 @@
     <!-- Search Section -->
     <div class="search-section">
         <div class="section-container">
-            <h2 class="section-title">Find Your Tool</h2>
+            <h2 class="section-title white-text">Find Your Tool</h2>
             <p class="section-subtitle">Search from our collection of {{ totalTools }} developer utilities</p>
 
             <div class="search-box">
@@ -56,7 +56,8 @@
     <!-- Categories Section -->
     <div class="categories-section">
         <div class="section-container">
-            <h2 class="section-title">Browse by Category</h2>
+            <h2 class="section-title white-text">Browse by Category</h2>
+            <br>
             <div class="categories-grid">
                 <div class="category-card" *ngFor="let category of categories" (click)="navigateToFirstTool(category)">
                     <div class="category-icon">
@@ -117,11 +118,11 @@
                     yourself!</p>
                 <div class="cta-buttons">
                     <a href="https://github.com/techtocore/Dev-Toolbox/issues" target="_blank"
-                        class="btn btn-primary-custom">
+                        class="btn btn-primary-custom white-text">
                         <i class="bi bi-github"></i> Request a Tool
                     </a>
                     <a href="https://github.com/techtocore/Dev-Toolbox" target="_blank"
-                        class="btn btn-secondary-custom">
+                        class="btn btn-secondary-custom white-text">
                         <i class="bi bi-star"></i> Star on GitHub
                     </a>
                 </div>

@@ -37,7 +37,15 @@ export class SidebarMenuComponent implements OnInit {
     const categoryIndex = this.menuData.findIndex(item => item.text === categoryName);
     
     if (categoryIndex !== -1 && this.jsonTree) {
-      // Open the category in the tree
+      // Close all other categories first
+      Object.keys(this.jsonTree.isOpen).forEach(key => {
+        const index = parseInt(key);
+        if (index !== categoryIndex) {
+          this.jsonTree.isOpen[index] = false;
+        }
+      });
+      
+      // Open the selected category in the tree
       this.jsonTree.isOpen[categoryIndex] = true;
       
       // Scroll sidebar to the category

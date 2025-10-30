@@ -66,10 +66,15 @@ export class HomeComponent implements OnInit {
     const isMobile = window.innerWidth < 768;
     
     if (isMobile && sidebarElement && !sidebarElement.classList.contains('show')) {
-      // First, open the sidebar
-      const bsCollapse = new (window as any).bootstrap.Collapse(sidebarElement, {
-        toggle: true
-      });
+      // First, open the sidebar by adding the 'show' class
+      sidebarElement.classList.add('show');
+      
+      // Also update the toggler button state
+      const togglerButton = document.querySelector('.navbar-toggler');
+      if (togglerButton) {
+        togglerButton.classList.remove('collapsed');
+        togglerButton.setAttribute('aria-expanded', 'true');
+      }
       
       // Wait for sidebar to open, then expand the category
       setTimeout(() => {
@@ -78,9 +83,9 @@ export class HomeComponent implements OnInit {
           bubbles: true 
         });
         window.dispatchEvent(event);
-      }, 350); // Bootstrap collapse animation takes ~350ms
+      }, 350); // Allow time for animation
     } else {
-      // Desktop: just expand the category
+      // Desktop or sidebar already open: just expand the category
       const event = new CustomEvent('expandCategory', { 
         detail: { category },
         bubbles: true 
