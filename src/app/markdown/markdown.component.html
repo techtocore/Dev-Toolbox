@@ -1,22 +1,101 @@
 <div>
     <br />
-    <h2> {{ context['title'] }} </h2>
+    <h2>Markdown Editor</h2>
     <br />
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="data-input bg-light-custom" [(ngModel)]="markdownText"> </textarea>
+            <div class="col-lg-6 col-md-12">
+                <div class="editor-header">
+                    <h5>Editor</h5>
+                    <div class="header-actions">
+                        <button class="btn btn-sm custom-btn" (click)="copyMarkdown()" title="Copy markdown">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                        <button class="btn btn-sm custom-btn" (click)="downloadMarkdown()" title="Download as .md">
+                            <i class="bi bi-download"></i>
+                        </button>
+                        <button class="btn btn-sm custom-btn" (click)="clear()" title="Clear all">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(1)" title="Heading 1">
+                            <strong>H1</strong>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(2)" title="Heading 2">
+                            <strong>H2</strong>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(3)" title="Heading 3">
+                            <strong>H3</strong>
+                        </button>
+                    </div>
+
+                    <div class="toolbar-divider"></div>
+
+                    <div class="toolbar-group">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="makeBold()" title="Bold (Ctrl+B)">
+                            <i class="bi bi-type-bold"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="makeItalic()" title="Italic (Ctrl+I)">
+                            <i class="bi bi-type-italic"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="makeStrikethrough()" title="Strikethrough">
+                            <i class="bi bi-type-strikethrough"></i>
+                        </button>
+                    </div>
+
+                    <div class="toolbar-divider"></div>
+
+                    <div class="toolbar-group">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertLink()" title="Insert link">
+                            <i class="bi bi-link-45deg"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertImage()" title="Insert image">
+                            <i class="bi bi-image"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="makeCode()" title="Inline code">
+                            <i class="bi bi-code"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertCodeBlock()" title="Code block">
+                            <i class="bi bi-code-square"></i>
+                        </button>
+                    </div>
+
+                    <div class="toolbar-divider"></div>
+
+                    <div class="toolbar-group">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertList()" title="Bullet list">
+                            <i class="bi bi-list-ul"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertNumberedList()" title="Numbered list">
+                            <i class="bi bi-list-ol"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertQuote()" title="Quote">
+                            <i class="bi bi-quote"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertTable()" title="Insert table">
+                            <i class="bi bi-table"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHorizontalRule()" title="Horizontal rule">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <textarea #markdownTextarea class="markdown-editor bg-light-custom" 
+                          [(ngModel)]="markdownText" 
+                          (ngModelChange)="updatePreview()"
+                          placeholder="Start typing or use the toolbar above to format your text..."></textarea>
             </div>
-            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
-                <br>
-                <button class="btn custom-btn btn-margin" (click)="compile()">
-                    Compile
-                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
-                </button>
-                <br>
-            </div>
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <div class="data-input bg-light-custom" [innerHtml]="compiledMarkdown"></div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="preview-header">
+                    <h5>Live Preview</h5>
+                </div>
+                <div class="markdown-preview bg-light-custom" [innerHTML]="compiledMarkdown"></div>
             </div>
         </div>
     </div>
