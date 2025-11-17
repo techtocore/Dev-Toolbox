@@ -41,6 +41,11 @@
                 "glob": "favicon.ico",
                 "input": "src",
                 "output": "/"
+              },
+              {
+                "glob": ".nojekyll",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": [
