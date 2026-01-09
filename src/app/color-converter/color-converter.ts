@@ -125,7 +125,7 @@ export class ColorConverter implements OnInit {
     return this.hexInput;
   }
 
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
+  async copyToClipboard(text: string): Promise<void> {
+    await this.utilityService.copyToClipboard(text);
   }
 }

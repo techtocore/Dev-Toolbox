@@ -63,21 +63,36 @@ export class RegexTester implements OnInit {
     }
   }
 
-  highlightMatches(regex: RegExp) {
+  highlightMatches(regex: RegExp): void {
     if (!this.testString) {
       this.highlightedText = '';
       return;
     }
 
     const matches: Array<{ index: number; length: number }> = [];
+    const MAX_MATCHES = 10000; // Safety limit to prevent infinite loops
 
     // Find all match positions
     const globalRegex = new RegExp(regex.source, this.getFlagString() + (this.flags.global ? '' : 'g'));
     let match;
-    
+    let iterations = 0;
+
     while ((match = globalRegex.exec(this.testString)) !== null) {
       matches.push({ index: match.index, length: match[0].length });
       if (!this.flags.global) break;
+
+      // Safety check to prevent infinite loops with zero-length matches
+      if (match[0].length === 0) {
+        globalRegex.lastIndex++;
+      }
+
+      // Safety limit on iterations
+      iterations++;
+      if (iterations >= MAX_MATCHES) {
+        this.errorMessage = `Too many matches (>${MAX_MATCHES}). Please refine your pattern.`;
+        this.isValid = false;
+        break;
+      }
     }
 
     // Build highlighted text by escaping HTML first, then adding marks
@@ -129,7 +144,7 @@ export class RegexTester implements OnInit {
     this.errorMessage = '';
   }
 
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
+  async copyToClipboard(text: string): Promise<void> {
+    await this.utilityService.copyToClipboard(text);
   }
 }

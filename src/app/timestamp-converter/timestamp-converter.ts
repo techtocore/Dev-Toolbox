@@ -197,7 +197,7 @@ export class TimestampConverter implements OnInit {
     this.clearOutputs();
   }
 
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
+  async copyToClipboard(text: string): Promise<void> {
+    await this.utilityService.copyToClipboard(text);
   }
 }

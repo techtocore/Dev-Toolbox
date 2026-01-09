@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToolsService, Tool } from '../services/tools.service';
+import { environment } from '../../environments/environment';
+
+// Constant for mobile breakpoint (matches Bootstrap's md breakpoint)
+const MOBILE_BREAKPOINT = 768;
+const SIDEBAR_ANIMATION_DELAY = 350;
 
 @Component({
   selector: 'app-home',
@@ -14,6 +19,7 @@ export class HomeComponent implements OnInit {
   showResults = false;
   categories: string[] = [];
   totalTools = 0;
+  appVersion = environment.version;
 
   constructor(
     private toolsService: ToolsService,
@@ -63,32 +69,32 @@ export class HomeComponent implements OnInit {
   navigateToFirstTool(category: string): void {
     // Check if we're on mobile (sidebar is collapsed)
     const sidebarElement = document.getElementById('sidebarMenu');
-    const isMobile = window.innerWidth < 768;
-    
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+
     if (isMobile && sidebarElement && !sidebarElement.classList.contains('show')) {
       // First, open the sidebar by adding the 'show' class
       sidebarElement.classList.add('show');
-      
+
       // Also update the toggler button state
       const togglerButton = document.querySelector('.navbar-toggler');
       if (togglerButton) {
         togglerButton.classList.remove('collapsed');
         togglerButton.setAttribute('aria-expanded', 'true');
       }
-      
+
       // Wait for sidebar to open, then expand the category
       setTimeout(() => {
-        const event = new CustomEvent('expandCategory', { 
+        const event = new CustomEvent('expandCategory', {
           detail: { category },
-          bubbles: true 
+          bubbles: true
         });
         window.dispatchEvent(event);
-      }, 350); // Allow time for animation
+      }, SIDEBAR_ANIMATION_DELAY); // Allow time for animation
     } else {
       // Desktop or sidebar already open: just expand the category
-      const event = new CustomEvent('expandCategory', { 
+      const event = new CustomEvent('expandCategory', {
         detail: { category },
-        bubbles: true 
+        bubbles: true
       });
       window.dispatchEvent(event);
     }

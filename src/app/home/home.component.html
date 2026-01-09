@@ -1,132 +1,147 @@
 <div class="home-container">
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="hero-content">
-            <div class="hero-icon">
-                <i class="bi bi-gear-wide-connected"></i>
-            </div>
-            <h1 class="hero-title">Welcome to Dev Toolbox 👋🏽</h1>
-            <p class="hero-subtitle">Your all-in-one collection of developer utilities, right in your browser</p>
-        </div>
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div class="hero-icon">
+        <i class="bi bi-gear-wide-connected"></i>
+      </div>
+      <h1 class="hero-title">Welcome to Dev Toolbox 👋🏽</h1>
+      <p class="hero-subtitle">Your all-in-one collection of developer utilities, right in your browser</p>
     </div>
+  </div>
 
-    <!-- Search Section -->
-    <div class="search-section">
-        <div class="section-container">
-            <h2 class="section-title white-text">Find Your Tool</h2>
-            <p class="section-subtitle">Search from our collection of {{ totalTools }} developer utilities</p>
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="section-container">
+      <h2 class="section-title white-text">Find Your Tool</h2>
+      <p class="section-subtitle">Search from our collection of {{ totalTools }} developer utilities</p>
 
-            <div class="search-box">
-                <div class="search-input-wrapper">
-                    <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="form-control search-input" [(ngModel)]="searchQuery"
-                        (input)="onSearchChange()" (focus)="onSearchFocus()" (blur)="onSearchBlur()"
-                        placeholder="Search for tools... (e.g., 'json', 'hash', 'color')" />
-                    <button *ngIf="searchQuery" class="btn btn-sm clear-btn" (click)="clearSearch()"
-                        title="Clear search">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
+      <div class="search-box">
+        <div class="search-input-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" class="form-control search-input" [(ngModel)]="searchQuery"
+            (input)="onSearchChange()" (focus)="onSearchFocus()" (blur)="onSearchBlur()"
+            placeholder="Search for tools... (e.g., 'json', 'hash', 'color')" />
+            @if (searchQuery) {
+              <button class="btn btn-sm clear-btn" (click)="clearSearch()"
+                title="Clear search">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            }
+          </div>
 
-                <div class="search-results" *ngIf="showResults && filteredTools.length > 0">
-                    <div class="search-result-item" *ngFor="let tool of filteredTools" (click)="selectTool(tool)">
-                        <div class="result-icon">
-                            <i [class]="tool.icon || 'bi-tools'"></i>
-                        </div>
-                        <div class="result-content">
-                            <div class="result-name">{{ tool.name }}</div>
-                            <div class="result-description">{{ tool.description }}</div>
-                            <div class="result-category">
-                                <span class="badge">{{ tool.category }}</span>
-                            </div>
-                        </div>
+          @if (showResults && filteredTools.length > 0) {
+            <div class="search-results">
+              @for (tool of filteredTools; track tool) {
+                <div class="search-result-item" (click)="selectTool(tool)">
+                  <div class="result-icon">
+                    <i [class]="tool.icon || 'bi-tools'"></i>
+                  </div>
+                  <div class="result-content">
+                    <div class="result-name">{{ tool.name }}</div>
+                    <div class="result-description">{{ tool.description }}</div>
+                    <div class="result-category">
+                      <span class="badge">{{ tool.category }}</span>
                     </div>
+                  </div>
                 </div>
-
-                <div class="search-results empty-results" *ngIf="showResults && filteredTools.length === 0">
-                    <div class="search-empty-state">
-                        <i class="bi bi-search"></i>
-                        <p>No tools found matching "{{ searchQuery }}"</p>
-                    </div>
-                </div>
+              }
             </div>
+          }
+
+          @if (showResults && filteredTools.length === 0) {
+            <div class="search-results empty-results">
+              <div class="search-empty-state">
+                <i class="bi bi-search"></i>
+                <p>No tools found matching "{{ searchQuery }}"</p>
+              </div>
+            </div>
+          }
         </div>
+      </div>
     </div>
 
     <!-- Categories Section -->
     <div class="categories-section">
-        <div class="section-container">
-            <h2 class="section-title white-text">Browse by Category</h2>
-            <br>
-            <div class="categories-grid">
-                <div class="category-card" *ngFor="let category of categories" (click)="navigateToFirstTool(category)">
-                    <div class="category-icon">
-                        <i [class]="getCategoryIcon(category)"></i>
-                    </div>
-                    <h3 class="category-name">{{ category }}</h3>
-                    <p class="category-count">{{ getToolsCount(category) }} tools</p>
+      <div class="section-container">
+        <h2 class="section-title white-text">Browse by Category</h2>
+        <br>
+          <div class="categories-grid">
+            @for (category of categories; track category) {
+              <div class="category-card" (click)="navigateToFirstTool(category)">
+                <div class="category-icon">
+                  <i [class]="getCategoryIcon(category)"></i>
                 </div>
-            </div>
+                <h3 class="category-name">{{ category }}</h3>
+                <p class="category-count">{{ getToolsCount(category) }} tools</p>
+              </div>
+            }
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Features Section -->
-    <div class="features-section">
+      <!-- Features Section -->
+      <div class="features-section">
         <div class="section-container">
-            <h2 class="section-title">Why Dev Toolbox?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon privacy">
-                        <i class="bi bi-shield-lock"></i>
-                    </div>
-                    <h3 class="feature-title">100% Private</h3>
-                    <p class="feature-description">All processing happens in your browser. Your data never leaves your
-                        device.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon free">
-                        <i class="bi bi-gift"></i>
-                    </div>
-                    <h3 class="feature-title">Always Free</h3>
-                    <p class="feature-description">No subscriptions, no paywalls, no ads. Free forever.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon fast">
-                        <i class="bi bi-lightning-charge"></i>
-                    </div>
-                    <h3 class="feature-title">Lightning Fast</h3>
-                    <p class="feature-description">Client-side processing means instant results without server delays.
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon opensource">
-                        <i class="bi bi-code-square"></i>
-                    </div>
-                    <h3 class="feature-title">Open Source</h3>
-                    <p class="feature-description">Community-driven and transparent. Contribute on GitHub!</p>
-                </div>
+          <h2 class="section-title">Why Dev Toolbox?</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon privacy">
+                <i class="bi bi-shield-lock"></i>
+              </div>
+              <h3 class="feature-title">100% Private</h3>
+              <p class="feature-description">All processing happens in your browser. Your data never leaves your
+              device.</p>
             </div>
+            <div class="feature-card">
+              <div class="feature-icon free">
+                <i class="bi bi-gift"></i>
+              </div>
+              <h3 class="feature-title">Always Free</h3>
+              <p class="feature-description">No subscriptions, no paywalls, no ads. Free forever.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon fast">
+                <i class="bi bi-lightning-charge"></i>
+              </div>
+              <h3 class="feature-title">Lightning Fast</h3>
+              <p class="feature-description">Client-side processing means instant results without server delays.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon opensource">
+                <i class="bi bi-code-square"></i>
+              </div>
+              <h3 class="feature-title">Open Source</h3>
+              <p class="feature-description">Community-driven and transparent. Contribute on GitHub!</p>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- CTA Section -->
-    <div class="cta-section">
+      <!-- CTA Section -->
+      <div class="cta-section">
         <div class="section-container">
-            <div class="cta-content">
-                <h2 class="cta-title">Can't find what you're looking for?</h2>
-                <p class="cta-description">We're always adding new tools. Create an issue on GitHub or contribute code
-                    yourself!</p>
-                <div class="cta-buttons">
-                    <a href="https://github.com/techtocore/Dev-Toolbox/issues" target="_blank"
-                        class="btn btn-primary-custom white-text">
-                        <i class="bi bi-github"></i> Request a Tool
-                    </a>
-                    <a href="https://github.com/techtocore/Dev-Toolbox" target="_blank"
-                        class="btn btn-secondary-custom white-text">
-                        <i class="bi bi-star"></i> Star on GitHub
-                    </a>
-                </div>
+          <div class="cta-content">
+            <h2 class="cta-title">Can't find what you're looking for?</h2>
+            <p class="cta-description">We're always adding new tools. Create an issue on GitHub or contribute code
+            yourself!</p>
+            <div class="cta-buttons">
+              <a href="https://github.com/techtocore/Dev-Toolbox/issues" target="_blank"
+                class="btn btn-primary-custom white-text">
+                <i class="bi bi-github"></i> Request a Tool
+              </a>
+              <a href="https://github.com/techtocore/Dev-Toolbox" target="_blank"
+                class="btn btn-secondary-custom white-text">
+                <i class="bi bi-star"></i> Star on GitHub
+              </a>
             </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Version Badge -->
+      <div class="version-badge">
+        <span class="version-text">v{{ appVersion }}</span>
+      </div>
     </div>
-</div>

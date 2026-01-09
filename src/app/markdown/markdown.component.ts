@@ -157,7 +157,7 @@ export class MarkdownComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  copyMarkdown() {
-    navigator.clipboard.writeText(this.markdownText);
+  async copyMarkdown(): Promise<void> {
+    await this.utilityService.copyToClipboard(this.markdownText);
   }
 }

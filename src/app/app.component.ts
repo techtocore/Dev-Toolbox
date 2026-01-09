@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { UtilityService } from './services/utility.service'
+
+// Constant for mobile breakpoint
+const MOBILE_BREAKPOINT = 658;
 
 @Component({
   selector: 'app-root',
@@ -7,7 +10,7 @@ import { UtilityService } from './services/utility.service'
   styleUrls: ['./app.component.scss'],
   standalone: false
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
 
   title = 'dev-toolbox';
   isMobile = false;
@@ -15,10 +18,22 @@ export class AppComponent {
   constructor(public utilityService: UtilityService) { }
 
   ngOnInit(): void {
-    if (window.innerWidth < 658) {
-      this.utilityService.setIsMobile(true);
-    }
-    this.isMobile = this.utilityService.getIsMobile();
+    this.checkMobileView();
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup if needed
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event?: Event): void {
+    this.checkMobileView();
+  }
+
+  private checkMobileView(): void {
+    const isMobileView = window.innerWidth < MOBILE_BREAKPOINT;
+    this.utilityService.setIsMobile(isMobileView);
+    this.isMobile = isMobileView;
   }
 
 }

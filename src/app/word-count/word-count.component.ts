@@ -18,15 +18,15 @@ export class WordCountComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  setCounts() {
-    let txt = this.inputTxt.trim();
+  setCounts(): void {
+    const txt = this.inputTxt.trim();
     this.wordCount = txt.split(' ').length;
     if (txt.length === 0) {
       this.wordCount = 0;
     }
     this.charCount = txt.length;
 
-    let remText = txt.replace(/\s/g, '');
+    const remText = txt.replace(/\s/g, '');
     this.charCountWithoutWS = remText.length;
 
   }

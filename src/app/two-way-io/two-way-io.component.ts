@@ -45,8 +45,8 @@ export class TwoWayIoComponent implements OnInit {
     this.utilityService.downloadFile(txt, 'text/plain', filename);
   }
 
-  async handleFileInput(files: FileList) {
-    let content = await this.utilityService.readTextFile(files[0]);
+  async handleFileInput(files: FileList): Promise<void> {
+    const content = await this.utilityService.readTextFile(files[0]);
     if (this.currentBtn === 0) {
       this.context['txt1'] = content;
     } else {

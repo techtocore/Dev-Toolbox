@@ -141,12 +141,12 @@ export class DiffChecker implements OnInit {
     this.resetCounts();
   }
 
-  copyDiff() {
+  async copyDiff(): Promise<void> {
     const diffText = this.diffLines.map(line => {
       const prefix = line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  ';
       return prefix + line.content;
     }).join('\n');
-    
-    navigator.clipboard.writeText(diffText);
+
+    await this.utilityService.copyToClipboard(diffText);
   }
 }

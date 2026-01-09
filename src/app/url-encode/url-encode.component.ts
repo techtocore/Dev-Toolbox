@@ -22,13 +22,13 @@ export class UrlEncodeComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  encode(txt) {
-    var encodedData = encodeURIComponent(txt);
+  encode(txt: string): void {
+    const encodedData = encodeURIComponent(txt);
     this.context['txt2'] = encodedData;
   }
 
-  decode(txt) {
-    var decodedData = decodeURIComponent(txt);
+  decode(txt: string): void {
+    const decodedData = decodeURIComponent(txt);
     this.context['txt1'] = decodedData;
   }
 

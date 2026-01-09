@@ -34,13 +34,13 @@ export class UuidGenerator implements OnInit {
     });
   }
 
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
+  async copyToClipboard(text: string): Promise<void> {
+    await this.utilityService.copyToClipboard(text);
   }
 
-  copyAll() {
+  async copyAll(): Promise<void> {
     const allUuids = this.uuids.join('\n');
-    navigator.clipboard.writeText(allUuids);
+    await this.utilityService.copyToClipboard(allUuids);
   }
 
   clear() {

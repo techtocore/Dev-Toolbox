@@ -71,11 +71,15 @@ npm test
 
 ## 📦 Tech Stack
 
-- **Angular 20** - Modern web framework
-- **TypeScript 5.8** - Type-safe development
-- **Bootstrap 5** - Responsive UI components
-- **RxJS 7** - Reactive programming
-- **ESLint** - Code quality and consistency
+- **Angular 21.0.8** - Latest modern web framework with new control flow syntax (@if, @for)
+- **TypeScript 5.9** - Type-safe development
+- **Bootstrap 5.3** - Responsive UI components
+- **RxJS 7.8** - Reactive programming
+- **ESLint 9.39** - Code quality and consistency
+- **Zone.js 0.16** - Change detection with event coalescing
+- **Marked 16.4** - Markdown parsing
+- **Node-Forge 1.3** - Certificate parsing
+- **Crypto-JS 4.2** - Cryptographic functions
 
 ## 📄 License
 

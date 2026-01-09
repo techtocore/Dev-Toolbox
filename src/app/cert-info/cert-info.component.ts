@@ -2,6 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { UtilityService } from '../services/utility.service'
 import * as Forge from 'node-forge'
 
+interface CertificateInfo {
+  issuer?: { [key: string]: string | string[] };
+  subject?: { [key: string]: string | string[] };
+  serialNumber?: string;
+  validFrom?: Date;
+  validTill?: Date;
+  signatureOid?: string;
+  signAlgorithmOid?: string;
+  signParameters?: string;
+  thumbprint?: string;
+  message?: string;
+  error?: string;
+}
+
 @Component({
   selector: 'app-cert-info',
   templateUrl: './cert-info.component.html',
@@ -14,8 +28,9 @@ export class CertInfoComponent implements OnInit {
     'filename': 'certInfo'
   }
   encodedCert: string = '';
-  certInfo: any = {};
-  isMobile;
+  certInfo: CertificateInfo = {};
+  isMobile: boolean = false;
+
   constructor(public utilityService: UtilityService) { }
 
   ngOnInit(): void {

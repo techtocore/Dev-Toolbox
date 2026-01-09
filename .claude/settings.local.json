@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm install)",
+      "Bash(npm run lint:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm install:*)",
+      "Bash(npm update:*)",
+      "Bash(npm audit:*)",
+      "Bash(npx ng update:*)"
+    ]
+  }
+}

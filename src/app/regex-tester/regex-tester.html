@@ -1,103 +1,113 @@
 <div>
-    <br />
-    <h2>Regex Tester</h2>
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <h5>Regular Expression</h5>
-                <div class="regex-input-section">
-                    <div class="input-group">
-                        <span class="input-group-text">/</span>
-                        <input type="text" class="form-control bg-light-custom" [(ngModel)]="regexPattern" 
-                               (ngModelChange)="testRegex()" 
-                               placeholder="Enter regex pattern (e.g., \d+|[a-z]+)" />
-                        <span class="input-group-text">/{{ getFlagString() }}</span>
-                    </div>
-                    <div *ngIf="!isValid" class="error-message">
-                        <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
-                    </div>
-                </div>
+  <br />
+  <h2>Regex Tester</h2>
+  <br />
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-6 col-md-12">
+        <h5>Regular Expression</h5>
+        <div class="regex-input-section">
+          <div class="input-group">
+            <span class="input-group-text">/</span>
+            <input type="text" class="form-control bg-light-custom" [(ngModel)]="regexPattern"
+              (ngModelChange)="testRegex()"
+              placeholder="Enter regex pattern (e.g., \d+|[a-z]+)" />
+              <span class="input-group-text">/{{ getFlagString() }}</span>
+            </div>
+            @if (!isValid) {
+              <div class="error-message">
+                <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+              </div>
+            }
+          </div>
 
-                <div class="flags-section">
-                    <label><strong>Flags:</strong></label>
-                    <div class="flags-grid">
-                        <div class="flag-checkbox">
-                            <input type="checkbox" id="global" [(ngModel)]="flags.global" 
-                                   (ngModelChange)="testRegex()" />
-                            <label for="global">Global (g)</label>
+          <div class="flags-section">
+            <label><strong>Flags:</strong></label>
+            <div class="flags-grid">
+              <div class="flag-checkbox">
+                <input type="checkbox" id="global" [(ngModel)]="flags.global"
+                  (ngModelChange)="testRegex()" />
+                  <label for="global">Global (g)</label>
+                </div>
+                <div class="flag-checkbox">
+                  <input type="checkbox" id="multiline" [(ngModel)]="flags.multiline"
+                    (ngModelChange)="testRegex()" />
+                    <label for="multiline">Multiline (m)</label>
+                  </div>
+                  <div class="flag-checkbox">
+                    <input type="checkbox" id="caseInsensitive" [(ngModel)]="flags.caseInsensitive"
+                      (ngModelChange)="testRegex()" />
+                      <label for="caseInsensitive">Case Insensitive (i)</label>
+                    </div>
+                    <div class="flag-checkbox">
+                      <input type="checkbox" id="dotAll" [(ngModel)]="flags.dotAll"
+                        (ngModelChange)="testRegex()" />
+                        <label for="dotAll">Dot All (s)</label>
+                      </div>
+                      <div class="flag-checkbox">
+                        <input type="checkbox" id="unicode" [(ngModel)]="flags.unicode"
+                          (ngModelChange)="testRegex()" />
+                          <label for="unicode">Unicode (u)</label>
                         </div>
                         <div class="flag-checkbox">
-                            <input type="checkbox" id="multiline" [(ngModel)]="flags.multiline" 
-                                   (ngModelChange)="testRegex()" />
-                            <label for="multiline">Multiline (m)</label>
-                        </div>
-                        <div class="flag-checkbox">
-                            <input type="checkbox" id="caseInsensitive" [(ngModel)]="flags.caseInsensitive" 
-                                   (ngModelChange)="testRegex()" />
-                            <label for="caseInsensitive">Case Insensitive (i)</label>
-                        </div>
-                        <div class="flag-checkbox">
-                            <input type="checkbox" id="dotAll" [(ngModel)]="flags.dotAll" 
-                                   (ngModelChange)="testRegex()" />
-                            <label for="dotAll">Dot All (s)</label>
-                        </div>
-                        <div class="flag-checkbox">
-                            <input type="checkbox" id="unicode" [(ngModel)]="flags.unicode" 
-                                   (ngModelChange)="testRegex()" />
-                            <label for="unicode">Unicode (u)</label>
-                        </div>
-                        <div class="flag-checkbox">
-                            <input type="checkbox" id="sticky" [(ngModel)]="flags.sticky" 
-                                   (ngModelChange)="testRegex()" />
+                          <input type="checkbox" id="sticky" [(ngModel)]="flags.sticky"
+                            (ngModelChange)="testRegex()" />
                             <label for="sticky">Sticky (y)</label>
+                          </div>
                         </div>
+                      </div>
+
+                      <h5>Test String</h5>
+                      <textarea class="data-input bg-light-custom" [(ngModel)]="testString"
+                        (ngModelChange)="testRegex()"
+                      placeholder="Enter text to test against your regex..."></textarea>
+
+                      <button class="btn custom-btn margin-top-10px" (click)="clear()">
+                        Clear All
+                      </button>
                     </div>
-                </div>
 
-                <h5>Test String</h5>
-                <textarea class="data-input bg-light-custom" [(ngModel)]="testString" 
-                          (ngModelChange)="testRegex()" 
-                          placeholder="Enter text to test against your regex..."></textarea>
-                
-                <button class="btn custom-btn margin-top-10px" (click)="clear()">
-                    Clear All
-                </button>
-            </div>
+                    <div class="col-lg-6 col-md-12">
+                      <h5>Results</h5>
 
-            <div class="col-lg-6 col-md-12">
-                <h5>Results</h5>
-                
-                <div class="match-summary">
-                    Matches Found: 
-                    <span [class.has-matches]="matchCount > 0">{{ matchCount }}</span>
-                </div>
-                <br>
-                
-                <div *ngIf="matchCount > 0" class="matches-section">
-                    <label><strong>Matched Values:</strong></label>
-                    <div class="matches-list">
-                        <div *ngFor="let match of matches; let i = index" class="match-item">
-                            <span class="match-number">{{ i + 1 }}.</span>
-                            <code>{{ match }}</code>
-                            <button class="btn btn-sm custom-btn" (click)="copyToClipboard(match)" 
+                      <div class="match-summary">
+                        Matches Found:
+                        <span [class.has-matches]="matchCount > 0">{{ matchCount }}</span>
+                      </div>
+                      <br>
+
+                        @if (matchCount > 0) {
+                          <div class="matches-section">
+                            <label><strong>Matched Values:</strong></label>
+                            <div class="matches-list">
+                              @for (match of matches; track match; let i = $index) {
+                                <div class="match-item">
+                                  <span class="match-number">{{ i + 1 }}.</span>
+                                  <code>{{ match }}</code>
+                                  <button class="btn btn-sm custom-btn" (click)="copyToClipboard(match)"
                                     title="Copy to clipboard">
-                                <i class="bi bi-clipboard"></i>
-                            </button>
-                        </div>
+                                    <i class="bi bi-clipboard"></i>
+                                  </button>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
+
+                        @if (testString && regexPattern) {
+                          <div class="highlighted-section">
+                            <label><strong>Highlighted Text:</strong></label>
+                            <div class="highlighted-text bg-light-custom" [innerHTML]="highlightedText"></div>
+                          </div>
+                        }
+
+                        @if (!testString || !regexPattern) {
+                          <div class="empty-state bg-light-custom">
+                            <i class="bi bi-regex"></i>
+                            <p>Enter a regex pattern and test string to see matches</p>
+                          </div>
+                        }
+                      </div>
                     </div>
+                  </div>
                 </div>
-
-                <div *ngIf="testString && regexPattern" class="highlighted-section">
-                    <label><strong>Highlighted Text:</strong></label>
-                    <div class="highlighted-text bg-light-custom" [innerHTML]="highlightedText"></div>
-                </div>
-
-                <div *ngIf="!testString || !regexPattern" class="empty-state bg-light-custom">
-                    <i class="bi bi-regex"></i>
-                    <p>Enter a regex pattern and test string to see matches</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
