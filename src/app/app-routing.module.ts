@@ -15,6 +15,10 @@ import { TimestampConverter } from './timestamp-converter/timestamp-converter';
 import { JwtDecoder } from './jwt-decoder/jwt-decoder';
 import { RegexTester } from './regex-tester/regex-tester';
 import { DiffChecker } from './diff-checker/diff-checker';
+import { PromptTemplate } from './prompt-template/prompt-template';
+import { TokenCounter } from './token-counter/token-counter';
+import { JsonSchemaGenerator } from './json-schema-generator/json-schema-generator';
+import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -31,7 +35,11 @@ const routes: Routes = [
   { path: 'timestampConverter', component: TimestampConverter },
   { path: 'jwtDecoder', component: JwtDecoder },
   { path: 'regexTester', component: RegexTester },
-  { path: 'diffChecker', component: DiffChecker }
+  { path: 'diffChecker', component: DiffChecker },
+  { path: 'promptTemplate', component: PromptTemplate },
+  { path: 'tokenCounter', component: TokenCounter },
+  { path: 'jsonSchemaGenerator', component: JsonSchemaGenerator },
+  { path: 'promptOptimizer', component: PromptOptimizer }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

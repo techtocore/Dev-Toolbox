@@ -25,6 +25,10 @@ import { TimestampConverter } from './timestamp-converter/timestamp-converter';
 import { JwtDecoder } from './jwt-decoder/jwt-decoder';
 import { RegexTester } from './regex-tester/regex-tester';
 import { DiffChecker } from './diff-checker/diff-checker';
+import { PromptTemplate } from './prompt-template/prompt-template';
+import { TokenCounter } from './token-counter/token-counter';
+import { JsonSchemaGenerator } from './json-schema-generator/json-schema-generator';
+import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
 
 @NgModule({
   declarations: [
@@ -46,7 +50,11 @@ import { DiffChecker } from './diff-checker/diff-checker';
     TimestampConverter,
     JwtDecoder,
     RegexTester,
-    DiffChecker
+    DiffChecker,
+    PromptTemplate,
+    TokenCounter,
+    JsonSchemaGenerator,
+    PromptOptimizer
   ],
   imports: [
     BrowserModule,

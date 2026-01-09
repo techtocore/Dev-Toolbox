@@ -152,6 +152,38 @@ export class ToolsService {
       category: 'Development Tools',
       icon: 'bi-regex',
       keywords: ['regex', 'regexp', 'regular', 'expression', 'pattern', 'match', 'test']
+    },
+    {
+      name: 'Prompt Template Builder',
+      description: 'Create reusable prompt templates with variables for LLM interactions',
+      route: '/promptTemplate',
+      category: 'AI & Machine Learning',
+      icon: 'bi-chat-left-text',
+      keywords: ['prompt', 'template', 'llm', 'ai', 'gpt', 'claude', 'variables']
+    },
+    {
+      name: 'Token Counter & Cost Estimator',
+      description: 'Estimate token counts and API costs for different LLM providers',
+      route: '/tokenCounter',
+      category: 'AI & Machine Learning',
+      icon: 'bi-calculator',
+      keywords: ['token', 'cost', 'llm', 'openai', 'anthropic', 'pricing', 'estimate']
+    },
+    {
+      name: 'JSON Schema Generator',
+      description: 'Generate JSON schemas to constrain LLM outputs and function calling',
+      route: '/jsonSchemaGenerator',
+      category: 'AI & Machine Learning',
+      icon: 'bi-diagram-3',
+      keywords: ['json', 'schema', 'llm', 'function', 'calling', 'structured', 'output']
+    },
+    {
+      name: 'Prompt Optimizer',
+      description: 'Analyze and improve your LLM prompts using best practices',
+      route: '/promptOptimizer',
+      category: 'AI & Machine Learning',
+      icon: 'bi-lightbulb',
+      keywords: ['prompt', 'optimize', 'improve', 'llm', 'ai', 'best', 'practices']
     }
   ];
 

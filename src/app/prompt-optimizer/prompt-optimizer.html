@@ -1,0 +1,186 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Prompt Optimizer</h2>
+      <p class="text-muted mb-4">
+        Analyze and improve your LLM prompts using best practices and proven techniques.
+      </p>
+    </div>
+  </div>
+
+  <!-- Quick Examples -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Quick Examples</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-danger" (click)="loadExample('poor')">
+              Poor Example
+            </button>
+            <button class="btn btn-outline-warning" (click)="loadExample('good')">
+              Good Example
+            </button>
+            <button class="btn btn-outline-success" (click)="loadExample('excellent')">
+              Excellent Example
+            </button>
+            <button class="btn btn-outline-secondary" (click)="clearPrompt()">
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Prompt Input -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Your Prompt</h5>
+        </div>
+        <div class="card-body">
+          <textarea
+            class="form-control font-monospace mb-3"
+            rows="20"
+            [(ngModel)]="prompt"
+            (input)="analyzePrompt()"
+            placeholder="Enter your prompt here..."></textarea>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted">{{ prompt.length }} characters</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Results -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Analysis</h5>
+          <div class="score-badge">
+            <span class="badge" [ngClass]="getScoreClass() + ' bg-white'">
+              {{ score }}% - {{ getScoreLabel() }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Progress Bar -->
+          <div class="mb-4">
+            <label class="form-label">Prompt Quality Score</label>
+            <div class="progress" style="height: 30px;">
+              <div
+                class="progress-bar"
+                [class.bg-success]="score >= 80"
+                [class.bg-warning]="score >= 60 && score < 80"
+                [class.bg-danger]="score < 60"
+                [style.width.%]="score"
+                role="progressbar">
+                {{ score }}%
+              </div>
+            </div>
+          </div>
+
+          <!-- Analysis Results -->
+          <div class="analysis-results">
+            @for (result of analysisResults; track result.category) {
+              <div class="result-item" [ngClass]="'result-' + result.status">
+                <div class="d-flex align-items-start">
+                  <div class="result-icon me-3">
+                    @if (result.status === 'good') {
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                    } @else if (result.status === 'warning') {
+                      <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                    } @else {
+                      <i class="bi bi-x-circle-fill text-danger"></i>
+                    }
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="result-category">{{ result.category }}</div>
+                    <div class="result-message">{{ result.message }}</div>
+                    @if (result.suggestion) {
+                      <div class="result-suggestion">
+                        <i class="bi bi-lightbulb me-1"></i>
+                        {{ result.suggestion }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Best Practices Guide -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Prompt Engineering Best Practices</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6><i class="bi bi-check2-circle text-success me-2"></i>Do's</h6>
+              <ul>
+                <li><strong>Be Specific:</strong> Use concrete details and clear instructions</li>
+                <li><strong>Provide Context:</strong> Explain the background and purpose</li>
+                <li><strong>Define the Role:</strong> Specify who the AI should act as</li>
+                <li><strong>Set Boundaries:</strong> Use constraints like "do not" or "must"</li>
+                <li><strong>Use Examples:</strong> Show desired input/output pairs (few-shot)</li>
+                <li><strong>Specify Format:</strong> Define how the output should be structured</li>
+                <li><strong>Break It Down:</strong> Use sections, numbered lists, or headers</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6><i class="bi bi-x-circle text-danger me-2"></i>Don'ts</h6>
+              <ul>
+                <li><strong>Avoid Vagueness:</strong> Don't use "this", "that", "it" without clarity</li>
+                <li><strong>Skip Filler Words:</strong> Remove unnecessary politeness</li>
+                <li><strong>Don't Assume:</strong> Don't expect the AI to guess context</li>
+                <li><strong>Avoid Ambiguity:</strong> Be explicit about what you want</li>
+                <li><strong>Don't Overload:</strong> Split complex tasks into multiple prompts</li>
+                <li><strong>Minimize Jargon:</strong> Use clear language unless technical terms are needed</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <h6>Prompt Structure Template</h6>
+            <div class="template-box">
+              <pre><code>[Role]: You are a [specific role/expert]
+
+[Task]: [Clear, specific instruction]
+
+[Context]: [Background information or situation]
+
+[Requirements]:
+- [Specific requirement 1]
+- [Specific requirement 2]
+- [Specific requirement 3]
+
+[Format]: [How the output should be structured]
+
+[Constraints]:
+- Do not [unwanted behavior]
+- Must [required behavior]
+
+[Example] (optional):
+Input: [example input]
+Output: [example output]
+
+[Input]: [Actual data or content to process]</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
