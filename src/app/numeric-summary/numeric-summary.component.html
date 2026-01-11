@@ -1,51 +1,268 @@
-<div>
-    <br />
-    <h2>1 Variable Numeric Summary</h2>
-    <br />
-    <div class="container-fluid">
-
-        <div class="row">
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="data-input bg-light-custom" [(ngModel)]="inputTxt"> </textarea>
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
-                <br>
-                <button class="btn custom-btn btn-margin" (click)="process()">
-                    Calculate
-                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
-                </button>
-                <br>
-                <br>
-            </div>
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <br>
-                Count: {{count}}
-                <br>
-                Min: {{min}}
-                <br>
-                Max: {{max}}
-                <br>
-                Mode: {{mode}}
-                <br>
-                <br>
-                Mean: {{mean}}
-                <br>
-                Sample Standard Deviation: {{sd1}}
-                <br>
-                Population Standard Deviation: {{sd2}}
-                <br>
-                <br>
-                Q1: {{q1}}
-                <br>
-                Median: {{median}}
-                <br>
-                Q3: {{q3}}
-                <br>
-                IQR: {{iqr}}
-                <br>
-            </div>
-        </div>
-
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Numeric Summary & Statistics</h2>
+      <p class="text-muted mb-4">
+        Comprehensive statistical analysis of numeric data. Enter comma or space-separated numbers.
+      </p>
     </div>
+  </div>
+
+  <!-- Input Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Input Data</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Numeric Values (comma or space separated)</label>
+            <textarea
+              class="form-control font-monospace"
+              rows="4"
+              [(ngModel)]="inputTxt"
+              placeholder="12, 15, 18, 20, 22, 25, 28, 30, 32, 35, 38, 40, 45, 50, 55"></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-success" (click)="process()">
+              <i class="bi bi-calculator me-2"></i>Calculate Statistics
+            </button>
+            <button class="btn btn-outline-info" (click)="loadSample()">
+              <i class="bi bi-file-earmark-text me-1"></i> Load Sample
+            </button>
+            <button class="btn btn-outline-secondary" (click)="clearAll()">
+              <i class="bi bi-x-circle me-1"></i> Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  @if (errorMessage) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Results -->
+  @if (hasResults) {
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm stat-card">
+          <div class="card-body text-center">
+            <div class="stat-icon bg-primary">
+              <i class="bi bi-123"></i>
+            </div>
+            <div class="stat-label">Count</div>
+            <div class="stat-value">{{ count }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm stat-card">
+          <div class="card-body text-center">
+            <div class="stat-icon bg-success">
+              <i class="bi bi-calculator"></i>
+            </div>
+            <div class="stat-label">Sum</div>
+            <div class="stat-value">{{ formatNumber(sum) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm stat-card">
+          <div class="card-body text-center">
+            <div class="stat-icon bg-info">
+              <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="stat-label">Mean</div>
+            <div class="stat-value">{{ formatNumber(mean) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <div class="card shadow-sm stat-card">
+          <div class="card-body text-center">
+            <div class="stat-icon bg-warning">
+              <i class="bi bi-dash-circle"></i>
+            </div>
+            <div class="stat-label">Median</div>
+            <div class="stat-value">{{ formatNumber(median) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="row">
+      <!-- Central Tendency -->
+      <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0"><i class="bi bi-bullseye me-2"></i>Central Tendency</h6>
+          </div>
+          <div class="card-body">
+            <div class="metric-row">
+              <span class="metric-label">Mean (Average):</span>
+              <span class="metric-value">{{ formatNumber(mean) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Median (Q2):</span>
+              <span class="metric-value">{{ formatNumber(median) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Mode:</span>
+              <span class="metric-value">{{ mode }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Sum:</span>
+              <span class="metric-value">{{ formatNumber(sum) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Count:</span>
+              <span class="metric-value">{{ count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spread/Dispersion -->
+      <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0"><i class="bi bi-arrows-expand me-2"></i>Spread & Dispersion</h6>
+          </div>
+          <div class="card-body">
+            <div class="metric-row">
+              <span class="metric-label">Minimum:</span>
+              <span class="metric-value">{{ formatNumber(min) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Maximum:</span>
+              <span class="metric-value">{{ formatNumber(max) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Range:</span>
+              <span class="metric-value">{{ formatNumber(range) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Variance:</span>
+              <span class="metric-value">{{ formatNumber(variance) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Std Dev (Sample):</span>
+              <span class="metric-value">{{ formatNumber(stdDev) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Std Dev (Population):</span>
+              <span class="metric-value">{{ formatNumber(stdDevPop) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Coeff of Variation:</span>
+              <span class="metric-value">{{ formatNumber(coefficientOfVariation) }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quartiles & Outliers -->
+      <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-distribute-vertical me-2"></i>Quartiles & Outliers</h6>
+          </div>
+          <div class="card-body">
+            <div class="metric-row">
+              <span class="metric-label">Q1 (25th percentile):</span>
+              <span class="metric-value">{{ formatNumber(q1) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Q2 (50th / Median):</span>
+              <span class="metric-value">{{ formatNumber(median) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Q3 (75th percentile):</span>
+              <span class="metric-value">{{ formatNumber(q3) }}</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">IQR (Q3 - Q1):</span>
+              <span class="metric-value">{{ formatNumber(iqr) }}</span>
+            </div>
+            <hr>
+            <div class="metric-row">
+              <span class="metric-label">Outlier Count:</span>
+              <span class="metric-value" [class.text-danger]="outlierCount > 0">
+                {{ outlierCount }}
+              </span>
+            </div>
+            @if (outlierCount > 0) {
+              <div class="alert alert-warning mt-2 mb-0">
+                <small><strong>Outliers detected:</strong><br>{{ outliers.join(', ') }}</small>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Metrics -->
+    @if (count >= 4) {
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+              <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Shape & Distribution</h6>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="metric-row">
+                    <span class="metric-label">Skewness:</span>
+                    <span class="metric-value">{{ formatNumber(skewness, 4) }}</span>
+                  </div>
+                  <small class="text-muted">
+                    @if (skewness > 0.5) {
+                      Right-skewed (positive skew, tail on right)
+                    } @else if (skewness < -0.5) {
+                      Left-skewed (negative skew, tail on left)
+                    } @else {
+                      Approximately symmetric
+                    }
+                  </small>
+                </div>
+                <div class="col-md-6">
+                  <div class="metric-row">
+                    <span class="metric-label">Kurtosis:</span>
+                    <span class="metric-value">{{ formatNumber(kurtosis, 4) }}</span>
+                  </div>
+                  <small class="text-muted">
+                    @if (kurtosis > 0) {
+                      Leptokurtic (heavy tails, more outliers)
+                    } @else if (kurtosis < 0) {
+                      Platykurtic (light tails, fewer outliers)
+                    } @else {
+                      Mesokurtic (normal distribution)
+                    }
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
 </div>

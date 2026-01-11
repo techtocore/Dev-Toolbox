@@ -1,0 +1,245 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">SQL Query Builder</h2>
+      <p class="text-muted mb-4">
+        Build SQL queries visually without writing code. Perfect for quick database operations.
+      </p>
+    </div>
+  </div>
+
+  <!-- Quick Examples -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Quick Examples</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-primary" (click)="loadExample('basic')">
+              Basic SELECT
+            </button>
+            <button class="btn btn-outline-primary" (click)="loadExample('join')">
+              SELECT with JOIN
+            </button>
+            <button class="btn btn-outline-primary" (click)="loadExample('aggregate')">
+              Aggregate Query
+            </button>
+            <button class="btn btn-outline-secondary" (click)="clearAll()">
+              Clear All
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Query Builder -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Query Builder</h5>
+        </div>
+        <div class="card-body">
+          <!-- Query Type -->
+          <div class="mb-3">
+            <label class="form-label">Query Type</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="queryType" id="type-select" [(ngModel)]="queryType" value="SELECT" checked>
+              <label class="btn btn-outline-primary" for="type-select">SELECT</label>
+
+              <input type="radio" class="btn-check" name="queryType" id="type-insert" [(ngModel)]="queryType" value="INSERT">
+              <label class="btn btn-outline-primary" for="type-insert">INSERT</label>
+
+              <input type="radio" class="btn-check" name="queryType" id="type-update" [(ngModel)]="queryType" value="UPDATE">
+              <label class="btn btn-outline-primary" for="type-update">UPDATE</label>
+
+              <input type="radio" class="btn-check" name="queryType" id="type-delete" [(ngModel)]="queryType" value="DELETE">
+              <label class="btn btn-outline-danger" for="type-delete">DELETE</label>
+            </div>
+          </div>
+
+          <!-- Table Name -->
+          <div class="mb-3">
+            <label class="form-label">Table Name</label>
+            <input type="text" class="form-control" [(ngModel)]="tableName" placeholder="users">
+          </div>
+
+          <!-- SELECT Options -->
+          @if (queryType === 'SELECT') {
+            <div class="mb-3">
+              <label class="form-label">Columns (comma-separated or *)</label>
+              <input type="text" class="form-control" [(ngModel)]="selectedColumns" placeholder="id, name, email">
+            </div>
+
+            <!-- JOINs -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">JOINs</label>
+                <button class="btn btn-sm btn-outline-primary" (click)="addJoin()">
+                  <i class="bi bi-plus-circle"></i> Add JOIN
+                </button>
+              </div>
+
+              @for (join of joins; track join; let i = $index) {
+                <div class="card mb-2 border-secondary">
+                  <div class="card-body p-2">
+                    <div class="row g-2">
+                      <div class="col-md-3">
+                        <select class="form-select form-select-sm" [(ngModel)]="join.type">
+                          <option value="INNER">INNER</option>
+                          <option value="LEFT">LEFT</option>
+                          <option value="RIGHT">RIGHT</option>
+                          <option value="FULL">FULL</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="join.table" placeholder="Table name">
+                      </div>
+                      <div class="col-md-4">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="join.on" placeholder="table1.id = table2.id">
+                      </div>
+                      <div class="col-md-1">
+                        <button class="btn btn-sm btn-outline-danger w-100" (click)="removeJoin(i)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- GROUP BY -->
+            <div class="mb-3">
+              <label class="form-label">GROUP BY</label>
+              <input type="text" class="form-control" [(ngModel)]="groupBy" placeholder="category">
+            </div>
+
+            <!-- ORDER BY -->
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label class="form-label">ORDER BY</label>
+                <input type="text" class="form-control" [(ngModel)]="orderBy" placeholder="name">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Direction</label>
+                <select class="form-select" [(ngModel)]="orderDirection">
+                  <option value="ASC">ASC</option>
+                  <option value="DESC">DESC</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- LIMIT -->
+            <div class="mb-3">
+              <label class="form-label">LIMIT</label>
+              <input type="number" class="form-control" [(ngModel)]="limit" placeholder="10">
+            </div>
+          }
+
+          <!-- INSERT Options -->
+          @if (queryType === 'INSERT') {
+            <div class="mb-3">
+              <label class="form-label">Columns (comma-separated)</label>
+              <input type="text" class="form-control" [(ngModel)]="insertColumns" placeholder="name, email, age">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Values (comma-separated)</label>
+              <input type="text" class="form-control" [(ngModel)]="insertValues" placeholder="'John Doe', 'john@example.com', 30">
+            </div>
+          }
+
+          <!-- UPDATE Options -->
+          @if (queryType === 'UPDATE') {
+            <div class="mb-3">
+              <label class="form-label">SET (field = value, ...)</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="updateSet" placeholder="name = 'John Doe', age = 30"></textarea>
+            </div>
+          }
+
+          <!-- WHERE Conditions -->
+          @if (queryType === 'SELECT' || queryType === 'UPDATE' || queryType === 'DELETE') {
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">WHERE Conditions</label>
+                <button class="btn btn-sm btn-outline-primary" (click)="addCondition()">
+                  <i class="bi bi-plus-circle"></i> Add Condition
+                </button>
+              </div>
+
+              @for (condition of conditions; track condition; let i = $index) {
+                <div class="card mb-2">
+                  <div class="card-body p-2">
+                    <div class="row g-2 align-items-center">
+                      @if (i > 0) {
+                        <div class="col-md-2">
+                          <select class="form-select form-select-sm" [(ngModel)]="condition.logic">
+                            <option value="AND">AND</option>
+                            <option value="OR">OR</option>
+                          </select>
+                        </div>
+                      }
+                      <div [class]="i > 0 ? 'col-md-3' : 'col-md-4'">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="condition.field" placeholder="Field name">
+                      </div>
+                      <div [class]="i > 0 ? 'col-md-3' : 'col-md-4'">
+                        <select class="form-select form-select-sm" [(ngModel)]="condition.operator">
+                          @for (op of operators; track op.value) {
+                            <option [value]="op.value">{{ op.label }}</option>
+                          }
+                        </select>
+                      </div>
+                      <div [class]="i > 0 ? 'col-md-3' : 'col-md-3'">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="condition.value"
+                          placeholder="Value"
+                          [disabled]="condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL'">
+                      </div>
+                      <div class="col-md-1">
+                        <button class="btn btn-sm btn-outline-danger w-100" (click)="removeCondition(i)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <button class="btn btn-success w-100" (click)="generateQuery()">
+            <i class="bi bi-play-circle me-2"></i>Generate Query
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated Query -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Generated SQL Query</h5>
+          <div>
+            <button class="btn btn-sm btn-light me-2" (click)="copyQuery()" [disabled]="!generatedQuery">
+              <i class="bi bi-clipboard"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="downloadQuery()" [disabled]="!generatedQuery">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="query-output">
+            <pre class="mb-0"><code>{{ generatedQuery || '-- Click "Generate Query" to see the SQL' }}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

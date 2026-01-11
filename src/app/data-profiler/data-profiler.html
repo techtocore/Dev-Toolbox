@@ -1,0 +1,207 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Data Profiler</h2>
+      <p class="text-muted mb-4">
+        Analyze data quality, statistics, and patterns. Get insights into your datasets quickly.
+      </p>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Input Data</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label">Format</label>
+              <select class="form-select" [(ngModel)]="format">
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
+
+            @if (format === 'csv') {
+              <div class="col-md-3">
+                <label class="form-label">Delimiter</label>
+                <select class="form-select" [(ngModel)]="delimiter">
+                  <option value=",">Comma (,)</option>
+                  <option value=";">Semicolon (;)</option>
+                  <option value="|">Pipe (|)</option>
+                  <option value="	">Tab</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">Options</label>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [(ngModel)]="hasHeader"
+                    id="hasHeader">
+                  <label class="form-check-label" for="hasHeader">
+                    Has Header Row
+                  </label>
+                </div>
+              </div>
+            }
+
+            <div class="col-md-3">
+              <label class="form-label">Quick Actions</label>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-info btn-sm" (click)="loadSampleData()">
+                  <i class="bi bi-file-earmark-text me-1"></i> Sample
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="clearAll()">
+                  <i class="bi bi-x-circle me-1"></i> Clear
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Data @if (format === 'csv') { (CSV) } @else { (JSON) }</label>
+            <textarea
+              class="form-control font-monospace"
+              rows="8"
+              [(ngModel)]="inputData"
+              [placeholder]="format === 'csv' ? 'Paste CSV data here...' : 'Paste JSON array here...'"></textarea>
+          </div>
+
+          <button class="btn btn-primary" (click)="analyzeData()">
+            <i class="bi bi-bar-chart-line me-2"></i>Analyze Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (profiles.length > 0) {
+    <!-- Summary -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Data Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-4">
+                <div class="summary-stat">
+                  <div class="stat-label">Total Rows</div>
+                  <div class="stat-value">{{ totalRows.toLocaleString() }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="summary-stat">
+                  <div class="stat-label">Total Columns</div>
+                  <div class="stat-value">{{ profiles.length }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="summary-stat">
+                  <div class="stat-label">Data Points</div>
+                  <div class="stat-value">{{ (totalRows * profiles.length).toLocaleString() }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column Profiles -->
+    <div class="row">
+      <div class="col-12">
+        <h4 class="mb-3">Column Profiles</h4>
+      </div>
+
+      @for (profile of profiles; track profile.name) {
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-header" [class.bg-info]="profile.type === 'number'" [class.bg-warning]="profile.type === 'string'" [class.bg-success]="profile.type === 'date'" [class.text-white]="profile.type !== 'mixed'">
+              <h6 class="mb-0">
+                <i class="bi" [class.bi-123]="profile.type === 'number'" [class.bi-fonts]="profile.type === 'string'" [class.bi-calendar]="profile.type === 'date'" [class.bi-question-circle]="profile.type === 'mixed' || profile.type === 'boolean'"></i>
+                {{ profile.name }}
+                <span class="badge bg-secondary ms-2">{{ profile.type }}</span>
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="profile-stat mb-2">
+                <span class="stat-label">Total Values:</span>
+                <span class="stat-value">{{ profile.count.toLocaleString() }}</span>
+              </div>
+
+              <div class="profile-stat mb-2">
+                <span class="stat-label">Null Values:</span>
+                <span class="stat-value" [class.text-danger]="profile.nullPercent > 20">
+                  {{ profile.nullCount }} ({{ profile.nullPercent.toFixed(1) }}%)
+                </span>
+              </div>
+
+              <div class="profile-stat mb-2">
+                <span class="stat-label">Unique Values:</span>
+                <span class="stat-value">
+                  {{ profile.uniqueCount.toLocaleString() }} ({{ profile.uniquePercent.toFixed(1) }}%)
+                </span>
+              </div>
+
+              @if (profile.type === 'number') {
+                <hr>
+                <div class="profile-stat mb-2">
+                  <span class="stat-label">Min:</span>
+                  <span class="stat-value">{{ profile.min }}</span>
+                </div>
+                <div class="profile-stat mb-2">
+                  <span class="stat-label">Max:</span>
+                  <span class="stat-value">{{ profile.max }}</span>
+                </div>
+                <div class="profile-stat mb-2">
+                  <span class="stat-label">Mean:</span>
+                  <span class="stat-value">{{ profile.mean?.toFixed(2) }}</span>
+                </div>
+                <div class="profile-stat mb-2">
+                  <span class="stat-label">Median:</span>
+                  <span class="stat-value">{{ profile.median?.toFixed(2) }}</span>
+                </div>
+              }
+
+              <div class="profile-stat mb-2">
+                <span class="stat-label">Mode:</span>
+                <span class="stat-value">{{ profile.mode }}</span>
+              </div>
+
+              @if (profile.topValues && profile.topValues.length > 0) {
+                <hr>
+                <div class="top-values">
+                  <small class="text-muted d-block mb-2">Top Values:</small>
+                  @for (item of profile.topValues; track item.value) {
+                    <div class="top-value-item">
+                      <span class="value-name">{{ item.value }}</span>
+                      <span class="value-count badge bg-secondary">{{ item.count }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

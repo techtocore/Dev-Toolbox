@@ -125,9 +125,33 @@ export class ToolsService {
       name: 'Numeric Summary',
       description: 'Statistical analysis of numeric data',
       route: '/numericSummary',
-      category: 'Statistics',
+      category: 'Data Analysis',
       icon: 'bi-graph-up',
       keywords: ['statistics', 'numeric', 'mean', 'median', 'mode', 'stats', 'analysis']
+    },
+    {
+      name: 'CSV/JSON Converter',
+      description: 'Convert between CSV and JSON formats with customizable options',
+      route: '/csvJsonConverter',
+      category: 'Data Analysis',
+      icon: 'bi-arrow-left-right',
+      keywords: ['csv', 'json', 'convert', 'data', 'transform', 'format']
+    },
+    {
+      name: 'SQL Query Builder',
+      description: 'Build SQL queries visually without writing code',
+      route: '/sqlQueryBuilder',
+      category: 'Data Analysis',
+      icon: 'bi-database',
+      keywords: ['sql', 'query', 'builder', 'database', 'select', 'where', 'join']
+    },
+    {
+      name: 'Data Profiler',
+      description: 'Analyze data quality, statistics, and patterns in your datasets',
+      route: '/dataProfiler',
+      category: 'Data Analysis',
+      icon: 'bi-bar-chart-line',
+      keywords: ['data', 'profile', 'quality', 'statistics', 'analysis', 'insights']
     },
     {
       name: 'UUID Generator',

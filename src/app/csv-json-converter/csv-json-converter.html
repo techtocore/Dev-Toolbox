@@ -1,0 +1,212 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">CSV ⇄ JSON Converter</h2>
+      <p class="text-muted mb-4">
+        Convert between CSV and JSON formats with customizable options.
+      </p>
+    </div>
+  </div>
+
+  <!-- Mode Selection & Options -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Conversion Settings</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Conversion Mode</label>
+              <div class="btn-group w-100" role="group">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="mode"
+                  id="mode-csv-json"
+                  [(ngModel)]="mode"
+                  value="csv-to-json"
+                  checked>
+                <label class="btn btn-outline-primary" for="mode-csv-json">
+                  <i class="bi bi-file-earmark-text me-2"></i>CSV → JSON
+                </label>
+
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="mode"
+                  id="mode-json-csv"
+                  [(ngModel)]="mode"
+                  value="json-to-csv">
+                <label class="btn btn-outline-primary" for="mode-json-csv">
+                  <i class="bi bi-braces me-2"></i>JSON → CSV
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Quick Actions</label>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" (click)="swapMode()">
+                  <i class="bi bi-arrow-left-right me-1"></i> Swap
+                </button>
+                <button class="btn btn-outline-info" (click)="loadSampleCsv()">
+                  <i class="bi bi-file-earmark-text me-1"></i> Sample CSV
+                </button>
+                <button class="btn btn-outline-info" (click)="loadSampleJson()">
+                  <i class="bi bi-braces me-1"></i> Sample JSON
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3">
+              <label class="form-label">Delimiter</label>
+              <select class="form-select" [(ngModel)]="delimiter">
+                <option value=",">Comma (,)</option>
+                <option value=";">Semicolon (;)</option>
+                <option value="|">Pipe (|)</option>
+                <option value="	">Tab</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Options</label>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [(ngModel)]="hasHeader"
+                  id="hasHeader">
+                <label class="form-check-label" for="hasHeader">
+                  Has Header Row
+                </label>
+              </div>
+            </div>
+
+            @if (mode === 'csv-to-json') {
+              <div class="col-md-3">
+                <label class="form-label">JSON Format</label>
+                <select class="form-select" [(ngModel)]="jsonFormat">
+                  <option value="objects">Objects</option>
+                  <option value="array">Arrays</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label">JSON Style</label>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [(ngModel)]="prettyPrint"
+                    id="prettyPrint">
+                  <label class="form-check-label" for="prettyPrint">
+                    Pretty Print
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input/Output -->
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi" [class.bi-file-earmark-text]="mode === 'csv-to-json'" [class.bi-braces]="mode === 'json-to-csv'"></i>
+            Input @if (mode === 'csv-to-json') { (CSV) } @else { (JSON) }
+          </h5>
+          <button class="btn btn-sm btn-light" (click)="clearAll()">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <textarea
+            class="form-control font-monospace mb-3"
+            rows="16"
+            [(ngModel)]="inputText"
+            [placeholder]="mode === 'csv-to-json' ? 'Paste CSV data here...' : 'Paste JSON data here...'"></textarea>
+
+          <button class="btn btn-primary w-100" (click)="convert()">
+            <i class="bi bi-arrow-right-circle me-2"></i>
+            Convert to @if (mode === 'csv-to-json') { JSON } @else { CSV }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi" [class.bi-braces]="mode === 'csv-to-json'" [class.bi-file-earmark-text]="mode === 'json-to-csv'"></i>
+            Output @if (mode === 'csv-to-json') { (JSON) } @else { (CSV) }
+          </h5>
+          <div>
+            <button class="btn btn-sm btn-light me-2" (click)="copyOutput()" [disabled]="!outputText">
+              <i class="bi bi-clipboard"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="downloadOutput()" [disabled]="!outputText">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          @if (errorMessage) {
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ errorMessage }}
+            </div>
+          }
+
+          <div class="output-area">
+            <pre class="mb-0">{{ outputText }}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Features</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>CSV to JSON</h6>
+              <ul class="small">
+                <li>Handles quoted fields with delimiters</li>
+                <li>Supports custom delimiters (comma, semicolon, tab, pipe)</li>
+                <li>Optional header row detection</li>
+                <li>Output as objects or arrays</li>
+                <li>Pretty print formatting</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>JSON to CSV</h6>
+              <ul class="small">
+                <li>Converts JSON arrays to CSV format</li>
+                <li>Auto-detects headers from object keys</li>
+                <li>Handles nested objects (stringifies them)</li>
+                <li>Properly escapes special characters</li>
+                <li>Optional header row</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

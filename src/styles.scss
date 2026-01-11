@@ -17,6 +17,42 @@ body {
   font-size: inherit !important;
 }
 
+.bg-primary {
+  background-color: #017cad !important;
+}
+
+// Override Bootstrap primary color
+.btn-primary {
+  background-color: #017cad !important;
+  border-color: #017cad !important;
+
+  &:hover, &:focus, &:active {
+    background-color: #015a82 !important;
+    border-color: #015a82 !important;
+  }
+}
+
+.btn-outline-primary {
+  color: #017cad !important;
+  border-color: #017cad !important;
+
+  &:hover, &:focus, &:active {
+    background-color: #017cad !important;
+    border-color: #017cad !important;
+    color: #fff !important;
+  }
+}
+
+.btn-check:checked + .btn-outline-primary {
+  background-color: #017cad !important;
+  border-color: #017cad !important;
+  color: #fff !important;
+}
+
+.text-primary {
+  color: #017cad !important;
+}
+
 .data-input {
   width: 100%;
   border: 1px solid #ccc;

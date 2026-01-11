@@ -19,6 +19,9 @@ import { PromptTemplate } from './prompt-template/prompt-template';
 import { TokenCounter } from './token-counter/token-counter';
 import { JsonSchemaGenerator } from './json-schema-generator/json-schema-generator';
 import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
+import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
+import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
+import { DataProfiler } from './data-profiler/data-profiler';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -39,7 +42,10 @@ const routes: Routes = [
   { path: 'promptTemplate', component: PromptTemplate },
   { path: 'tokenCounter', component: TokenCounter },
   { path: 'jsonSchemaGenerator', component: JsonSchemaGenerator },
-  { path: 'promptOptimizer', component: PromptOptimizer }
+  { path: 'promptOptimizer', component: PromptOptimizer },
+  { path: 'csvJsonConverter', component: CsvJsonConverter },
+  { path: 'sqlQueryBuilder', component: SqlQueryBuilder },
+  { path: 'dataProfiler', component: DataProfiler }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

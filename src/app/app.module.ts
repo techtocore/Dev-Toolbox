@@ -29,6 +29,9 @@ import { PromptTemplate } from './prompt-template/prompt-template';
 import { TokenCounter } from './token-counter/token-counter';
 import { JsonSchemaGenerator } from './json-schema-generator/json-schema-generator';
 import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
+import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
+import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
+import { DataProfiler } from './data-profiler/data-profiler';
 
 @NgModule({
   declarations: [
@@ -54,7 +57,10 @@ import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
     PromptTemplate,
     TokenCounter,
     JsonSchemaGenerator,
-    PromptOptimizer
+    PromptOptimizer,
+    CsvJsonConverter,
+    SqlQueryBuilder,
+    DataProfiler
   ],
   imports: [
     BrowserModule,

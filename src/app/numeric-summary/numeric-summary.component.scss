@@ -1,16 +1,80 @@
-.wordCounts {
-    color: aliceblue;
-    font-size: large;
-    padding-top: 10px;
-    padding-bottom: 15px;
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #212529;
+  }
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .metric-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .metric-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #212529;
+  }
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 
 @media (max-width: 768px) {
-    .wordCounts {
-        font-size: 1rem;
+  .stat-card {
+    .stat-value {
+      font-size: 1.5rem;
     }
+  }
 
-    .text-center {
-        margin: 15px 0;
+  .metric-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    .metric-value {
+      font-size: 1.1rem;
     }
+  }
 }
