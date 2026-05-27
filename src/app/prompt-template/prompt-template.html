@@ -16,7 +16,7 @@
           <h5 class="mb-0">Template Editor</h5>
           <div>
             <button class="btn btn-sm btn-light me-2" (click)="showLoadDialog = true" title="Load template">
-              <i class="bi bi-folder-open"></i>
+              <i class="bi bi-folder2-open"></i>
             </button>
             <button class="btn btn-sm btn-light me-2" (click)="showSaveDialog = true" title="Save template">
               <i class="bi bi-save"></i>
@@ -153,9 +153,11 @@
             (keyup.enter)="saveTemplate()">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="showSaveDialog = false">Cancel</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="showSaveDialog = false">
+            <i class="bi bi-x-lg me-1"></i> Cancel
+          </button>
           <button type="button" class="btn btn-primary" (click)="saveTemplate()" [disabled]="!currentTemplateName.trim()">
-            Save
+            <i class="bi bi-save me-1"></i> Save
           </button>
         </div>
       </div>
@@ -174,7 +176,8 @@
         </div>
         <div class="modal-body">
           @if (savedTemplates.length === 0) {
-            <div class="alert alert-info">
+            <div class="alert alert-info mb-0">
+              <i class="bi bi-info-circle me-2"></i>
               No saved templates yet. Save your current template to see it here.
             </div>
           } @else {
@@ -185,7 +188,7 @@
                     <h6 class="mb-1">{{ template.name }}</h6>
                     <small class="text-muted">{{ template.variables.length }} variable(s)</small>
                   </div>
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteTemplate(i)" title="Delete">
+                  <button class="btn btn-sm btn-outline-danger ms-2" (click)="deleteTemplate(i)" title="Delete">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -194,7 +197,9 @@
           }
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="showLoadDialog = false">Close</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="showLoadDialog = false">
+            <i class="bi bi-x-lg me-1"></i> Close
+          </button>
         </div>
       </div>
     </div>

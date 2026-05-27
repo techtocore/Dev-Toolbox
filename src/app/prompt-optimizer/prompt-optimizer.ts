@@ -3,9 +3,12 @@ import { Component } from '@angular/core';
 interface AnalysisResult {
   category: string;
   status: 'good' | 'warning' | 'error';
+  weight: number;
   message: string;
   suggestion?: string;
 }
+
+type TargetModel = 'generic' | 'claude' | 'gpt' | 'gemini';
 
 @Component({
   selector: 'app-prompt-optimizer',
@@ -15,28 +18,33 @@ interface AnalysisResult {
 })
 export class PromptOptimizer {
   prompt: string = `Summarize this text`;
+  targetModel: TargetModel = 'generic';
 
   analysisResults: AnalysisResult[] = [];
   score: number = 0;
 
-  // Best practices patterns
-  bestPractices = {
-    hasRole: /(?:you are|act as|role:|as an?)\s+\w+/i,
-    hasTask: /(?:please|task:|instruction:|goal:)/i,
-    hasContext: /(?:context:|background:|given that)/i,
-    hasFormat: /(?:format:|output:|return|respond with)/i,
-    hasExamples: /(?:example:|for instance|such as|e\.g\.)/i,
-    hasFewShot: /(?:input:|output:|###)/i,
-    hasConstraints: /(?:do not|avoid|never|must not|should not)/i,
-    tooShort: 10, // characters
-    tooLong: 4000 // characters
+  // Heuristic patterns for prompt-engineering best practices.
+  private patterns = {
+    role:           /(?:^|\n)\s*(?:you are|act as|role:|persona:|as an?\s+(?:expert|experienced|senior))\b/i,
+    task:           /\b(?:task|instruction|goal|objective|please)\s*[:\-]/i,
+    context:        /\b(?:context|background|given that|here(?:'s| is)|reference)\s*[:\-]/i,
+    format:         /\b(?:format|output|return|respond with|reply with|produce)\s*[:\-]?/i,
+    examples:       /\b(?:example|for instance|e\.g\.|sample(?: input| output)?)\s*[:\-]?/i,
+    fewShot:        /(?:input\s*:[\s\S]+?output\s*:|###[\s\S]+###|<example>[\s\S]+<\/example>)/i,
+    constraints:    /\b(?:do not|don't|avoid|never|must not|should not|only|always|exclusively)\b/i,
+    xmlTags:        /<\s*([a-z][a-z0-9_-]*)\s*>[\s\S]*<\s*\/\s*\1\s*>/i,
+    cot:            /\b(?:think step[- ]by[- ]step|let'?s think|chain[- ]of[- ]thought|show your (?:work|reasoning)|reason about|explain your reasoning)\b/i,
+    jsonOutput:     /(?:return|respond|reply|output)[^.]*\b(?:json|object|array)\b/i,
+    delimiter:      /(?:^|\n)\s*(?:---+|===+|###+|```|<\/?[a-z][a-z0-9_-]*>)/i,
+    prefilled:      /\n\s*(?:assistant|response|answer)\s*:\s*$/i,
+    safety:         /\b(?:if you cannot|if unsure|when uncertain|do not (?:guess|hallucinate|invent)|cite (?:sources?|evidence)|answer only if)\b/i,
   };
 
-  // Common issues
-  issues = {
-    vague: ['it', 'this', 'that', 'something', 'thing', 'stuff'],
-    filler: ['please', 'kindly', 'would you', 'could you', 'i want you to'],
-    redundant: ['very', 'really', 'quite', 'just', 'actually']
+  private issues = {
+    vague:    ['it', 'this', 'that', 'something', 'thing', 'stuff', 'somehow'],
+    filler:   ['please', 'kindly', 'would you', 'could you', 'i want you to', 'i would like'],
+    redundant:['very', 'really', 'quite', 'just', 'actually', 'basically', 'literally'],
+    politeness:['please', 'kindly', 'thanks', 'thank you']
   };
 
   constructor() {
@@ -46,178 +54,223 @@ export class PromptOptimizer {
   analyzePrompt(): void {
     this.analysisResults = [];
 
-    if (!this.prompt.trim()) {
+    const prompt = this.prompt;
+    if (!prompt.trim()) {
       this.analysisResults.push({
-        category: 'General',
-        status: 'error',
+        category: 'General', status: 'error', weight: 1,
         message: 'Empty prompt',
-        suggestion: 'Enter a prompt to analyze'
+        suggestion: 'Enter a prompt to analyze.'
       });
       this.score = 0;
       return;
     }
 
-    // Check length
-    const length = this.prompt.length;
-    if (length < this.bestPractices.tooShort) {
+    const length = prompt.length;
+    const wordCount = prompt.trim().split(/\s+/).length;
+
+    // 1. Length
+    if (length < 30) {
       this.analysisResults.push({
-        category: 'Length',
-        status: 'error',
-        message: `Prompt is too short (${length} characters)`,
-        suggestion: 'Add more context and specific instructions'
+        category: 'Length', status: 'error', weight: 2,
+        message: `Very short prompt (${length} chars)`,
+        suggestion: 'Short prompts under-specify the task. Add a role, task statement, context, and output format.'
       });
-    } else if (length > this.bestPractices.tooLong) {
+    } else if (length > 8000) {
       this.analysisResults.push({
-        category: 'Length',
-        status: 'warning',
-        message: `Prompt is very long (${length} characters)`,
-        suggestion: 'Consider breaking into smaller, focused prompts'
+        category: 'Length', status: 'warning', weight: 1,
+        message: `Very long prompt (${length} chars, ~${Math.round(length / 4)} tokens)`,
+        suggestion: 'Consider moving stable instructions into a cached system prompt and only varying the per-request payload.'
       });
     } else {
       this.analysisResults.push({
-        category: 'Length',
-        status: 'good',
-        message: `Good length (${length} characters)`
+        category: 'Length', status: 'good', weight: 1,
+        message: `Reasonable length (${length} chars, ${wordCount} words)`
       });
     }
 
-    // Check for role/persona
-    if (this.bestPractices.hasRole.test(this.prompt)) {
-      this.analysisResults.push({
-        category: 'Role',
-        status: 'good',
-        message: 'Defines a role or persona'
-      });
-    } else {
-      this.analysisResults.push({
-        category: 'Role',
-        status: 'warning',
-        message: 'No explicit role defined',
-        suggestion: 'Start with "You are a [role]..." to set context'
-      });
-    }
-
-    // Check for clear task
-    if (this.bestPractices.hasTask.test(this.prompt)) {
-      this.analysisResults.push({
-        category: 'Task',
-        status: 'good',
-        message: 'Clear task instruction present'
-      });
-    } else {
-      this.analysisResults.push({
-        category: 'Task',
-        status: 'warning',
-        message: 'Task could be more explicit',
-        suggestion: 'Use "Task: [specific action]" or "Please [action]"'
-      });
-    }
-
-    // Check for context
-    if (this.bestPractices.hasContext.test(this.prompt)) {
-      this.analysisResults.push({
-        category: 'Context',
-        status: 'good',
-        message: 'Provides context'
-      });
-    } else {
-      this.analysisResults.push({
-        category: 'Context',
-        status: 'warning',
-        message: 'No explicit context provided',
-        suggestion: 'Add "Context: ..." to provide background information'
-      });
-    }
-
-    // Check for output format
-    if (this.bestPractices.hasFormat.test(this.prompt)) {
-      this.analysisResults.push({
-        category: 'Format',
-        status: 'good',
-        message: 'Specifies output format'
-      });
-    } else {
-      this.analysisResults.push({
-        category: 'Format',
-        status: 'warning',
-        message: 'Output format not specified',
-        suggestion: 'Specify desired format (e.g., "Return as JSON", "Use bullet points")'
-      });
-    }
-
-    // Check for examples
-    if (this.bestPractices.hasExamples.test(this.prompt) || this.bestPractices.hasFewShot.test(this.prompt)) {
-      this.analysisResults.push({
-        category: 'Examples',
-        status: 'good',
-        message: 'Includes examples or few-shot learning'
-      });
-    } else {
-      this.analysisResults.push({
-        category: 'Examples',
-        status: 'warning',
-        message: 'No examples provided',
-        suggestion: 'Add examples to improve accuracy: "Example: Input: ... Output: ..."'
-      });
-    }
-
-    // Check for constraints
-    if (this.bestPractices.hasConstraints.test(this.prompt)) {
-      this.analysisResults.push({
-        category: 'Constraints',
-        status: 'good',
-        message: 'Includes constraints or boundaries'
-      });
-    }
-
-    // Check for vague language
-    const vagueWords = this.issues.vague.filter(word =>
-      new RegExp(`\\b${word}\\b`, 'i').test(this.prompt)
+    // 2. Role / persona
+    this.push(
+      this.patterns.role.test(prompt), 'Role', 2,
+      'Defines a role or persona',
+      'Start with "You are a [specific expert]" — concrete personas measurably improve grounding.'
     );
-    if (vagueWords.length > 0) {
-      this.analysisResults.push({
-        category: 'Clarity',
-        status: 'warning',
-        message: `Contains vague words: ${vagueWords.join(', ')}`,
-        suggestion: 'Replace vague terms with specific nouns or descriptions'
-      });
-    }
 
-    // Check for redundant/filler words
-    const fillerWords = this.issues.filler.filter(word =>
-      new RegExp(`\\b${word}\\b`, 'i').test(this.prompt)
+    // 3. Task clarity
+    this.push(
+      this.patterns.task.test(prompt), 'Task', 3,
+      'Clear task statement',
+      'Use an explicit "Task:" or imperative verb up top (e.g. "Extract...", "Summarize...", "Classify...").'
     );
-    if (fillerWords.length > 2) {
+
+    // 4. Context
+    this.push(
+      this.patterns.context.test(prompt), 'Context', 2,
+      'Provides context / background',
+      'Add background ("Context: ...") so the model knows why it\'s doing the task — improves relevance.'
+    );
+
+    // 5. Output format
+    this.push(
+      this.patterns.format.test(prompt) || this.patterns.jsonOutput.test(prompt),
+      'Output format', 3,
+      'Specifies output format',
+      'State the format: "Reply with a JSON object containing keys X, Y, Z" or "Use Markdown bullets".'
+    );
+
+    // 6. Examples / few-shot
+    const hasExamples = this.patterns.fewShot.test(prompt) || this.patterns.examples.test(prompt);
+    this.push(
+      hasExamples, 'Examples (few-shot)', 2,
+      'Includes examples or few-shot demonstrations',
+      'Add 1–3 input→output examples. Few-shot remains the single highest-ROI technique for accuracy.'
+    );
+
+    // 7. Constraints / guardrails
+    if (this.patterns.constraints.test(prompt)) {
       this.analysisResults.push({
-        category: 'Conciseness',
-        status: 'warning',
-        message: 'Contains filler words',
-        suggestion: 'Remove unnecessary politeness and get straight to the instruction'
+        category: 'Constraints', status: 'good', weight: 1,
+        message: 'States constraints or boundaries'
       });
     }
 
-    // Check for structure (paragraphs, sections)
-    const hasStructure = this.prompt.includes('\n\n') ||
-                         this.prompt.match(/\n(?:\d+\.|[-*]|\w+:)/);
-    if (hasStructure) {
+    // 8. Structure (XML tags / delimiters)
+    const hasXml = this.patterns.xmlTags.test(prompt);
+    const hasDelim = this.patterns.delimiter.test(prompt);
+    if (hasXml) {
       this.analysisResults.push({
-        category: 'Structure',
-        status: 'good',
-        message: 'Well-structured with sections or lists'
+        category: 'Structure', status: 'good', weight: 2,
+        message: 'Uses XML-style tags to delimit sections'
       });
-    } else if (length > 200) {
+    } else if (hasDelim) {
       this.analysisResults.push({
-        category: 'Structure',
-        status: 'warning',
-        message: 'Long prompt without clear structure',
-        suggestion: 'Break into sections with headers or numbered lists'
+        category: 'Structure', status: 'good', weight: 1,
+        message: 'Uses delimiters (---, ###, code fences) to separate sections'
+      });
+    } else if (length > 250) {
+      const suggestion = this.targetModel === 'claude'
+        ? 'Wrap inputs in XML tags like <context>...</context>, <example>...</example>. Claude is trained to attend to them.'
+        : 'Separate sections with delimiters (### Headers, --- separators, or XML tags) — improves parsability.';
+      this.analysisResults.push({
+        category: 'Structure', status: 'warning', weight: 1,
+        message: 'No structural delimiters in a long prompt',
+        suggestion
       });
     }
 
-    // Calculate score
-    const goodCount = this.analysisResults.filter(r => r.status === 'good').length;
-    const totalChecks = this.analysisResults.length;
-    this.score = Math.round((goodCount / totalChecks) * 100);
+    // 9. Chain of Thought
+    const isReasoningLikely = length > 400 || /\b(?:complex|multi[- ]step|analy[sz]e|reason|deduce)\b/i.test(prompt);
+    if (this.patterns.cot.test(prompt)) {
+      this.analysisResults.push({
+        category: 'Reasoning', status: 'good', weight: 1,
+        message: 'Invokes chain-of-thought reasoning'
+      });
+    } else if (isReasoningLikely) {
+      const suggestion = this.targetModel === 'claude' || this.targetModel === 'gpt'
+        ? 'For reasoning-capable models (Claude extended thinking, o-series), CoT cues are mostly unnecessary — they reason by default. Otherwise, add "Think step by step before answering."'
+        : 'Add "Think step by step, then provide your final answer" for non-reasoning models.';
+      this.analysisResults.push({
+        category: 'Reasoning', status: 'warning', weight: 1,
+        message: 'Complex task without an explicit reasoning cue',
+        suggestion
+      });
+    }
+
+    // 10. Safety / grounding
+    if (this.patterns.safety.test(prompt)) {
+      this.analysisResults.push({
+        category: 'Grounding', status: 'good', weight: 1,
+        message: 'Includes uncertainty/grounding instructions'
+      });
+    } else if (/\b(?:fact|cite|source|reference|accurate|truth)\b/i.test(prompt)) {
+      this.analysisResults.push({
+        category: 'Grounding', status: 'warning', weight: 1,
+        message: 'Task implies factual accuracy but no hedging instruction',
+        suggestion: 'Add: "If you are unsure, say so explicitly rather than guessing."'
+      });
+    }
+
+    // 11. Vague language
+    const vagueWords = this.issues.vague.filter(w =>
+      new RegExp(`\\b${w}\\b`, 'i').test(prompt)
+    );
+    if (vagueWords.length >= 2) {
+      this.analysisResults.push({
+        category: 'Clarity', status: 'warning', weight: 1,
+        message: `Vague pronouns / fillers: ${vagueWords.join(', ')}`,
+        suggestion: 'Replace pronouns with the actual referent (e.g. "the user\'s comment" instead of "it").'
+      });
+    }
+
+    // 12. Conciseness
+    const fillerWords = this.issues.filler.filter(w =>
+      new RegExp(`\\b${w}\\b`, 'i').test(prompt)
+    );
+    if (fillerWords.length >= 3) {
+      this.analysisResults.push({
+        category: 'Conciseness', status: 'warning', weight: 1,
+        message: 'Heavy use of filler / politeness words',
+        suggestion: 'LLMs don\'t need politeness. Replace "Could you please kindly..." with the imperative.'
+      });
+    }
+
+    // 13. Prompt-injection risk on user-supplied content
+    if (/\{\{.*?\}\}|\$\{.*?\}|user input/i.test(prompt) && !hasXml && !hasDelim) {
+      this.analysisResults.push({
+        category: 'Injection risk', status: 'warning', weight: 2,
+        message: 'Embeds user input without isolating delimiters',
+        suggestion: 'Wrap untrusted input in XML tags and tell the model to treat tag contents as data, not instructions.'
+      });
+    }
+
+    // 14. Provider-specific recommendation
+    if (this.targetModel === 'claude' && !hasXml && length > 200) {
+      this.analysisResults.push({
+        category: 'Claude-specific', status: 'warning', weight: 1,
+        message: 'No XML tags',
+        suggestion: 'Claude responds especially well to <task>, <context>, <example>, <output_format> tags.'
+      });
+    }
+    if (this.targetModel === 'gpt' && !/\bsystem\s*:/i.test(prompt) && length > 400) {
+      this.analysisResults.push({
+        category: 'GPT-specific', status: 'warning', weight: 1,
+        message: 'Single long instruction block',
+        suggestion: 'Split persona + standing rules into the system message and keep the user message focused on the request.'
+      });
+    }
+    if (this.targetModel === 'gemini' && !this.patterns.jsonOutput.test(prompt) && /extract|classify|parse/i.test(prompt)) {
+      this.analysisResults.push({
+        category: 'Gemini-specific', status: 'warning', weight: 1,
+        message: 'Extraction task without explicit JSON output',
+        suggestion: 'For extraction tasks on Gemini, pair the prompt with `responseMimeType: "application/json"` + `responseSchema`.'
+      });
+    }
+
+    // Score: weighted ratio of good results vs total weight.
+    let goodWeight = 0;
+    let totalWeight = 0;
+    this.analysisResults.forEach(r => {
+      totalWeight += r.weight;
+      if (r.status === 'good') goodWeight += r.weight;
+    });
+    this.score = totalWeight > 0 ? Math.round((goodWeight / totalWeight) * 100) : 0;
+  }
+
+  private push(
+    passed: boolean,
+    category: string,
+    weight: number,
+    okMessage: string,
+    suggestion: string
+  ): void {
+    if (passed) {
+      this.analysisResults.push({ category, status: 'good', weight, message: okMessage });
+    } else {
+      this.analysisResults.push({
+        category, status: 'warning', weight,
+        message: `Missing: ${category.toLowerCase()}`,
+        suggestion
+      });
+    }
   }
 
   getScoreClass(): string {
@@ -227,23 +280,25 @@ export class PromptOptimizer {
   }
 
   getScoreLabel(): string {
-    if (this.score >= 80) return 'Excellent';
-    if (this.score >= 60) return 'Good';
-    if (this.score >= 40) return 'Needs Improvement';
+    if (this.score >= 85) return 'Excellent';
+    if (this.score >= 70) return 'Strong';
+    if (this.score >= 50) return 'Needs work';
     return 'Poor';
   }
 
   applyOptimization(): void {
-    let optimized = this.prompt;
+    let optimized = this.prompt.trim();
 
-    // Add role if missing
-    if (!this.bestPractices.hasRole.test(optimized)) {
-      optimized = `You are a helpful AI assistant.\n\n${optimized}`;
+    if (!this.patterns.role.test(optimized)) {
+      optimized = `You are an expert assistant.\n\n${optimized}`;
     }
-
-    // Structure improvement
-    if (!optimized.includes('\n') && optimized.length > 100) {
-      // Try to break into sections
+    if (!this.patterns.format.test(optimized) && !this.patterns.jsonOutput.test(optimized)) {
+      optimized += `\n\nOutput format: respond in Markdown.`;
+    }
+    if (this.targetModel === 'claude' && !this.patterns.xmlTags.test(optimized) && optimized.length > 200) {
+      optimized = optimized.replace(/Context\s*:\s*([\s\S]*?)(?=\n\n|$)/i, '<context>\n$1\n</context>');
+    }
+    if (!optimized.includes('\n\n')) {
       optimized = optimized.replace(/\.\s+/g, '.\n\n');
     }
 
@@ -252,7 +307,7 @@ export class PromptOptimizer {
   }
 
   loadExample(type: string): void {
-    switch(type) {
+    switch (type) {
       case 'poor':
         this.prompt = 'Summarize this text about AI';
         break;
@@ -274,35 +329,50 @@ Output format: Markdown bullet points
 Text to summarize: [paste text here]`;
         break;
       case 'excellent':
-        this.prompt = `You are a senior data scientist specializing in machine learning.
+        this.prompt = `You are a senior data scientist specializing in machine learning literature review.
 
-Task: Extract key information about machine learning models from the following research paper abstract.
+<task>
+Extract structured metadata about the ML approach described in the abstract below.
+</task>
 
-Context: This is for a literature review comparing different ML approaches for image classification.
+<context>
+This extraction feeds a comparative literature review of image-classification methods. Accuracy matters more than verbosity.
+</context>
 
-Required fields to extract:
-- Model architecture name
-- Dataset used
-- Accuracy metrics
-- Key innovations or techniques
+<output_format>
+Return a single JSON object matching this schema, and nothing else:
+{
+  "model_name": string,
+  "dataset": string,
+  "accuracy": { "metric": string, "value": string },
+  "innovations": string[]
+}
+</output_format>
 
-Output format: JSON object with keys: model_name, dataset, accuracy, innovations (array)
+<rules>
+- Only extract information explicitly stated in the abstract.
+- If a field is not mentioned, use null.
+- Do not infer architecture from model name alone.
+- If you are uncertain about a value, set it to null rather than guessing.
+</rules>
 
-Constraints:
-- Only extract information explicitly stated in the text
-- If a field is not mentioned, use null
-- For accuracy, include both the metric name and value
-
-Example:
-Input: "We propose ResNet-50 trained on ImageNet achieving 92.1% top-1 accuracy using residual connections."
-Output: {
+<example>
+<input>
+We propose ResNet-50 trained on ImageNet achieving 92.1% top-1 accuracy using residual connections.
+</input>
+<output>
+{
   "model_name": "ResNet-50",
   "dataset": "ImageNet",
-  "accuracy": "92.1% top-1",
+  "accuracy": { "metric": "top-1", "value": "92.1%" },
   "innovations": ["residual connections"]
 }
+</output>
+</example>
 
-Abstract: [paste abstract here]`;
+<abstract>
+[paste abstract here]
+</abstract>`;
         break;
     }
     this.analyzePrompt();

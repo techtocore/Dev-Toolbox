@@ -1,9 +1,10 @@
 <div class="container-fluid py-4">
   <div class="row">
     <div class="col-12">
-      <h2 class="mb-3">Token Counter & Cost Estimator</h2>
+      <h2 class="mb-3">Token Counter &amp; Cost Estimator</h2>
       <p class="text-muted mb-4">
-        Estimate token counts and API costs for different LLM providers. Note: Token counts are approximations.
+        Estimate token usage and API cost for the latest frontier LLMs (Claude 4.7, GPT-5.1, Gemini 3).
+        Counts are estimates — use each provider's official tokenizer for billing-grade accuracy.
       </p>
     </div>
   </div>
@@ -29,7 +30,7 @@
               <label class="form-label">Model</label>
               <select class="form-select" [(ngModel)]="selectedModel">
                 @for (model of filteredModels; track model.model) {
-                  <option [value]="model.model">{{ model.model }}</option>
+                  <option [value]="model.model">{{ model.displayName }}</option>
                 }
               </select>
             </div>
@@ -38,16 +39,54 @@
           @if (currentModel) {
             <div class="alert alert-info mb-0">
               <div class="row">
-                <div class="col-md-4">
-                  <strong>Input:</strong> {{ formatCurrency(currentModel.inputPricePer1M) }} / 1M tokens
+                <div class="col-md-3">
+                  <small class="text-muted d-block">Input</small>
+                  <strong>{{ formatCurrency(currentModel.inputPricePer1M) }}</strong>
+                  <small> / 1M</small>
                 </div>
-                <div class="col-md-4">
-                  <strong>Output:</strong> {{ formatCurrency(currentModel.outputPricePer1M) }} / 1M tokens
+                <div class="col-md-3">
+                  <small class="text-muted d-block">Output</small>
+                  <strong>{{ formatCurrency(currentModel.outputPricePer1M) }}</strong>
+                  <small> / 1M</small>
                 </div>
-                <div class="col-md-4">
-                  <strong>Context:</strong> {{ formatNumber(currentModel.contextWindow) }} tokens
+                <div class="col-md-3">
+                  <small class="text-muted d-block">Context</small>
+                  <strong>{{ formatNumber(currentModel.contextWindow) }}</strong>
+                  <small> tokens</small>
+                </div>
+                <div class="col-md-3">
+                  <small class="text-muted d-block">Max Output</small>
+                  <strong>
+                    @if (currentModel.outputLimit) {
+                      {{ formatNumber(currentModel.outputLimit) }}
+                    } @else {
+                      —
+                    }
+                  </strong>
+                  @if (currentModel.outputLimit) { <small> tokens</small> }
                 </div>
               </div>
+              @if (supportsCaching) {
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <small class="text-muted d-block">Cache Read</small>
+                    <strong>{{ formatCurrency(currentModel.cacheReadPricePer1M || 0) }}</strong>
+                    <small> / 1M tokens (≈ {{ ((1 - (currentModel.cacheReadPricePer1M || 0) / currentModel.inputPricePer1M) * 100).toFixed(0) }}% off input)</small>
+                  </div>
+                  @if (supportsCacheWrite) {
+                    <div class="col-md-6">
+                      <small class="text-muted d-block">Cache Write</small>
+                      <strong>{{ formatCurrency(currentModel.cacheWritePricePer1M || 0) }}</strong>
+                      <small> / 1M tokens (one-time)</small>
+                    </div>
+                  }
+                </div>
+              }
+              @if (currentModel.notes) {
+                <div class="mt-2 small">
+                  <i class="bi bi-info-circle me-1"></i>{{ currentModel.notes }}
+                </div>
+              }
             </div>
           }
         </div>
@@ -114,6 +153,65 @@
     </div>
   </div>
 
+  <!-- Prompt Caching -->
+  @if (supportsCaching) {
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-database-check me-2"></i>Prompt Caching</h5>
+            <small>Reuse a fixed prefix across requests to slash input cost.</small>
+          </div>
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-5">
+                <label class="form-label">% of input that is cached (reused prefix)</label>
+                <input
+                  type="range"
+                  class="form-range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  [(ngModel)]="cachedInputPercent">
+                <div class="d-flex justify-content-between small text-muted">
+                  <span>0%</span>
+                  <strong>{{ cachedInputPercent }}%</strong>
+                  <span>100%</span>
+                </div>
+              </div>
+              <div class="col-md-7">
+                <div class="row text-center">
+                  <div class="col-4">
+                    <small class="text-muted d-block">Without cache</small>
+                    <strong>{{ formatCurrency(inputCostWithoutCaching) }}</strong>
+                  </div>
+                  <div class="col-4">
+                    <small class="text-muted d-block">With cache</small>
+                    <strong class="text-success">{{ formatCurrency(inputCost) }}</strong>
+                  </div>
+                  <div class="col-4">
+                    <small class="text-muted d-block">Saved / request</small>
+                    <strong class="text-success">{{ formatCurrency(cacheSavings) }}</strong>
+                  </div>
+                </div>
+                @if (supportsCacheWrite && cachedInputTokens > 0) {
+                  <div class="alert alert-warning mt-3 mb-0 small">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    First request also pays a one-time
+                    <strong>{{ formatCurrency(cacheWriteCost) }}</strong>
+                    cache-write fee. Break-even after
+                    <strong>{{ cacheBreakEvenRequests ?? '—' }}</strong>
+                    requests.
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Summary -->
   <div class="row">
     <div class="col-12">
@@ -130,20 +228,22 @@
               <div class="summary-stat">
                 <div class="summary-label">Total Tokens</div>
                 <div class="summary-value">{{ formatNumber(totalTokens) }}</div>
-                <small class="text-muted">{{ inputTokens }} in + {{ outputTokens }} out</small>
+                <small class="text-muted">{{ formatNumber(inputTokens) }} in + {{ formatNumber(outputTokens) }} out</small>
               </div>
             </div>
             <div class="col-md-3">
               <div class="summary-stat">
-                <div class="summary-label">Total Cost</div>
+                <div class="summary-label">Total Cost / request</div>
                 <div class="summary-value text-danger">{{ formatCurrency(totalCost) }}</div>
-                <small class="text-muted">per request</small>
+                <small class="text-muted">in {{ formatCurrency(inputCost) }} + out {{ formatCurrency(outputCost) }}</small>
               </div>
             </div>
             <div class="col-md-3">
               <div class="summary-stat">
                 <div class="summary-label">Context Usage</div>
-                <div class="summary-value" [class.text-danger]="contextUsagePercent > 80" [class.text-warning]="contextUsagePercent > 50 && contextUsagePercent <= 80">
+                <div class="summary-value"
+                  [class.text-danger]="contextUsagePercent > 80"
+                  [class.text-warning]="contextUsagePercent > 50 && contextUsagePercent <= 80">
                   {{ contextUsagePercent.toFixed(2) }}%
                 </div>
                 <small class="text-muted">of {{ formatNumber(currentModel?.contextWindow || 0) }}</small>
@@ -151,9 +251,9 @@
             </div>
             <div class="col-md-3">
               <div class="summary-stat">
-                <div class="summary-label">Cost per 1K</div>
+                <div class="summary-label">Cost per 1K requests</div>
                 <div class="summary-value">{{ formatCurrency(totalCost * 1000) }}</div>
-                <small class="text-muted">requests</small>
+                <small class="text-muted">at current settings</small>
               </div>
             </div>
           </div>
@@ -174,24 +274,32 @@
                 </div>
                 <div class="col-md-8">
                   <div class="row text-center">
-                    <div class="col-4">
+                    <div class="col-3">
                       <div class="batch-stat">
                         <small class="text-muted">Input Tokens</small>
                         <div class="fw-bold">{{ formatNumber(batchInputTokens) }}</div>
                       </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                       <div class="batch-stat">
                         <small class="text-muted">Output Tokens</small>
                         <div class="fw-bold">{{ formatNumber(batchOutputTokens) }}</div>
                       </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                       <div class="batch-stat">
                         <small class="text-muted">Total Cost</small>
                         <div class="fw-bold text-danger">{{ formatCurrency(batchTotalCost) }}</div>
                       </div>
                     </div>
+                    @if (supportsCaching && cachedInputPercent > 0) {
+                      <div class="col-3">
+                        <div class="batch-stat">
+                          <small class="text-muted">Cache savings</small>
+                          <div class="fw-bold text-success">{{ formatCurrency(batchCacheSavings) }}</div>
+                        </div>
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
@@ -208,11 +316,17 @@
                   [class.bg-success]="contextUsagePercent <= 50"
                   [class.bg-warning]="contextUsagePercent > 50 && contextUsagePercent <= 80"
                   [class.bg-danger]="contextUsagePercent > 80"
-                  [style.width.%]="contextUsagePercent"
+                  [style.width.%]="contextUsagePercent > 100 ? 100 : contextUsagePercent"
                   role="progressbar">
                   {{ contextUsagePercent.toFixed(1) }}%
                 </div>
               </div>
+              @if (currentModel?.outputLimit && outputTokens > (currentModel?.outputLimit || 0)) {
+                <div class="alert alert-danger mt-2 mb-0 small">
+                  <i class="bi bi-exclamation-triangle me-1"></i>
+                  Output exceeds this model's max output limit ({{ formatNumber(currentModel?.outputLimit || 0) }} tokens).
+                </div>
+              }
             </div>
           }
         </div>
@@ -225,8 +339,13 @@
     <div class="col-12">
       <div class="alert alert-warning">
         <i class="bi bi-exclamation-triangle me-2"></i>
-        <strong>Note:</strong> Token counts are estimates based on character and word analysis. Actual tokenization varies by model and provider.
-        For exact counts, use the provider's official tokenizer. Prices are approximate and may change.
+        <strong>Estimation method:</strong> token counts use a provider-aware
+        character/word heuristic (Claude ≈ 3.6 chars/tok, GPT ≈ 4.0, Gemini ≈ 4.2, Llama ≈ 3.8).
+        Real tokenization depends on language, code, whitespace, and special characters.
+        For billing-accurate counts, use each provider's official tokenizer (Anthropic
+        <code>count_tokens</code> API, OpenAI <code>tiktoken</code>, Google
+        <code>countTokens</code>). Reasoning-model output (o3, o4-mini, Claude extended
+        thinking) includes hidden reasoning tokens you are billed for.
       </div>
     </div>
   </div>

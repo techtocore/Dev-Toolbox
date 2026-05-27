@@ -3,7 +3,9 @@
     <div class="col-12">
       <h2 class="mb-3">Prompt Optimizer</h2>
       <p class="text-muted mb-4">
-        Analyze and improve your LLM prompts using best practices and proven techniques.
+        Score and improve LLM prompts against modern best practices — role framing,
+        XML structure (Claude), system/user split (GPT), few-shot examples,
+        explicit output schema, grounding, and injection isolation.
       </p>
     </div>
   </div>
@@ -16,19 +18,27 @@
           <h5 class="mb-0">Quick Examples</h5>
         </div>
         <div class="card-body">
-          <div class="d-flex gap-2 flex-wrap">
-            <button class="btn btn-outline-danger" (click)="loadExample('poor')">
-              Poor Example
-            </button>
-            <button class="btn btn-outline-warning" (click)="loadExample('good')">
-              Good Example
-            </button>
-            <button class="btn btn-outline-success" (click)="loadExample('excellent')">
-              Excellent Example
-            </button>
-            <button class="btn btn-outline-secondary" (click)="clearPrompt()">
-              Clear
-            </button>
+          <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+              <label class="form-label small mb-1">Target model</label>
+              <select class="form-select form-select-sm" [(ngModel)]="targetModel" (change)="analyzePrompt()">
+                <option value="generic">Generic / unspecified</option>
+                <option value="claude">Anthropic Claude</option>
+                <option value="gpt">OpenAI GPT / o-series</option>
+                <option value="gemini">Google Gemini</option>
+              </select>
+            </div>
+            <div class="col-md-7">
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-sm btn-outline-danger" (click)="loadExample('poor')">Poor</button>
+                <button class="btn btn-sm btn-outline-warning" (click)="loadExample('good')">Good</button>
+                <button class="btn btn-sm btn-outline-success" (click)="loadExample('excellent')">Excellent</button>
+                <button class="btn btn-sm btn-outline-primary" (click)="applyOptimization()">
+                  <i class="bi bi-magic me-1"></i>Auto-improve
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="clearPrompt()">Clear</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -128,55 +138,61 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-6">
-              <h6><i class="bi bi-check2-circle text-success me-2"></i>Do's</h6>
+              <h6><i class="bi bi-check2-circle text-success me-2"></i>Do</h6>
               <ul>
-                <li><strong>Be Specific:</strong> Use concrete details and clear instructions</li>
-                <li><strong>Provide Context:</strong> Explain the background and purpose</li>
-                <li><strong>Define the Role:</strong> Specify who the AI should act as</li>
-                <li><strong>Set Boundaries:</strong> Use constraints like "do not" or "must"</li>
-                <li><strong>Use Examples:</strong> Show desired input/output pairs (few-shot)</li>
-                <li><strong>Specify Format:</strong> Define how the output should be structured</li>
-                <li><strong>Break It Down:</strong> Use sections, numbered lists, or headers</li>
+                <li><strong>Lead with a concrete role</strong> — "You are a senior X" beats "You are helpful."</li>
+                <li><strong>State the task imperatively</strong> at the top, then context, then constraints.</li>
+                <li><strong>Use structural delimiters</strong> — XML tags for Claude, system messages for GPT, JSON schema for Gemini.</li>
+                <li><strong>Provide 1–3 few-shot examples</strong> — still the highest-ROI technique for accuracy.</li>
+                <li><strong>Specify output shape</strong> — JSON schema, Markdown sections, or a fixed template.</li>
+                <li><strong>Add a hedge instruction</strong> — "If unsure, say so" reduces hallucination.</li>
+                <li><strong>Cache static prefixes</strong> — move stable instructions into cacheable system prompts.</li>
               </ul>
             </div>
             <div class="col-md-6">
-              <h6><i class="bi bi-x-circle text-danger me-2"></i>Don'ts</h6>
+              <h6><i class="bi bi-x-circle text-danger me-2"></i>Avoid</h6>
               <ul>
-                <li><strong>Avoid Vagueness:</strong> Don't use "this", "that", "it" without clarity</li>
-                <li><strong>Skip Filler Words:</strong> Remove unnecessary politeness</li>
-                <li><strong>Don't Assume:</strong> Don't expect the AI to guess context</li>
-                <li><strong>Avoid Ambiguity:</strong> Be explicit about what you want</li>
-                <li><strong>Don't Overload:</strong> Split complex tasks into multiple prompts</li>
-                <li><strong>Minimize Jargon:</strong> Use clear language unless technical terms are needed</li>
+                <li><strong>CoT cues on reasoning models</strong> — Claude extended thinking and o-series already reason; "think step by step" wastes tokens.</li>
+                <li><strong>Politeness scaffolding</strong> — "Could you please kindly..." adds tokens without improving output.</li>
+                <li><strong>Embedding user input bare</strong> — wrap it in tags and instruct the model to treat tag contents as data.</li>
+                <li><strong>Ambiguous pronouns</strong> — "summarize this" with no anchor for "this".</li>
+                <li><strong>Format drift</strong> — asking for "JSON or similar" guarantees neither.</li>
+                <li><strong>Reasoning + JSON in the same response</strong> for non-reasoning models — split into two calls or use structured outputs.</li>
               </ul>
             </div>
           </div>
 
           <div class="mt-4">
-            <h6>Prompt Structure Template</h6>
+            <h6>Reference prompt structure</h6>
             <div class="template-box">
-              <pre><code>[Role]: You are a [specific role/expert]
+              <pre><code>You are a &lt;specific expert role&gt;.
 
-[Task]: [Clear, specific instruction]
+&lt;task&gt;
+&lt;Clear, single-sentence instruction&gt;
+&lt;/task&gt;
 
-[Context]: [Background information or situation]
+&lt;context&gt;
+&lt;Background, why this matters, who consumes the output&gt;
+&lt;/context&gt;
 
-[Requirements]:
-- [Specific requirement 1]
-- [Specific requirement 2]
-- [Specific requirement 3]
+&lt;output_format&gt;
+&lt;Exact schema, JSON shape, or template — leave no ambiguity&gt;
+&lt;/output_format&gt;
 
-[Format]: [How the output should be structured]
+&lt;rules&gt;
+- Do not &lt;unwanted behavior&gt;
+- If uncertain, say so explicitly
+- &lt;Other invariants&gt;
+&lt;/rules&gt;
 
-[Constraints]:
-- Do not [unwanted behavior]
-- Must [required behavior]
+&lt;example&gt;
+&lt;input&gt;…&lt;/input&gt;
+&lt;output&gt;…&lt;/output&gt;
+&lt;/example&gt;
 
-[Example] (optional):
-Input: [example input]
-Output: [example output]
-
-[Input]: [Actual data or content to process]</code></pre>
+&lt;input&gt;
+&lt;actual untrusted user data&gt;
+&lt;/input&gt;</code></pre>
             </div>
           </div>
         </div>

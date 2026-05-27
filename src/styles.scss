@@ -19,7 +19,9 @@ body {
 .bg-white .text-muted,
 .bg-light .text-muted,
 .bg-light-custom .text-muted,
-.search-results .text-muted {
+.search-results .text-muted,
+.modal-content .text-muted,
+.modal-dialog .text-muted {
   color: rgba(33, 37, 41, 0.75) !important;
 }
 

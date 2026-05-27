@@ -10,8 +10,40 @@
   bottom: 0;
   left: 0;
   z-index: 100; /* Behind the navbar */
-  padding: 48px 0 0; /* Height of navbar */
+  padding: 48px 0 60px; /* Navbar height + room for the fixed footer */
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  // Slim scrollbar that doesn't fight the light sidebar bg.
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+// The Bootstrap markup wraps the tree in `.position-sticky`. Inside a
+// scrollable parent that does nothing useful and breaks scroll math —
+// neutralize it so the tree flows naturally inside the sidebar.
+.sidebar .position-sticky {
+  position: static !important;
 }
 
 .sidebar-sticky {
@@ -21,6 +53,20 @@
   padding-top: 0.5rem;
   overflow-x: hidden;
   overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+// Mobile: sidebar opens below the navbar as a full-height drawer.
+// Without this, the 48px top padding eats into the visible drawer area
+// and the menu cannot scroll past the footer.
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 48px;
+    bottom: 0;
+    padding-top: 0;
+    padding-bottom: 60px;
+    max-height: calc(100vh - 48px);
+    background-color: #eef2f7;
+  }
 }
 
 .sidebar .nav-link {

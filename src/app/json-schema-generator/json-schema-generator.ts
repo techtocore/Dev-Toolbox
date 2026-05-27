@@ -42,7 +42,12 @@ export class JsonSchemaGenerator {
   currentEnumField: number = -1;
   enumValues: string = '';
 
-  outputFormat: 'json-schema' | 'anthropic' | 'openai' = 'json-schema';
+  outputFormat:
+    | 'json-schema'
+    | 'anthropic-tool'
+    | 'openai-tool'
+    | 'openai-structured'
+    | 'gemini-structured' = 'json-schema';
 
   // Predefined templates
   templates = [
@@ -182,57 +187,161 @@ export class JsonSchemaGenerator {
   get generatedSchema(): string {
     const schema = this.generateSchema();
 
-    if (this.outputFormat === 'anthropic') {
-      return this.generateAnthropicFormat(schema);
-    } else if (this.outputFormat === 'openai') {
-      return this.generateOpenAIFormat(schema);
+    switch (this.outputFormat) {
+      case 'anthropic-tool':
+        return this.generateAnthropicToolFormat(schema);
+      case 'openai-tool':
+        return this.generateOpenAIToolFormat(schema);
+      case 'openai-structured':
+        return this.generateOpenAIStructuredFormat(schema);
+      case 'gemini-structured':
+        return this.generateGeminiStructuredFormat(schema);
+      default:
+        return JSON.stringify(schema, null, 2);
     }
-
-    return JSON.stringify(schema, null, 2);
   }
 
-  generateAnthropicFormat(schema: any): string {
-    const anthropicExample = {
-      model: 'claude-sonnet-4.5',
-      messages: [
-        {
-          role: 'user',
-          content: 'Extract the following information...'
-        }
-      ],
+  private get toolName(): string {
+    const base = (this.schemaTitle || 'extract_data')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+    return base || 'extract_data';
+  }
+
+  generateAnthropicToolFormat(schema: any): string {
+    const example = {
+      model: 'claude-opus-4-7',
+      max_tokens: 4096,
       tools: [
         {
-          name: 'extract_data',
-          description: `Extract data according to the ${schema.title || 'schema'}`,
+          name: this.toolName,
+          description:
+            schema.description ||
+            `Extract data conforming to the ${schema.title || 'schema'}.`,
           input_schema: schema
         }
       ],
-      tool_choice: { type: 'tool', name: 'extract_data' }
-    };
-
-    return JSON.stringify(anthropicExample, null, 2);
-  }
-
-  generateOpenAIFormat(schema: any): string {
-    const openAIExample = {
-      model: 'gpt-4',
+      tool_choice: { type: 'tool', name: this.toolName },
       messages: [
         {
           role: 'user',
-          content: 'Extract the following information...'
+          content: 'Extract the structured fields from the following text:\n\n<text>\n...\n</text>'
         }
-      ],
-      functions: [
-        {
-          name: 'extract_data',
-          description: `Extract data according to the ${schema.title || 'schema'}`,
-          parameters: schema
-        }
-      ],
-      function_call: { name: 'extract_data' }
+      ]
     };
+    return JSON.stringify(example, null, 2);
+  }
 
-    return JSON.stringify(openAIExample, null, 2);
+  generateOpenAIToolFormat(schema: any): string {
+    // Modern OpenAI Chat Completions tools API.
+    const example = {
+      model: 'gpt-5.1',
+      messages: [
+        { role: 'system', content: 'You extract structured data from text.' },
+        { role: 'user', content: 'Extract the structured fields from the following text...' }
+      ],
+      tools: [
+        {
+          type: 'function',
+          function: {
+            name: this.toolName,
+            description:
+              schema.description ||
+              `Extract data conforming to the ${schema.title || 'schema'}.`,
+            parameters: schema,
+            strict: true
+          }
+        }
+      ],
+      tool_choice: { type: 'function', function: { name: this.toolName } }
+    };
+    return JSON.stringify(example, null, 2);
+  }
+
+  generateOpenAIStructuredFormat(schema: any): string {
+    // OpenAI Structured Outputs (response_format json_schema). Requires `strict: true`
+    // and every property listed in `required`. Mirrors the schema as-is.
+    const strictSchema = this.toStrictSchema(schema);
+
+    const example = {
+      model: 'gpt-5.1',
+      messages: [
+        { role: 'system', content: 'You extract structured data from text.' },
+        { role: 'user', content: 'Extract the structured fields from the following text...' }
+      ],
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: this.toolName,
+          description: schema.description || `Structured ${schema.title || 'output'}`,
+          strict: true,
+          schema: strictSchema
+        }
+      }
+    };
+    return JSON.stringify(example, null, 2);
+  }
+
+  generateGeminiStructuredFormat(schema: any): string {
+    // Gemini structured output via generationConfig.responseSchema.
+    // Gemini's schema dialect ignores $schema, title, description on the root;
+    // we strip them for clarity.
+    const responseSchema = this.toGeminiSchema(schema);
+
+    const example = {
+      model: 'gemini-3-pro',
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: 'Extract the structured fields from the following text...' }]
+        }
+      ],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
+      }
+    };
+    return JSON.stringify(example, null, 2);
+  }
+
+  // OpenAI Structured Outputs requires every property in `required` and no
+  // additional properties. Apply both recursively.
+  private toStrictSchema(schema: any): any {
+    if (!schema || typeof schema !== 'object') return schema;
+
+    const out: any = Array.isArray(schema) ? [] : { ...schema };
+
+    if (out.type === 'object' && out.properties) {
+      out.required = Object.keys(out.properties);
+      out.additionalProperties = false;
+      const props: any = {};
+      for (const key of Object.keys(out.properties)) {
+        props[key] = this.toStrictSchema(out.properties[key]);
+      }
+      out.properties = props;
+    }
+    if (out.type === 'array' && out.items) {
+      out.items = this.toStrictSchema(out.items);
+    }
+    return out;
+  }
+
+  private toGeminiSchema(schema: any): any {
+    if (!schema || typeof schema !== 'object') return schema;
+    // Strip JSON-Schema-isms Gemini doesn't accept on the root.
+    const { $schema, title, ...rest } = schema;
+    if (rest.properties) {
+      const props: any = {};
+      for (const key of Object.keys(rest.properties)) {
+        props[key] = this.toGeminiSchema(rest.properties[key]);
+      }
+      rest.properties = props;
+    }
+    if (rest.items) {
+      rest.items = this.toGeminiSchema(rest.items);
+    }
+    return rest;
   }
 
   copyToClipboard(): void {
