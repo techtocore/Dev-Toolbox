@@ -1,0 +1,270 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">IP &amp; Browser Info</h2>
+      <p class="text-muted mb-4">
+        Inspect your public IP, ISP, approximate location, timezone, and browser environment. All data is fetched directly from your browser — nothing is stored or sent to our server.
+      </p>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-primary" (click)="lookup()" [disabled]="loading">
+          @if (loading) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Looking up...
+          } @else {
+            <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+          }
+        </button>
+        <button class="btn btn-outline-secondary" (click)="exportJson()" [disabled]="loading || !network.ip">
+          <i class="bi bi-download me-2"></i>Export JSON
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (network.ip) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-globe me-2"></i>
+            <h5 class="mb-0">Public Network</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-row">
+                  <span class="info-label">IP Address</span>
+                  <span class="info-value">
+                    <code>{{ network.ip }}</code>
+                    <button class="btn btn-sm btn-link p-0 ms-2" (click)="copyToClipboard(network.ip)" title="Copy">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">IP Type</span>
+                  <span class="info-value">{{ network.type || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">ISP</span>
+                  <span class="info-value">{{ network.isp || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Organization</span>
+                  <span class="info-value">{{ network.org || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">ASN</span>
+                  <span class="info-value">{{ network.asn || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Hostname / Domain</span>
+                  <span class="info-value">{{ network.domain || '—' }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-row">
+                  <span class="info-label">City</span>
+                  <span class="info-value">{{ network.city || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Region</span>
+                  <span class="info-value">{{ network.region || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Country</span>
+                  <span class="info-value">
+                    {{ network.country || '—' }}
+                    @if (network.countryCode) {
+                      <span class="text-muted">({{ network.countryCode }})</span>
+                    }
+                  </span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Continent</span>
+                  <span class="info-value">{{ network.continent || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Postal Code</span>
+                  <span class="info-value">{{ network.postal || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Calling Code</span>
+                  <span class="info-value">
+                    @if (network.callingCode) { +{{ network.callingCode }} } @else { — }
+                  </span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Coordinates</span>
+                  <span class="info-value">
+                    @if (network.latitude != null && network.longitude != null) {
+                      {{ network.latitude }}, {{ network.longitude }}
+                      <a [href]="mapsUrl" target="_blank" rel="noopener" class="ms-2">
+                        <i class="bi bi-map"></i> View map
+                      </a>
+                    } @else { — }
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white d-flex align-items-center">
+            <i class="bi bi-clock me-2"></i>
+            <h5 class="mb-0">Timezone (from IP)</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-row">
+                  <span class="info-label">Timezone ID</span>
+                  <span class="info-value">{{ network.timezoneId || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Abbreviation</span>
+                  <span class="info-value">{{ network.timezoneAbbr || '—' }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-row">
+                  <span class="info-label">UTC Offset</span>
+                  <span class="info-value">{{ network.timezoneUtc || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Current Time</span>
+                  <span class="info-value">{{ network.timezoneCurrentTime || '—' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (browser) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-success text-white d-flex align-items-center">
+            <i class="bi bi-window me-2"></i>
+            <h5 class="mb-0">Browser &amp; Device</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-row">
+                  <span class="info-label">Browser</span>
+                  <span class="info-value">{{ browser.browser }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Operating System</span>
+                  <span class="info-value">{{ browser.os }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Platform</span>
+                  <span class="info-value">{{ browser.platform }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Vendor</span>
+                  <span class="info-value">{{ browser.vendor }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Language</span>
+                  <span class="info-value">{{ browser.language }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Accepted Languages</span>
+                  <span class="info-value">{{ browser.languages }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Local Timezone</span>
+                  <span class="info-value">{{ browser.localTimezone }} ({{ browser.localTimezoneOffset }})</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Local Time</span>
+                  <span class="info-value">{{ browser.localTime }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-row">
+                  <span class="info-label">Screen Resolution</span>
+                  <span class="info-value">{{ browser.screenResolution }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Viewport Size</span>
+                  <span class="info-value">{{ browser.viewportSize }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Color Depth</span>
+                  <span class="info-value">{{ browser.colorDepth }}-bit</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Device Pixel Ratio</span>
+                  <span class="info-value">{{ browser.pixelRatio }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">CPU Cores</span>
+                  <span class="info-value">{{ browser.hardwareConcurrency || '—' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Device Memory</span>
+                  <span class="info-value">{{ browser.deviceMemory }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Touch Support</span>
+                  <span class="info-value">{{ browser.touchSupport ? 'Yes' : 'No' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Cookies Enabled</span>
+                  <span class="info-value">{{ browser.cookiesEnabled ? 'Yes' : 'No' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Online</span>
+                  <span class="info-value">{{ browser.onlineStatus ? 'Yes' : 'No' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Do Not Track</span>
+                  <span class="info-value">{{ browser.doNotTrack }}</span>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="info-row align-items-start">
+              <span class="info-label">User Agent</span>
+              <span class="info-value user-agent">
+                <code>{{ browser.userAgent }}</code>
+                <button class="btn btn-sm btn-link p-0 ms-2" (click)="copyToClipboard(browser.userAgent)" title="Copy">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

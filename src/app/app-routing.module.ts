@@ -22,6 +22,7 @@ import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
 import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
 import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
 import { DataProfiler } from './data-profiler/data-profiler';
+import { IpInfo } from './ip-info/ip-info';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -45,7 +46,8 @@ const routes: Routes = [
   { path: 'promptOptimizer', component: PromptOptimizer },
   { path: 'csvJsonConverter', component: CsvJsonConverter },
   { path: 'sqlQueryBuilder', component: SqlQueryBuilder },
-  { path: 'dataProfiler', component: DataProfiler }
+  { path: 'dataProfiler', component: DataProfiler },
+  { path: 'ipInfo', component: IpInfo }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

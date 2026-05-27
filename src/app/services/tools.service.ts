@@ -178,6 +178,14 @@ export class ToolsService {
       keywords: ['regex', 'regexp', 'regular', 'expression', 'pattern', 'match', 'test']
     },
     {
+      name: 'IP & Browser Info',
+      description: 'View your public IP, ISP, location, timezone, and browser details',
+      route: '/ipInfo',
+      category: 'Development Tools',
+      icon: 'bi-globe',
+      keywords: ['ip', 'address', 'isp', 'hostname', 'location', 'timezone', 'browser', 'user agent', 'geolocation', 'network']
+    },
+    {
       name: 'Prompt Template Builder',
       description: 'Create reusable prompt templates with variables for LLM interactions',
       route: '/promptTemplate',

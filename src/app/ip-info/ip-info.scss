@@ -1,0 +1,59 @@
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f5;
+  font-size: 0.9rem;
+  color: #212529;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: #6c757d;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .info-value {
+    text-align: right;
+    word-break: break-word;
+    color: #212529;
+
+    code {
+      background: #f8f9fa;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      color: #d63384;
+    }
+
+    .text-muted {
+      color: rgba(33, 37, 41, 0.6) !important;
+    }
+  }
+}
+
+.user-agent {
+  text-align: left;
+  flex: 1;
+
+  code {
+    display: inline-block;
+    white-space: normal;
+    word-break: break-all;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-row {
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .info-value {
+      text-align: left;
+    }
+  }
+}

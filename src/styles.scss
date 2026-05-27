@@ -7,6 +7,22 @@ body {
   color: azure;
 }
 
+// Bootstrap's `.text-muted` is dark gray, which is invisible on the dark body bg.
+// Lighten it globally, then restore the default inside light/white containers
+// (cards, sidebar, etc.) so contrast stays correct there.
+.text-muted {
+  color: #adb5bd !important;
+}
+
+.card .text-muted,
+.card-body .text-muted,
+.bg-white .text-muted,
+.bg-light .text-muted,
+.bg-light-custom .text-muted,
+.search-results .text-muted {
+  color: rgba(33, 37, 41, 0.75) !important;
+}
+
 .custom-btn {
   color: #fff !important;
   background-color: #017cad !important;

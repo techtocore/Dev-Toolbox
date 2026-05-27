@@ -32,6 +32,7 @@ import { PromptOptimizer } from './prompt-optimizer/prompt-optimizer';
 import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
 import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
 import { DataProfiler } from './data-profiler/data-profiler';
+import { IpInfo } from './ip-info/ip-info';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { DataProfiler } from './data-profiler/data-profiler';
     PromptOptimizer,
     CsvJsonConverter,
     SqlQueryBuilder,
-    DataProfiler
+    DataProfiler,
+    IpInfo
   ],
   imports: [
     BrowserModule,
