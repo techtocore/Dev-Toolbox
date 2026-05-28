@@ -1,65 +1,124 @@
-<div>
-    <br />
-    <h2>Hash Generator</h2>
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <h5>Input Text</h5>
-                <textarea class="data-input bg-light-custom" [(ngModel)]="inputText" 
-                          (ngModelChange)="generateHashes()" 
-                          placeholder="Enter text to generate hashes..."></textarea>
-                <button class="btn custom-btn margin-top-10px" (click)="clear()">
-                    Clear
-                </button>
-            </div>
-            <div class="col-lg-6 col-md-12">
-                <h5>Generated Hashes</h5>
-                
-                <div class="hash-output">
-                    <label><strong>MD5:</strong></label>
-                    <div class="output-box">
-                        <input type="text" readonly [value]="md5Hash" class="form-control" />
-                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(md5Hash)" 
-                                [disabled]="!md5Hash" title="Copy to clipboard">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="hash-output">
-                    <label><strong>SHA-1:</strong></label>
-                    <div class="output-box">
-                        <input type="text" readonly [value]="sha1Hash" class="form-control" />
-                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(sha1Hash)" 
-                                [disabled]="!sha1Hash" title="Copy to clipboard">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="hash-output">
-                    <label><strong>SHA-256:</strong></label>
-                    <div class="output-box">
-                        <input type="text" readonly [value]="sha256Hash" class="form-control" />
-                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(sha256Hash)" 
-                                [disabled]="!sha256Hash" title="Copy to clipboard">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="hash-output">
-                    <label><strong>SHA-512:</strong></label>
-                    <div class="output-box">
-                        <input type="text" readonly [value]="sha512Hash" class="form-control" />
-                        <button class="btn btn-sm custom-btn" (click)="copyToClipboard(sha512Hash)" 
-                                [disabled]="!sha512Hash" title="Copy to clipboard">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Hash Generator</h2>
+      <p class="text-muted mb-4">
+        Generate MD5, SHA-1, SHA-256, and SHA-512 hashes for text or files.
+        Optional HMAC mode for keyed hashes. Everything runs locally — files never leave your browser.
+      </p>
     </div>
+  </div>
+
+  <!-- Mode -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="mode" id="hash-mode-text"
+          [checked]="mode === 'text'" (change)="setMode('text')">
+        <label class="btn btn-outline-primary" for="hash-mode-text">
+          <i class="bi bi-textarea-t me-1"></i>Text
+        </label>
+
+        <input type="radio" class="btn-check" name="mode" id="hash-mode-file"
+          [checked]="mode === 'file'" (change)="setMode('file')">
+        <label class="btn btn-outline-primary" for="hash-mode-file">
+          <i class="bi bi-file-earmark me-1"></i>File
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Input -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-input-cursor-text me-2"></i>Input</h5>
+        </div>
+        <div class="card-body">
+          @if (mode === 'text') {
+            <textarea
+              class="form-control font-monospace"
+              rows="10"
+              [(ngModel)]="inputText"
+              (ngModelChange)="generateHashes()"
+              placeholder="Enter text to hash…"></textarea>
+
+            <div class="form-check mt-3">
+              <input type="checkbox" class="form-check-input" id="useHmac"
+                [(ngModel)]="useHmac" (change)="generateHashes()">
+              <label class="form-check-label" for="useHmac">
+                <strong>HMAC mode</strong> — keyed hash
+              </label>
+            </div>
+
+            @if (useHmac) {
+              <div class="mt-2">
+                <input
+                  type="text"
+                  class="form-control font-monospace"
+                  [(ngModel)]="hmacKey"
+                  (ngModelChange)="generateHashes()"
+                  placeholder="HMAC secret key">
+              </div>
+            }
+
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+              <button class="btn btn-outline-secondary" (click)="loadSample()">
+                <i class="bi bi-file-earmark-text me-1"></i>Sample
+              </button>
+              <button class="btn btn-outline-secondary" (click)="clear()">
+                <i class="bi bi-x-circle me-1"></i>Clear
+              </button>
+            </div>
+          } @else {
+            <div class="file-dropzone"
+                 (dragover)="onDragOver($event)"
+                 (drop)="onFileDropped($event)"
+                 (click)="fileInput.click()">
+              <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+              <i class="bi bi-cloud-arrow-up file-icon"></i>
+              <p class="mb-1"><strong>Drop a file here</strong> or click to browse.</p>
+              <small class="text-muted">Hashing happens in your browser. Files are never uploaded.</small>
+            </div>
+
+            @if (fileName) {
+              <div class="alert alert-info mt-3 mb-0 d-flex align-items-center justify-content-between">
+                <span>
+                  <i class="bi bi-file-earmark me-2"></i>
+                  <strong>{{ fileName }}</strong>
+                  <span class="text-muted ms-2">{{ formatBytes(fileSize) }}</span>
+                </span>
+                @if (fileHashing) {
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="bi bi-hash me-2"></i>Hashes</h5>
+        </div>
+        <div class="card-body">
+          @for (row of hashes; track row.algo) {
+            <div class="hash-row">
+              <div class="hash-label">{{ row.algo }}</div>
+              <input type="text" readonly [value]="row.value" class="form-control font-monospace"
+                placeholder="—">
+              <button class="btn btn-outline-secondary" (click)="copy(row.value, row.algo)"
+                [disabled]="!row.value" title="Copy {{ row.algo }}">
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

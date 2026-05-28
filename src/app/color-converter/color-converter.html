@@ -1,85 +1,163 @@
-<div>
-    <br />
-    <h2>Color Converter</h2>
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="color-section">
-                    <h5>Visual Color Picker</h5>
-                    <div class="color-picker-group">
-                        <input type="color" class="color-picker-input" [(ngModel)]="hexInput" 
-                               (ngModelChange)="onHexChange()" title="Pick a color" />
-                        <div class="color-picker-preview" [style.background-color]="hexInput">
-                            <span>{{ hexInput }}</span>
-                        </div>
-                        <button class="btn custom-btn" (click)="copyToClipboard(hexInput)">
-                            <i class="bi bi-clipboard"></i> Copy
-                        </button>
-                    </div>
-                    <small class="help-text">Click the color box to open the visual color picker</small>
-                </div>
-
-                <div class="color-section">
-                    <h5>HEX</h5>
-                    <div class="input-group">
-                        <input type="text" class="form-control" [(ngModel)]="hexInput" 
-                               (ngModelChange)="onHexChange()" placeholder="#000000" />
-                        <button class="btn custom-btn" (click)="copyToClipboard(hexInput)">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="color-section">
-                    <h5>RGB</h5>
-                    <div class="rgb-inputs">
-                        <div class="rgb-input">
-                            <label>R</label>
-                            <input type="number" class="form-control" [(ngModel)]="rgbR" 
-                                   (ngModelChange)="onRgbChange()" min="0" max="255" />
-                        </div>
-                        <div class="rgb-input">
-                            <label>G</label>
-                            <input type="number" class="form-control" [(ngModel)]="rgbG" 
-                                   (ngModelChange)="onRgbChange()" min="0" max="255" />
-                        </div>
-                        <div class="rgb-input">
-                            <label>B</label>
-                            <input type="number" class="form-control" [(ngModel)]="rgbB" 
-                                   (ngModelChange)="onRgbChange()" min="0" max="255" />
-                        </div>
-                        <button class="btn custom-btn" (click)="copyToClipboard('rgb(' + rgbR + ', ' + rgbG + ', ' + rgbB + ')')">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="color-section">
-                    <h5>HSL</h5>
-                    <div class="hsl-inputs">
-                        <div class="hsl-input">
-                            <label>H (0-360)</label>
-                            <input type="number" class="form-control" [(ngModel)]="hslH" 
-                                   (ngModelChange)="onHslChange()" min="0" max="360" />
-                        </div>
-                        <div class="hsl-input">
-                            <label>S (0-100)</label>
-                            <input type="number" class="form-control" [(ngModel)]="hslS" 
-                                   (ngModelChange)="onHslChange()" min="0" max="100" />
-                        </div>
-                        <div class="hsl-input">
-                            <label>L (0-100)</label>
-                            <input type="number" class="form-control" [(ngModel)]="hslL" 
-                                   (ngModelChange)="onHslChange()" min="0" max="100" />
-                        </div>
-                        <button class="btn custom-btn" (click)="copyToClipboard('hsl(' + hslH + ', ' + hslS + '%, ' + hslL + '%)')">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Color Converter</h2>
+      <p class="text-muted mb-4">
+        Convert between HEX, RGB, HSL, HSV, and CMYK with live preview and a WCAG contrast check.
+      </p>
     </div>
+  </div>
+
+  <!-- Preview + Picker -->
+  <div class="row mb-4">
+    <div class="col-lg-5 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-palette me-2"></i>Preview</h5>
+        </div>
+        <div class="card-body">
+          <div class="big-swatch" [style.background-color]="hexInput">
+            <span class="swatch-label">{{ hexInput.toUpperCase() }}</span>
+          </div>
+
+          <div class="d-flex gap-2 align-items-center mt-3">
+            <input type="color" class="form-control form-control-color" [(ngModel)]="hexInput" (ngModelChange)="onHexChange()" title="Pick a color">
+            <button class="btn btn-outline-secondary" (click)="randomColor()">
+              <i class="bi bi-shuffle me-1"></i>Random
+            </button>
+          </div>
+
+          <div class="presets mt-3">
+            <small class="d-block text-muted mb-2">Presets</small>
+            @for (p of presets; track $index) {
+              <button class="preset-chip" [style.background-color]="p" [title]="p" (click)="pickPreset(p)"></button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="bi bi-sliders me-2"></i>Values</h5>
+        </div>
+        <div class="card-body">
+          <!-- HEX -->
+          <label class="form-label small mb-1">HEX</label>
+          <div class="input-group mb-3">
+            <input type="text" class="form-control font-monospace" [(ngModel)]="hexInput" (ngModelChange)="onHexChange()">
+            <button class="btn btn-outline-secondary" (click)="copy(hexInput, 'HEX')" title="Copy">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+
+          <!-- RGB -->
+          <label class="form-label small mb-1">RGB</label>
+          <div class="row g-2 mb-3">
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbR" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="R"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbG" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="G"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbB" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="B"></div>
+            <div class="col-auto">
+              <button class="btn btn-outline-secondary" (click)="copy('rgb(' + rgbR + ', ' + rgbG + ', ' + rgbB + ')', 'RGB')" title="Copy rgb()">
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- HSL -->
+          <label class="form-label small mb-1">HSL</label>
+          <div class="row g-2 mb-3">
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslH" (ngModelChange)="onHslChange()" min="0" max="360" placeholder="H"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslS" (ngModelChange)="onHslChange()" min="0" max="100" placeholder="S%"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslL" (ngModelChange)="onHslChange()" min="0" max="100" placeholder="L%"></div>
+            <div class="col-auto">
+              <button class="btn btn-outline-secondary" (click)="copy('hsl(' + hslH + ', ' + hslS + '%, ' + hslL + '%)', 'HSL')" title="Copy hsl()">
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- HSV -->
+          <label class="form-label small mb-1">HSV</label>
+          <div class="readonly-row mb-3">
+            <code>hsv({{ hsv.h }}, {{ hsv.s }}%, {{ hsv.v }}%)</code>
+            <button class="btn btn-sm btn-outline-secondary" (click)="copy('hsv(' + hsv.h + ', ' + hsv.s + '%, ' + hsv.v + '%)', 'HSV')">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+
+          <!-- CMYK -->
+          <label class="form-label small mb-1">CMYK</label>
+          <div class="readonly-row">
+            <code>cmyk({{ cmyk.c }}%, {{ cmyk.m }}%, {{ cmyk.y }}%, {{ cmyk.k }}%)</code>
+            <button class="btn btn-sm btn-outline-secondary" (click)="copy('cmyk(' + cmyk.c + '%, ' + cmyk.m + '%, ' + cmyk.y + '%, ' + cmyk.k + '%)', 'CMYK')">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contrast Checker -->
+  @if (contrast) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-circle-half me-2"></i>WCAG Contrast Checker</h5>
+            <button class="btn btn-sm btn-light" (click)="swapContrast()" title="Swap colors">
+              <i class="bi bi-arrow-left-right"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-4">
+                <label class="form-label small mb-1">Compare against</label>
+                <div class="input-group">
+                  <input type="color" class="form-control form-control-color" [(ngModel)]="contrastAgainst">
+                  <input type="text" class="form-control font-monospace" [(ngModel)]="contrastAgainst">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="contrast-sample" [style.color]="hexInput" [style.background-color]="contrastAgainst">
+                  <div class="big">Aa</div>
+                  <div class="small">The quick brown fox</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="contrast-score">
+                  <div class="ratio">{{ contrast.ratioLabel }}</div>
+                  <div class="badges">
+                    <span class="badge" [class.bg-success]="contrast.aaNormal" [class.bg-secondary]="!contrast.aaNormal">AA normal</span>
+                    <span class="badge" [class.bg-success]="contrast.aaLarge"  [class.bg-secondary]="!contrast.aaLarge">AA large</span>
+                    <span class="badge" [class.bg-success]="contrast.aaaNormal" [class.bg-secondary]="!contrast.aaaNormal">AAA normal</span>
+                    <span class="badge" [class.bg-success]="contrast.aaaLarge"  [class.bg-secondary]="!contrast.aaaLarge">AAA large</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- CSS snippet -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-code me-2"></i>CSS snippet</h5>
+          <button class="btn btn-sm btn-light" (click)="copy(cssString, 'CSS snippet')">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <pre class="snippet font-monospace mb-0">{{ cssString }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

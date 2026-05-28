@@ -1,28 +1,57 @@
-<div>
-  <br />
-  <h2>Word / Character Counter</h2>
-  <br />
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-lg-2 d-none d-lg-block"></div>
-      <div class="col-lg-8 col-md-12">
-        <div class="wordCounts">
-          Word Count: {{wordCount}}
-          <br>
-            Character Count: {{charCount}}
-            @if (charCount != charCountWithoutWS) {
-              <span>
-                ({{charCountWithoutWS}} without whitespaces)
-              </span>
-            }
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Word &amp; Character Counter</h2>
+      <p class="text-muted mb-4">
+        Live word, character, sentence, paragraph, and reading-time stats. Counts unique words and the longest word too.
+      </p>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="stats-grid">
+        @for (stat of stats; track stat.label) {
+          <div class="stat-card" [class]="'stat-' + stat.tone">
+            <div class="stat-icon"><i class="bi" [class]="stat.icon"></i></div>
+            <div class="stat-body">
+              <div class="stat-label">{{ stat.label }}</div>
+              <div class="stat-value">{{ stat.value }}</div>
+            </div>
           </div>
-          <textarea class="data-input bg-light-custom" [(ngModel)]="inputTxt" (input)="setCounts()"> </textarea>
-          <button class="btn custom-btn float-right" (click)="saveAsFile()">
-            Save
-            <i class="bi bi-download padding-left-5px"></i>
-          </button>
-        </div>
-        <div class="col-lg-2 d-none d-lg-block"></div>
+        }
       </div>
     </div>
   </div>
+
+  <!-- Editor -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Text</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="loadSample()" title="Load sample">
+              <i class="bi bi-file-earmark-text me-1"></i>Sample
+            </button>
+            <button class="btn btn-sm btn-light" (click)="saveAsFile()" [disabled]="!inputTxt" title="Download">
+              <i class="bi bi-download"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="clear()" [disabled]="!inputTxt" title="Clear">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea
+            class="form-control"
+            rows="14"
+            [(ngModel)]="inputTxt"
+            (input)="setCounts()"
+            placeholder="Type or paste text here…"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

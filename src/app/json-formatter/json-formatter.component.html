@@ -1,27 +1,125 @@
-<div>
-    <br />
-    <h2>JSON Viewer</h2>
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="data-input bg-light-custom" [(ngModel)]="toEncode"> </textarea>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
-                <br>
-                <button class="btn custom-btn btn-margin" (click)="encode()">
-                    Format
-                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
-                </button>
-                <br>
-            </div>
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <pre class="data-input bg-light-custom">{{toDecode | json}}</pre>
-                <button class="btn custom-btn float-right" (click)="saveAsFile()">
-                    Save
-                    <i class="bi bi-download padding-left-5px"></i>
-                </button>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">JSON Formatter</h2>
+      <p class="text-muted mb-4">
+        Format, minify, sort keys, and validate JSON. Everything runs in your browser — paste freely.
+      </p>
     </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label small mb-1">Mode</label>
+              <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="mode" id="mode-format"
+                  [checked]="mode === 'format'" (change)="setMode('format')">
+                <label class="btn btn-outline-primary" for="mode-format">
+                  <i class="bi bi-braces"></i> Format
+                </label>
+
+                <input type="radio" class="btn-check" name="mode" id="mode-minify"
+                  [checked]="mode === 'minify'" (change)="setMode('minify')">
+                <label class="btn btn-outline-primary" for="mode-minify">
+                  <i class="bi bi-arrows-collapse"></i> Minify
+                </label>
+
+                <input type="radio" class="btn-check" name="mode" id="mode-sort"
+                  [checked]="mode === 'sort'" (change)="setMode('sort')">
+                <label class="btn btn-outline-primary" for="mode-sort">
+                  <i class="bi bi-sort-alpha-down"></i> Sort keys
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label small mb-1">Indent</label>
+              <select class="form-select" [(ngModel)]="indentSize" (change)="process()" [disabled]="mode === 'minify'">
+                <option [ngValue]="2">2 spaces</option>
+                <option [ngValue]="4">4 spaces</option>
+                <option [ngValue]="8">8 spaces</option>
+                <option [ngValue]="0">Tab</option>
+              </select>
+            </div>
+
+            <div class="col-md-5">
+              <label class="form-label small mb-1 d-block">Actions</label>
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary" (click)="process()">
+                  <i class="bi bi-play-fill me-1"></i>Process
+                </button>
+                <button class="btn btn-outline-secondary" (click)="loadSample()">
+                  <i class="bi bi-file-earmark-text me-1"></i>Sample
+                </button>
+                <button class="btn btn-outline-secondary" (click)="swapInputOutput()" [disabled]="!output">
+                  <i class="bi bi-arrow-left-right me-1"></i>Output → Input
+                </button>
+                <button class="btn btn-outline-secondary" (click)="clear()">
+                  <i class="bi bi-x-circle me-1"></i>Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="alert alert-danger mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Editor / Output -->
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-input-cursor-text me-2"></i>Input</h5>
+          <small>{{ formatBytes(inputBytes) }}</small>
+        </div>
+        <div class="card-body">
+          <textarea
+            class="form-control font-monospace"
+            rows="18"
+            [(ngModel)]="input"
+            (input)="inputBytes = input.length"
+            placeholder='Paste JSON here, e.g. {"key": "value"}'></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-file-earmark-code me-2"></i>Output</h5>
+          <div class="d-flex align-items-center gap-2">
+            <small>{{ formatBytes(outputBytes) }}</small>
+            @if (mode === 'minify' && savings > 0) {
+              <span class="badge bg-light text-success">−{{ savings }}%</span>
+            }
+            <button class="btn btn-sm btn-light" (click)="copyOutput()" [disabled]="!output" title="Copy output">
+              <i class="bi bi-clipboard"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="downloadOutput()" [disabled]="!output" title="Download">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <pre class="output-pane font-monospace mb-0">{{ output || 'Process some JSON to see the output here.' }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -17,11 +17,11 @@ interface NetworkInfo {
   org?: string;
   asn?: string;
   domain?: string;
-  reverseHostname?: string;
   timezoneId?: string;
   timezoneAbbr?: string;
   timezoneUtc?: string;
   timezoneCurrentTime?: string;
+  source?: string;
 }
 
 interface BrowserInfo {
@@ -47,6 +47,8 @@ interface BrowserInfo {
   touchSupport: boolean;
 }
 
+const CONSENT_STORAGE_KEY = 'ipInfo:lookupConsent';
+
 @Component({
   selector: 'app-ip-info',
   standalone: false,
@@ -56,64 +58,153 @@ interface BrowserInfo {
 export class IpInfo implements OnInit {
   network: NetworkInfo = {};
   browser: BrowserInfo | null = null;
+
   loading = false;
   errorMessage = '';
   isMobile = false;
+
+  consentGiven = false;
+  hasAttempted = false;
 
   constructor(public utilityService: UtilityService) {}
 
   ngOnInit(): void {
     this.isMobile = this.utilityService.getIsMobile();
     this.collectBrowserInfo();
+
+    try {
+      this.consentGiven = localStorage.getItem(CONSENT_STORAGE_KEY) === 'true';
+    } catch {
+      // localStorage may be unavailable (private mode, blocked); treat as no consent.
+      this.consentGiven = false;
+    }
+
+    if (this.consentGiven) {
+      this.lookup();
+    }
+  }
+
+  acceptDisclaimer(): void {
+    this.consentGiven = true;
+    try {
+      localStorage.setItem(CONSENT_STORAGE_KEY, 'true');
+    } catch {
+      // Persisting is best-effort; the in-memory flag is sufficient for this session.
+    }
     this.lookup();
   }
 
+  revokeConsent(): void {
+    this.consentGiven = false;
+    this.network = {};
+    this.errorMessage = '';
+    this.hasAttempted = false;
+    try {
+      localStorage.removeItem(CONSENT_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+  }
+
   async lookup(): Promise<void> {
+    if (!this.consentGiven) return;
+
     this.loading = true;
     this.errorMessage = '';
     this.network = {};
+    this.hasAttempted = true;
 
-    try {
-      const response = await fetch('https://ipwho.is/');
-      if (!response.ok) {
-        throw new Error(`Lookup failed with status ${response.status}`);
+    // Try providers in order. Each one returns partial data or throws.
+    const providers: Array<() => Promise<NetworkInfo>> = [
+      () => this.lookupIpapiCo(),
+      () => this.lookupFreeipapi(),
+    ];
+
+    const failures: string[] = [];
+    for (const fetchFn of providers) {
+      try {
+        const result = await fetchFn();
+        if (result.ip) {
+          this.network = result;
+          this.loading = false;
+          return;
+        }
+      } catch (err: any) {
+        failures.push(err?.message || 'unknown error');
       }
-
-      const data = await response.json();
-
-      if (data.success === false) {
-        throw new Error(data.message || 'Unable to retrieve IP information');
-      }
-
-      this.network = {
-        ip: data.ip,
-        type: data.type,
-        continent: data.continent,
-        country: data.country,
-        countryCode: data.country_code,
-        region: data.region,
-        city: data.city,
-        postal: data.postal,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        callingCode: data.calling_code,
-        isp: data.connection?.isp,
-        org: data.connection?.org,
-        asn: data.connection?.asn ? `AS${data.connection.asn}` : undefined,
-        domain: data.connection?.domain,
-        reverseHostname: data.connection?.domain || data.connection?.org,
-        timezoneId: data.timezone?.id,
-        timezoneAbbr: data.timezone?.abbr,
-        timezoneUtc: data.timezone?.utc,
-        timezoneCurrentTime: data.timezone?.current_time,
-      };
-    } catch (err: any) {
-      this.errorMessage =
-        err?.message ||
-        'Failed to look up IP info. Check your network or any privacy extensions blocking the request.';
-    } finally {
-      this.loading = false;
     }
+
+    this.errorMessage =
+      failures.length > 0
+        ? `All IP lookup providers failed: ${failures.join('; ')}. The service may be rate-limited or blocked by a network filter / extension.`
+        : 'No IP lookup providers available.';
+    this.loading = false;
+  }
+
+  private async lookupIpapiCo(): Promise<NetworkInfo> {
+    const response = await fetch('https://ipapi.co/json/');
+    if (!response.ok) {
+      throw new Error(`ipapi.co HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(`ipapi.co: ${data.reason || 'error'}`);
+    }
+
+    const offset: string | undefined = data.utc_offset;
+    let timezoneUtc: string | undefined;
+    if (offset && offset.length >= 5) {
+      timezoneUtc = `${offset.slice(0, 3)}:${offset.slice(3)}`;
+    }
+
+    return {
+      source: 'ipapi.co',
+      ip: data.ip,
+      type: data.version,
+      continent: data.continent_code,
+      country: data.country_name,
+      countryCode: data.country_code,
+      region: data.region,
+      city: data.city,
+      postal: data.postal,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      callingCode: data.country_calling_code?.replace('+', ''),
+      isp: data.org,
+      org: data.org,
+      asn: data.asn,
+      domain: undefined,
+      timezoneId: data.timezone,
+      timezoneAbbr: undefined,
+      timezoneUtc,
+      timezoneCurrentTime: undefined,
+    };
+  }
+
+  private async lookupFreeipapi(): Promise<NetworkInfo> {
+    const response = await fetch('https://freeipapi.com/api/json/');
+    if (!response.ok) {
+      throw new Error(`freeipapi HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    if (!data.ipAddress) {
+      throw new Error('freeipapi: no IP in response');
+    }
+
+    return {
+      source: 'freeipapi.com',
+      ip: data.ipAddress,
+      type: data.ipVersion === 4 ? 'IPv4' : data.ipVersion === 6 ? 'IPv6' : undefined,
+      continent: data.continent,
+      country: data.countryName,
+      countryCode: data.countryCode,
+      region: data.regionName,
+      city: data.cityName,
+      postal: data.zipCode,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      timezoneId: data.timeZone,
+    };
   }
 
   collectBrowserInfo(): void {

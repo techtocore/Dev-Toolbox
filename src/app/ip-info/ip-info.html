@@ -3,46 +3,116 @@
     <div class="col-12">
       <h2 class="mb-3">IP &amp; Browser Info</h2>
       <p class="text-muted mb-4">
-        Inspect your public IP, ISP, approximate location, timezone, and browser environment. All data is fetched directly from your browser — nothing is stored or sent to our server.
+        Inspect your public IP, ISP, approximate location, timezone, and browser environment.
+        Browser data is read locally; IP/location data requires a one-time network lookup.
       </p>
     </div>
   </div>
 
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="d-flex gap-2 flex-wrap">
-        <button class="btn btn-primary" (click)="lookup()" [disabled]="loading">
-          @if (loading) {
-            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-            Looking up...
-          } @else {
-            <i class="bi bi-arrow-clockwise me-2"></i>Refresh
-          }
-        </button>
-        <button class="btn btn-outline-secondary" (click)="exportJson()" [disabled]="loading || !network.ip">
-          <i class="bi bi-download me-2"></i>Export JSON
-        </button>
-      </div>
-    </div>
-  </div>
-
-  @if (errorMessage) {
+  <!-- Consent Gate -->
+  @if (!consentGiven) {
     <div class="row mb-4">
       <div class="col-12">
-        <div class="alert alert-danger">
-          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        <div class="card shadow-sm border-warning">
+          <div class="card-header bg-warning text-dark d-flex align-items-center">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <h5 class="mb-0">Third-party network call required</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">
+              To resolve your public IP, ISP, and approximate location, this tool will send a
+              request from your browser to a third-party geolocation API
+              (<a href="https://ipapi.co/" target="_blank" rel="noopener">ipapi.co</a>, with
+              <a href="https://freeipapi.com/" target="_blank" rel="noopener">freeipapi.com</a>
+              as a fallback).
+            </p>
+            <p class="mb-3">
+              That request reveals your <strong>public IP address</strong> to the provider.
+              The provider may log it under their privacy policy. Dev Toolbox does not run a
+              backend — no data passes through our servers, and nothing is stored beyond your
+              local browser session.
+            </p>
+            <p class="mb-3">
+              The Browser &amp; Device section below uses only local JavaScript APIs and does
+              not require this consent.
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-primary" (click)="acceptDisclaimer()">
+                <i class="bi bi-check2 me-1"></i>I understand — look up my IP
+              </button>
+              <a href="https://ipapi.co/privacy" target="_blank" rel="noopener" class="btn btn-outline-secondary">
+                <i class="bi bi-box-arrow-up-right me-1"></i>ipapi.co privacy
+              </a>
+              <a href="https://freeipapi.com/" target="_blank" rel="noopener" class="btn btn-outline-secondary">
+                <i class="bi bi-box-arrow-up-right me-1"></i>freeipapi.com
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-primary" (click)="lookup()" [disabled]="loading">
+            @if (loading) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Looking up...
+            } @else {
+              <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+            }
+          </button>
+          <button class="btn btn-outline-secondary" (click)="exportJson()" [disabled]="loading || !network.ip">
+            <i class="bi bi-download me-2"></i>Export JSON
+          </button>
+          <button class="btn btn-outline-warning ms-auto" (click)="revokeConsent()" title="Revoke consent and clear lookup data">
+            <i class="bi bi-shield-slash me-2"></i>Revoke consent
+          </button>
         </div>
       </div>
     </div>
   }
 
-  @if (network.ip) {
+  <!-- Error / empty state -->
+  @if (consentGiven && errorMessage) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-danger">
+          <div class="card-header bg-danger text-white d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <h5 class="mb-0">IP lookup unavailable</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-2">{{ errorMessage }}</p>
+            <p class="text-muted mb-3 small">
+              Common causes: rate limits on the free tier, an ad / privacy blocker
+              intercepting requests (uBlock Origin, Brave Shields, Pi-hole), a corporate
+              proxy filtering the API hosts, or a VPN endpoint already on the provider's
+              denylist. The Browser &amp; Device data below still works — it doesn't need
+              network access.
+            </p>
+            <button class="btn btn-outline-primary" (click)="lookup()" [disabled]="loading">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (consentGiven && network.ip) {
     <div class="row mb-4">
       <div class="col-12">
         <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white d-flex align-items-center">
-            <i class="bi bi-globe me-2"></i>
-            <h5 class="mb-0">Public Network</h5>
+          <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+            <span class="d-flex align-items-center">
+              <i class="bi bi-globe me-2"></i>
+              <h5 class="mb-0">Public Network</h5>
+            </span>
+            @if (network.source) {
+              <small class="opacity-75">source: {{ network.source }}</small>
+            }
           </div>
           <div class="card-body">
             <div class="row">
@@ -127,40 +197,42 @@
       </div>
     </div>
 
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-header bg-info text-white d-flex align-items-center">
-            <i class="bi bi-clock me-2"></i>
-            <h5 class="mb-0">Timezone (from IP)</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="info-row">
-                  <span class="info-label">Timezone ID</span>
-                  <span class="info-value">{{ network.timezoneId || '—' }}</span>
+    @if (network.timezoneId || network.timezoneUtc) {
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-info text-white d-flex align-items-center">
+              <i class="bi bi-clock me-2"></i>
+              <h5 class="mb-0">Timezone (from IP)</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-row">
+                    <span class="info-label">Timezone ID</span>
+                    <span class="info-value">{{ network.timezoneId || '—' }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Abbreviation</span>
+                    <span class="info-value">{{ network.timezoneAbbr || '—' }}</span>
+                  </div>
                 </div>
-                <div class="info-row">
-                  <span class="info-label">Abbreviation</span>
-                  <span class="info-value">{{ network.timezoneAbbr || '—' }}</span>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-row">
-                  <span class="info-label">UTC Offset</span>
-                  <span class="info-value">{{ network.timezoneUtc || '—' }}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Current Time</span>
-                  <span class="info-value">{{ network.timezoneCurrentTime || '—' }}</span>
+                <div class="col-md-6">
+                  <div class="info-row">
+                    <span class="info-label">UTC Offset</span>
+                    <span class="info-value">{{ network.timezoneUtc || '—' }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Current Time</span>
+                    <span class="info-value">{{ network.timezoneCurrentTime || '—' }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    }
   }
 
   @if (browser) {

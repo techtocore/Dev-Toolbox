@@ -1,3 +1,13 @@
-.data-input {
-    color: black;
+.output-pane {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  min-height: 360px;
+  max-height: 540px;
+  overflow: auto;
+  font-size: 0.85rem;
+  color: #212529;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

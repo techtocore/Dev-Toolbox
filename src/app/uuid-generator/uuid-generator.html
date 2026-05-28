@@ -1,31 +1,89 @@
-<div>
-  <br />
-  <h2>UUID Generator</h2>
-  <br />
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-12">
-        <div class="controls">
-          <label for="count"><strong>Number of UUIDs:</strong></label>
-          <input type="number" id="count" [(ngModel)]="count" min="1" max="100" class="form-control count-input" />
-          <button class="btn custom-btn" (click)="generate()">
-            <i class="bi bi-arrow-clockwise"></i> Generate
-          </button>
-          <button class="btn custom-btn" (click)="copyAll()" [disabled]="uuids.length === 0">
-            <i class="bi bi-clipboard"></i> Copy All
-          </button>
-          <button class="btn custom-btn" (click)="clear()" [disabled]="uuids.length === 0">
-            Clear
-          </button>
-        </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">UUID Generator</h2>
+      <p class="text-muted mb-4">
+        Generate v4 (random), v7 (Unix epoch, sortable), v1 (timestamp + node), or nil UUIDs.
+        Uses <code>crypto.getRandomValues</code> — cryptographically secure.
+      </p>
+    </div>
+  </div>
 
-        <div class="uuid-list">
-          @for (uuid of uuids; track uuid) {
-            <div class="uuid-item">
-              <input type="text" readonly [value]="uuid" class="form-control" />
-              <button class="btn btn-sm custom-btn" (click)="copyToClipboard(uuid)" title="Copy to clipboard">
-                <i class="bi bi-clipboard"></i>
-              </button>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label small mb-1">Version</label>
+              <select class="form-select" [(ngModel)]="version" (change)="generate()">
+                @for (v of versions; track v.value) {
+                  <option [value]="v.value">{{ v.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small mb-1">Count</label>
+              <input type="number" class="form-control" [(ngModel)]="count" min="1" max="1000">
+            </div>
+            <div class="col-md-3 d-flex align-items-end pb-1">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="uppercase"
+                  [(ngModel)]="uppercase" (change)="generate()">
+                <label class="form-check-label" for="uppercase">Uppercase</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small mb-1 d-block">Actions</label>
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary" (click)="generate()">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Generate
+                </button>
+                <button class="btn btn-outline-secondary" (click)="copyAll()" [disabled]="uuids.length === 0">
+                  <i class="bi bi-clipboard me-1"></i>Copy all
+                </button>
+                <button class="btn btn-outline-secondary" (click)="downloadAll()" [disabled]="uuids.length === 0">
+                  <i class="bi bi-download me-1"></i>Download
+                </button>
+                <button class="btn btn-outline-secondary" (click)="clear()" [disabled]="uuids.length === 0">
+                  <i class="bi bi-x-circle me-1"></i>Clear
+                </button>
+              </div>
+            </div>
+          </div>
+
+          @if (currentHint) {
+            <div class="alert alert-info mt-3 mb-0 small">
+              <i class="bi bi-info-circle me-2"></i>{{ currentHint }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-fingerprint me-2"></i>Generated UUIDs ({{ uuids.length }})</h5>
+        </div>
+        <div class="card-body">
+          @if (uuids.length === 0) {
+            <div class="text-center text-muted py-4">
+              <i class="bi bi-fingerprint" style="font-size: 2.5rem; opacity: 0.4;"></i>
+              <p class="mt-2 mb-0">Click <strong>Generate</strong> to create UUIDs.</p>
+            </div>
+          } @else {
+            <div class="uuid-list">
+              @for (uuid of uuids; track uuid) {
+                <div class="uuid-item">
+                  <input type="text" readonly [value]="uuid" class="form-control font-monospace" />
+                  <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard(uuid)" title="Copy">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+              }
             </div>
           }
         </div>

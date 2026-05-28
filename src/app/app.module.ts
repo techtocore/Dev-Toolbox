@@ -33,6 +33,7 @@ import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
 import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
 import { DataProfiler } from './data-profiler/data-profiler';
 import { IpInfo } from './ip-info/ip-info';
+import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { IpInfo } from './ip-info/ip-info';
     CsvJsonConverter,
     SqlQueryBuilder,
     DataProfiler,
-    IpInfo
+    IpInfo,
+    ToastOutletComponent
   ],
   imports: [
     BrowserModule,

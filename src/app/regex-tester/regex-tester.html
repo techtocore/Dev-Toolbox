@@ -1,113 +1,176 @@
-<div>
-  <br />
-  <h2>Regex Tester</h2>
-  <br />
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-lg-6 col-md-12">
-        <h5>Regular Expression</h5>
-        <div class="regex-input-section">
-          <div class="input-group">
-            <span class="input-group-text">/</span>
-            <input type="text" class="form-control bg-light-custom" [(ngModel)]="regexPattern"
-              (ngModelChange)="testRegex()"
-              placeholder="Enter regex pattern (e.g., \d+|[a-z]+)" />
-              <span class="input-group-text">/{{ getFlagString() }}</span>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Regex Tester</h2>
+      <p class="text-muted mb-4">
+        Test JavaScript regex patterns with live match highlighting. Switch to <strong>Replace</strong>
+        mode to preview substitutions. Built-in pattern library + cheatsheet for common cases.
+      </p>
+    </div>
+  </div>
+
+  <!-- Mode toggle + recipe library -->
+  <div class="row mb-3 g-2 align-items-center">
+    <div class="col-md-auto">
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="regexMode" id="regex-mode-test"
+          [checked]="mode === 'test'" (change)="setMode('test')">
+        <label class="btn btn-outline-primary" for="regex-mode-test">
+          <i class="bi bi-search me-1"></i>Test
+        </label>
+
+        <input type="radio" class="btn-check" name="regexMode" id="regex-mode-replace"
+          [checked]="mode === 'replace'" (change)="setMode('replace')">
+        <label class="btn btn-outline-primary" for="regex-mode-replace">
+          <i class="bi bi-arrow-repeat me-1"></i>Replace
+        </label>
+      </div>
+    </div>
+    <div class="col">
+      <div class="recipe-strip">
+        <small class="text-muted me-2">Common patterns:</small>
+        @for (r of recipes; track r.name) {
+          <button class="btn btn-sm btn-light recipe-chip" (click)="loadRecipe(r)">{{ r.name }}</button>
+        }
+      </div>
+    </div>
+    <div class="col-md-auto">
+      <button class="btn btn-outline-secondary btn-sm" (click)="cheatsheetOpen = !cheatsheetOpen">
+        <i class="bi" [class.bi-book]="!cheatsheetOpen" [class.bi-x-circle]="cheatsheetOpen"></i>
+        {{ cheatsheetOpen ? 'Hide' : 'Show' }} cheatsheet
+      </button>
+    </div>
+  </div>
+
+  <!-- Cheatsheet drawer -->
+  @if (cheatsheetOpen) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-book me-2"></i>Regex Cheatsheet</h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              @for (section of cheatsheet; track section.section) {
+                <div class="col-md-6 col-lg-4">
+                  <h6 class="text-primary">{{ section.section }}</h6>
+                  <table class="table table-sm cheatsheet-table mb-0">
+                    @for (entry of section.entries; track entry.pattern) {
+                      <tr>
+                        <td><code>{{ entry.pattern }}</code></td>
+                        <td>{{ entry.description }}</td>
+                      </tr>
+                    }
+                  </table>
+                </div>
+              }
             </div>
-            @if (!isValid) {
-              <div class="error-message">
-                <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
-              </div>
-            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row">
+    <!-- Pattern + test input -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-regex me-2"></i>Pattern</h5>
+        </div>
+        <div class="card-body">
+          <div class="input-group mb-2">
+            <span class="input-group-text">/</span>
+            <input type="text" class="form-control font-monospace" [(ngModel)]="regexPattern"
+              (ngModelChange)="run()" placeholder="\d+|[a-z]+">
+            <span class="input-group-text">/{{ getFlagString() }}</span>
           </div>
 
-          <div class="flags-section">
-            <label><strong>Flags:</strong></label>
-            <div class="flags-grid">
-              <div class="flag-checkbox">
-                <input type="checkbox" id="global" [(ngModel)]="flags.global"
-                  (ngModelChange)="testRegex()" />
-                  <label for="global">Global (g)</label>
-                </div>
-                <div class="flag-checkbox">
-                  <input type="checkbox" id="multiline" [(ngModel)]="flags.multiline"
-                    (ngModelChange)="testRegex()" />
-                    <label for="multiline">Multiline (m)</label>
+          @if (!isValid) {
+            <div class="alert alert-danger py-2 mb-2 small">
+              <i class="bi bi-exclamation-triangle me-1"></i>{{ errorMessage }}
+            </div>
+          }
+
+          <div class="flag-row mb-3">
+            <label><input type="checkbox" [(ngModel)]="flags.global"          (ngModelChange)="run()">  g</label>
+            <label><input type="checkbox" [(ngModel)]="flags.caseInsensitive" (ngModelChange)="run()">  i</label>
+            <label><input type="checkbox" [(ngModel)]="flags.multiline"       (ngModelChange)="run()">  m</label>
+            <label><input type="checkbox" [(ngModel)]="flags.dotAll"          (ngModelChange)="run()">  s</label>
+            <label><input type="checkbox" [(ngModel)]="flags.unicode"         (ngModelChange)="run()">  u</label>
+            <label><input type="checkbox" [(ngModel)]="flags.sticky"          (ngModelChange)="run()">  y</label>
+          </div>
+
+          @if (mode === 'replace') {
+            <label class="form-label small mb-1">Replacement (use <code>$1</code>, <code>$&lt;name&gt;</code>, <code>$&amp;</code>)</label>
+            <input type="text" class="form-control font-monospace mb-3" [(ngModel)]="replacement"
+              (ngModelChange)="run()" placeholder="$&">
+          }
+
+          <label class="form-label small mb-1">Test string</label>
+          <textarea class="form-control font-monospace" rows="8" [(ngModel)]="testString"
+            (ngModelChange)="run()" placeholder="Paste text to search…"></textarea>
+
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" (click)="loadSampleText()">
+              <i class="bi bi-file-earmark-text me-1"></i>Sample text
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" (click)="clear()">
+              <i class="bi bi-x-circle me-1"></i>Clear all
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-check2-square me-2"></i>Results</h5>
+          <span class="badge bg-light text-dark">{{ matchCount }} match{{ matchCount === 1 ? '' : 'es' }}</span>
+        </div>
+        <div class="card-body">
+          @if (!testString || !regexPattern) {
+            <div class="empty-state">
+              <i class="bi bi-regex"></i>
+              <p class="mb-0">Enter a regex and test string to see matches.</p>
+            </div>
+          } @else {
+            @if (mode === 'replace') {
+              <label class="form-label small mb-1">Replaced output</label>
+              <pre class="replaced-output mb-3">{{ replaceOutput }}</pre>
+              <button class="btn btn-sm btn-outline-secondary mb-3" (click)="copyOutput()" [disabled]="!replaceOutput">
+                <i class="bi bi-clipboard me-1"></i>Copy output
+              </button>
+            }
+
+            <label class="form-label small mb-1">Highlighted</label>
+            <div class="highlighted-text bg-light-custom" [innerHTML]="highlightedText"></div>
+
+            @if (matches.length > 0) {
+              <div class="mt-3 d-flex justify-content-between align-items-center">
+                <label class="form-label small mb-0">Matches</label>
+                <button class="btn btn-sm btn-outline-secondary" (click)="copyAllMatches()">
+                  <i class="bi bi-clipboard me-1"></i>Copy all
+                </button>
+              </div>
+              <div class="matches-list mt-2">
+                @for (match of matches; track $index) {
+                  <div class="match-item">
+                    <span class="match-number">{{ $index + 1 }}.</span>
+                    <code>{{ match }}</code>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard(match)" title="Copy">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
                   </div>
-                  <div class="flag-checkbox">
-                    <input type="checkbox" id="caseInsensitive" [(ngModel)]="flags.caseInsensitive"
-                      (ngModelChange)="testRegex()" />
-                      <label for="caseInsensitive">Case Insensitive (i)</label>
-                    </div>
-                    <div class="flag-checkbox">
-                      <input type="checkbox" id="dotAll" [(ngModel)]="flags.dotAll"
-                        (ngModelChange)="testRegex()" />
-                        <label for="dotAll">Dot All (s)</label>
-                      </div>
-                      <div class="flag-checkbox">
-                        <input type="checkbox" id="unicode" [(ngModel)]="flags.unicode"
-                          (ngModelChange)="testRegex()" />
-                          <label for="unicode">Unicode (u)</label>
-                        </div>
-                        <div class="flag-checkbox">
-                          <input type="checkbox" id="sticky" [(ngModel)]="flags.sticky"
-                            (ngModelChange)="testRegex()" />
-                            <label for="sticky">Sticky (y)</label>
-                          </div>
-                        </div>
-                      </div>
-
-                      <h5>Test String</h5>
-                      <textarea class="data-input bg-light-custom" [(ngModel)]="testString"
-                        (ngModelChange)="testRegex()"
-                      placeholder="Enter text to test against your regex..."></textarea>
-
-                      <button class="btn custom-btn margin-top-10px" (click)="clear()">
-                        Clear All
-                      </button>
-                    </div>
-
-                    <div class="col-lg-6 col-md-12">
-                      <h5>Results</h5>
-
-                      <div class="match-summary">
-                        Matches Found:
-                        <span [class.has-matches]="matchCount > 0">{{ matchCount }}</span>
-                      </div>
-                      <br>
-
-                        @if (matchCount > 0) {
-                          <div class="matches-section">
-                            <label><strong>Matched Values:</strong></label>
-                            <div class="matches-list">
-                              @for (match of matches; track match; let i = $index) {
-                                <div class="match-item">
-                                  <span class="match-number">{{ i + 1 }}.</span>
-                                  <code>{{ match }}</code>
-                                  <button class="btn btn-sm custom-btn" (click)="copyToClipboard(match)"
-                                    title="Copy to clipboard">
-                                    <i class="bi bi-clipboard"></i>
-                                  </button>
-                                </div>
-                              }
-                            </div>
-                          </div>
-                        }
-
-                        @if (testString && regexPattern) {
-                          <div class="highlighted-section">
-                            <label><strong>Highlighted Text:</strong></label>
-                            <div class="highlighted-text bg-light-custom" [innerHTML]="highlightedText"></div>
-                          </div>
-                        }
-
-                        @if (!testString || !regexPattern) {
-                          <div class="empty-state bg-light-custom">
-                            <i class="bi bi-regex"></i>
-                            <p>Enter a regex pattern and test string to see matches</p>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

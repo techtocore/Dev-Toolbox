@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root'
@@ -6,7 +7,7 @@ import { Injectable } from '@angular/core';
 export class UtilityService {
 
   isMobile: boolean = false;
-  constructor() { }
+  constructor(private toastService: ToastService) { }
 
   getIsMobile(): boolean {
     return this.isMobile;
@@ -51,19 +52,30 @@ export class UtilityService {
   }
 
   /**
-   * Copy text to clipboard with proper error handling and fallback
-   * @param text Text to copy to clipboard
-   * @returns Promise that resolves to true if successful, false otherwise
+   * Copy text to clipboard with proper error handling and fallback.
+   * Emits a toast on completion unless `silent: true` is passed.
    */
-  async copyToClipboard(text: string): Promise<boolean> {
+  async copyToClipboard(
+    text: string,
+    options: { silent?: boolean; label?: string } = {}
+  ): Promise<boolean> {
+    const ok = await this.tryCopy(text);
+    if (!options.silent) {
+      if (ok) {
+        this.toastService.success(options.label || 'Copied to clipboard');
+      } else {
+        this.toastService.error('Could not copy to clipboard');
+      }
+    }
+    return ok;
+  }
+
+  private async tryCopy(text: string): Promise<boolean> {
     try {
-      // Try modern clipboard API first
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(text);
         return true;
       }
-
-      // Fallback for older browsers or non-HTTPS contexts
       return this.copyToClipboardFallback(text);
     } catch (error) {
       console.error('Clipboard API failed, trying fallback:', error);
