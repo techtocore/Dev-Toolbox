@@ -1,92 +1,70 @@
-.input-section {
-    margin-bottom: 20px;
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .input-with-button {
-        display: flex;
-        gap: 10px;
-
-        input {
-            flex: 1;
-        }
-
-        button {
-            white-space: nowrap;
-        }
-    }
-
-    .help-text {
-        display: block;
-        margin-top: 5px;
-        color: #adb5bd;
-        font-size: 0.85rem;
-    }
+.output-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.output-item {
-    margin-bottom: 15px;
+.output-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 1.4fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #fff;
+  color: #212529;
 
-    label {
-        display: block;
-        margin-bottom: 5px;
-    }
+  .output-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(1, 124, 173, 0.10);
+    color: #017cad;
+  }
 
-    .output-box {
-        display: flex;
-        gap: 10px;
+  .output-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
 
-        input {
-            flex: 1;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
-
-        button {
-            padding: 0.375rem 0.75rem;
-        }
-    }
+  .output-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88rem;
+    word-break: break-word;
+  }
 }
 
 .empty-state {
-    padding: 40px 20px;
-    text-align: center;
-    border-radius: 4px;
-    
-    i {
-        font-size: 3rem;
-        opacity: 0.3;
-        display: block;
-        margin-bottom: 10px;
-    }
+  padding: 60px 20px;
+  text-align: center;
+  color: #6c757d;
 
-    p {
-        color: #6c757d;
-        margin: 0;
-    }
+  i {
+    font-size: 3rem;
+    opacity: 0.35;
+    display: block;
+    margin-bottom: 10px;
+  }
 }
 
 @media (max-width: 768px) {
-    .input-section .input-with-button {
-        flex-direction: column;
+  .output-row {
+    grid-template-columns: 28px 1fr auto;
+    grid-template-areas:
+      "icon label copy"
+      "value value value";
+    gap: 6px;
 
-        button {
-            width: 100%;
-        }
-    }
-
-    .output-item .output-box {
-        flex-direction: column;
-
-        input {
-            font-size: 0.85rem;
-        }
-
-        button {
-            width: 100%;
-        }
-    }
+    .output-icon { grid-area: icon; }
+    .output-label { grid-area: label; }
+    .output-value { grid-area: value; font-size: 0.82rem; }
+    button { grid-area: copy; }
+  }
 }

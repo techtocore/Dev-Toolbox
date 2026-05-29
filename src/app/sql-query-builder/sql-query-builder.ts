@@ -26,12 +26,15 @@ export class SqlQueryBuilder {
   // SELECT options
   tableName: string = 'users';
   selectedColumns: string = '*';
+  distinct: boolean = false;
   conditions: QueryCondition[] = [];
   joins: JoinClause[] = [];
   groupBy: string = '';
+  having: string = '';
   orderBy: string = '';
   orderDirection: 'ASC' | 'DESC' = 'ASC';
   limit: string = '';
+  offset: string = '';
 
   // INSERT options
   insertColumns: string = '';
@@ -104,7 +107,8 @@ export class SqlQueryBuilder {
   }
 
   buildSelectQuery(): string {
-    let query = `SELECT ${this.selectedColumns || '*'}\nFROM ${this.tableName}`;
+    const selectKeyword = this.distinct ? 'SELECT DISTINCT' : 'SELECT';
+    let query = `${selectKeyword} ${this.selectedColumns || '*'}\nFROM ${this.tableName}`;
 
     // Add JOINs
     if (this.joins.length > 0) {
@@ -126,14 +130,22 @@ export class SqlQueryBuilder {
       query += `\nGROUP BY ${this.groupBy}`;
     }
 
+    // Add HAVING (only meaningful with GROUP BY).
+    if (this.having && this.having.trim()) {
+      query += `\nHAVING ${this.having.trim()}`;
+    }
+
     // Add ORDER BY
     if (this.orderBy) {
       query += `\nORDER BY ${this.orderBy} ${this.orderDirection}`;
     }
 
-    // Add LIMIT
+    // Add LIMIT + optional OFFSET
     if (this.limit) {
       query += `\nLIMIT ${this.limit}`;
+      if (this.offset) {
+        query += ` OFFSET ${this.offset}`;
+      }
     }
 
     query += ';';
@@ -203,13 +215,18 @@ export class SqlQueryBuilder {
       if (condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL') {
         conditionStr += `${condition.field} ${condition.operator}`;
       } else if (condition.operator === 'LIKE') {
-        conditionStr += `${condition.field} LIKE '%${condition.value}%'`;
+        conditionStr += `${condition.field} LIKE '%${this.escapeSqlString(condition.value)}%'`;
       } else if (condition.operator === 'IN') {
+        // IN lists are passed through verbatim — user is expected to provide
+        // a comma-separated literal list (e.g. 1, 2, 3 or 'a', 'b').
         conditionStr += `${condition.field} IN (${condition.value})`;
       } else {
-        // Check if value is numeric
-        const isNumeric = !isNaN(Number(condition.value));
-        const quotedValue = isNumeric ? condition.value : `'${condition.value}'`;
+        // Numeric values pass through unquoted; strings get single-quoted with
+        // embedded single quotes doubled per the SQL standard.
+        const isNumeric = condition.value !== '' && !isNaN(Number(condition.value));
+        const quotedValue = isNumeric
+          ? condition.value
+          : `'${this.escapeSqlString(condition.value)}'`;
         conditionStr += `${condition.field} ${condition.operator} ${quotedValue}`;
       }
 
@@ -219,8 +236,14 @@ export class SqlQueryBuilder {
     return parts.join('');
   }
 
+  // SQL string literal escape: double up any embedded single quotes.
+  private escapeSqlString(value: string): string {
+    return String(value).replace(/'/g, "''");
+  }
+
   copyQuery(): void {
-    this.utilityService.copyToClipboard(this.generatedQuery);
+    if (!this.generatedQuery) return;
+    this.utilityService.copyToClipboard(this.generatedQuery, { label: 'SQL query copied' });
   }
 
   downloadQuery(): void {
@@ -264,9 +287,27 @@ export class SqlQueryBuilder {
         this.conditions = [];
         this.joins = [];
         this.groupBy = 'category';
+        this.having = 'SUM(amount) > 10000';
         this.orderBy = 'total';
         this.orderDirection = 'DESC';
         this.limit = '';
+        break;
+
+      case 'paginated':
+        this.queryType = 'SELECT';
+        this.tableName = 'posts';
+        this.distinct = false;
+        this.selectedColumns = 'id, title, author, published_at';
+        this.conditions = [
+          { field: 'published_at', operator: '<', value: 'NOW()', logic: 'AND' }
+        ];
+        this.joins = [];
+        this.groupBy = '';
+        this.having = '';
+        this.orderBy = 'published_at';
+        this.orderDirection = 'DESC';
+        this.limit = '20';
+        this.offset = '40';
         break;
     }
     this.generateQuery();
@@ -275,11 +316,14 @@ export class SqlQueryBuilder {
   clearAll(): void {
     this.tableName = 'users';
     this.selectedColumns = '*';
+    this.distinct = false;
     this.conditions = [{ field: '', operator: '=', value: '', logic: 'AND' }];
     this.joins = [];
     this.groupBy = '';
+    this.having = '';
     this.orderBy = '';
     this.limit = '';
+    this.offset = '';
     this.generatedQuery = '';
   }
 }

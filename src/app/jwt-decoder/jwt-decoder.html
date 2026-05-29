@@ -1,74 +1,136 @@
-<div>
-  <br />
-  <h2>JWT Decoder</h2>
-  <br />
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-lg-6 col-md-12">
-        <h5>JWT Token Input</h5>
-        <textarea class="data-input bg-light-custom" [(ngModel)]="jwtInput"
-          (ngModelChange)="decodeJwt()"
-        placeholder="Paste your JWT token here (e.g., eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c)"></textarea>
-        <button class="btn custom-btn margin-top-10px" (click)="clear()">
-          Clear
-        </button>
-      </div>
-
-      <div class="col-lg-6 col-md-12">
-        <h5>Decoded JWT</h5>
-
-        @if (errorMessage) {
-          <div class="alert alert-danger">
-            {{ errorMessage }}
-          </div>
-        }
-
-        @if (isValid) {
-          <div>
-            <div class="output-section">
-              <label><strong>Header:</strong></label>
-              <div class="output-box">
-                <pre class="data-output bg-light-custom">{{ header }}</pre>
-                <button class="btn btn-sm custom-btn copy-btn" (click)="copyToClipboard(header)"
-                  title="Copy to clipboard">
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
-            </div>
-            <div class="output-section">
-              <label><strong>Payload:</strong></label>
-              <div class="output-box">
-                <pre class="data-output bg-light-custom">{{ payload }}</pre>
-                <button class="btn btn-sm custom-btn copy-btn" (click)="copyToClipboard(payload)"
-                  title="Copy to clipboard">
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
-            </div>
-            <div class="output-section">
-              <label><strong>Signature:</strong></label>
-              <div class="output-box">
-                <input type="text" readonly [value]="signature" class="form-control" />
-                <button class="btn btn-sm custom-btn" (click)="copyToClipboard(signature)"
-                  title="Copy to clipboard">
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
-            </div>
-            <div class="info-box">
-              <i class="bi bi-info-circle"></i>
-              <small>Note: This tool only decodes the JWT. It does not verify the signature.</small>
-            </div>
-          </div>
-        }
-
-        @if (!isValid && !errorMessage) {
-          <div class="empty-state bg-light-custom">
-            <i class="bi bi-shield-lock"></i>
-            <p>Paste a JWT token to decode it</p>
-          </div>
-        }
-      </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">JWT Decoder</h2>
+      <p class="text-muted mb-4">
+        Decode JSON Web Tokens, view header/payload claims with documentation, and check expiry status.
+        This tool does not verify signatures — verification requires the issuer's secret or public key.
+      </p>
     </div>
   </div>
+
+  <div class="row">
+    <!-- Token input -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Token</h5>
+        </div>
+        <div class="card-body">
+          <textarea
+            class="form-control font-monospace"
+            rows="10"
+            [(ngModel)]="jwtInput"
+            (ngModelChange)="decodeJwt()"
+            placeholder="Paste a JWT here (header.payload.signature)"></textarea>
+
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            <button class="btn btn-outline-secondary" (click)="loadSample()">
+              <i class="bi bi-file-earmark-text me-1"></i>Sample
+            </button>
+            <button class="btn btn-outline-secondary" (click)="clear()">
+              <i class="bi bi-x-circle me-1"></i>Clear
+            </button>
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger mt-3 mb-0">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (isValid) {
+            <div class="alert mt-3 mb-0" [class]="'alert-' + expiryColor">
+              <i class="bi me-1"
+                [class.bi-check-circle]="expiryColor === 'success'"
+                [class.bi-x-circle]="expiryColor === 'danger'"
+                [class.bi-hourglass-split]="expiryColor === 'warning'"
+                [class.bi-info-circle]="expiryColor === 'secondary'"></i>
+              {{ expiryMessage }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Decoded -->
+    <div class="col-lg-6 mb-4">
+      @if (!isValid && !errorMessage) {
+        <div class="card shadow-sm h-100">
+          <div class="card-body empty-state">
+            <i class="bi bi-shield-lock"></i>
+            <p>Paste a JWT to see the decoded header and payload.</p>
+          </div>
+        </div>
+      } @else if (isValid) {
+        <div class="card shadow-sm mb-3">
+          <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-window-stack me-2"></i>Header</h6>
+            <button class="btn btn-sm btn-light" (click)="copyHeader()">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <pre class="json-pane mb-0">{{ headerJson }}</pre>
+          </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+          <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-collection me-2"></i>Payload</h6>
+            <button class="btn btn-sm btn-light" (click)="copyPayload()">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <pre class="json-pane mb-0">{{ payloadJson }}</pre>
+          </div>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-key me-2"></i>Signature</h6>
+            <button class="btn btn-sm btn-light" (click)="copySignature()">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <code class="signature">{{ signature }}</code>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isValid && claims.length > 0) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Claims</h5>
+          </div>
+          <div class="card-body p-0">
+            <table class="table claims-table mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 160px;">Claim</th>
+                  <th>Value</th>
+                  <th style="width: 35%;">Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of claims; track row.key) {
+                  <tr [class]="row.tone === 'normal' ? '' : 'claim-' + row.tone">
+                    <td><code class="claim-key">{{ row.key }}</code></td>
+                    <td class="claim-value">{{ row.display }}</td>
+                    <td class="claim-desc">{{ row.description }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>

@@ -1,116 +1,80 @@
-<div>
-  <br />
-  <h2>Timestamp Converter</h2>
-  <br />
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-lg-6 col-md-12">
-        <h5>Input</h5>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Timestamp Converter</h2>
+      <p class="text-muted mb-4">
+        Convert between Unix timestamps, ISO 8601, and human-readable formats — across timezones.
+        Includes ISO week, day of year, day of week, and relative time.
+      </p>
+    </div>
+  </div>
 
-        <div class="input-section">
-          <label><strong>Unix Timestamp:</strong></label>
-          <div class="input-with-button">
-            <input type="text" class="form-control bg-light-custom" [(ngModel)]="unixInput"
-              (ngModelChange)="onUnixInputChange()"
-              placeholder="e.g., 1730217600 or 1730217600000" />
-              <button class="btn btn-sm custom-btn" (click)="useCurrentTimestamp()"
-                title="Use current timestamp">
-                <i class="bi bi-clock"></i> Now
-              </button>
-            </div>
-            <small class="help-text">Supports seconds (10 digits) or milliseconds (13 digits)</small>
-          </div>
+  <div class="row">
+    <!-- Inputs -->
+    <div class="col-lg-5 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-input-cursor me-2"></i>Input</h5>
+          <button class="btn btn-sm btn-light" (click)="useCurrentTimestamp()" title="Use current time">
+            <i class="bi bi-clock me-1"></i>Now
+          </button>
+        </div>
+        <div class="card-body">
+          <label class="form-label small mb-1"><strong>Unix Timestamp</strong></label>
+          <input type="text" class="form-control mb-3" [(ngModel)]="unixInput"
+            (ngModelChange)="onUnixInputChange()" placeholder="e.g. 1730217600 or 1730217600000">
 
-          <div class="input-section">
-            <label><strong>Date & Time:</strong></label>
-            <input type="datetime-local" class="form-control bg-light-custom" [(ngModel)]="dateTimeInput"
-              (ngModelChange)="onDateTimeChange()" />
-              <small class="help-text">Select a date and time in your local timezone</small>
-            </div>
+          <label class="form-label small mb-1"><strong>Date &amp; Time (local)</strong></label>
+          <input type="datetime-local" class="form-control mb-3" [(ngModel)]="dateTimeInput"
+            (ngModelChange)="onDateTimeChange()">
 
-            <div class="input-section">
-              <label><strong>ISO 8601 String:</strong></label>
-              <input type="text" class="form-control bg-light-custom" [(ngModel)]="isoInput"
-                (ngModelChange)="onIsoInputChange()"
-                placeholder="e.g., 2024-10-29T12:00:00.000Z" />
-                <small class="help-text">Enter ISO 8601 formatted date string</small>
-              </div>
+          <label class="form-label small mb-1"><strong>ISO 8601</strong></label>
+          <input type="text" class="form-control mb-3" [(ngModel)]="isoInput"
+            (ngModelChange)="onIsoInputChange()" placeholder="2026-05-27T12:00:00.000Z">
 
-              <button class="btn custom-btn margin-top-10px" (click)="clear()">
-                Clear All
-              </button>
-            </div>
+          <label class="form-label small mb-1"><strong>Display timezone</strong></label>
+          <select class="form-select mb-3" [(ngModel)]="selectedTz" (change)="onTzChange()">
+            @for (tz of timezones; track tz) {
+              <option [value]="tz">{{ tz }}</option>
+            }
+          </select>
 
-            <div class="col-lg-6 col-md-12">
-              <h5>Conversions</h5>
-
-              @if (hasValidInput) {
-                <div>
-                  <div class="output-item">
-                    <label><strong>Unix (seconds):</strong></label>
-                    <div class="output-box">
-                      <input type="text" readonly [value]="unixSeconds" class="form-control" />
-                      <button class="btn btn-sm custom-btn" (click)="copyToClipboard(unixSeconds)"
-                        title="Copy to clipboard">
-                        <i class="bi bi-clipboard"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="output-item">
-                    <label><strong>Unix (milliseconds):</strong></label>
-                    <div class="output-box">
-                      <input type="text" readonly [value]="unixMilliseconds" class="form-control" />
-                      <button class="btn btn-sm custom-btn" (click)="copyToClipboard(unixMilliseconds)"
-                        title="Copy to clipboard">
-                        <i class="bi bi-clipboard"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="output-item">
-                    <label><strong>ISO 8601:</strong></label>
-                    <div class="output-box">
-                      <input type="text" readonly [value]="isoString" class="form-control" />
-                      <button class="btn btn-sm custom-btn" (click)="copyToClipboard(isoString)"
-                        title="Copy to clipboard">
-                        <i class="bi bi-clipboard"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="output-item">
-                    <label><strong>Local Time:</strong></label>
-                    <div class="output-box">
-                      <input type="text" readonly [value]="localTimeString" class="form-control" />
-                      <button class="btn btn-sm custom-btn" (click)="copyToClipboard(localTimeString)"
-                        title="Copy to clipboard">
-                        <i class="bi bi-clipboard"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="output-item">
-                    <label><strong>UTC Time:</strong></label>
-                    <div class="output-box">
-                      <input type="text" readonly [value]="utcTimeString" class="form-control" />
-                      <button class="btn btn-sm custom-btn" (click)="copyToClipboard(utcTimeString)"
-                        title="Copy to clipboard">
-                        <i class="bi bi-clipboard"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="output-item">
-                    <label><strong>Relative:</strong></label>
-                    <div class="output-box">
-                      <input type="text" readonly [value]="relativeTime" class="form-control" />
-                    </div>
-                  </div>
-                </div>
-              } @else {
-                <div class="empty-state bg-light-custom">
-                  <i class="bi bi-clock-history"></i>
-                  <p>Enter a timestamp or date to convert</p>
-                </div>
-              }
-
-            </div>
-          </div>
+          <button class="btn btn-outline-secondary w-100" (click)="clear()">
+            <i class="bi bi-x-circle me-1"></i>Clear all
+          </button>
         </div>
       </div>
+    </div>
+
+    <!-- Outputs -->
+    <div class="col-lg-7 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="bi bi-arrow-right-circle me-2"></i>Conversions</h5>
+        </div>
+        <div class="card-body">
+          @if (hasValidInput) {
+            <div class="output-list">
+              @for (row of outputs; track row.key) {
+                <div class="output-row">
+                  <div class="output-icon"><i class="bi" [class]="row.icon"></i></div>
+                  <div class="output-label">{{ row.label }}</div>
+                  <div class="output-value">{{ row.value }}</div>
+                  <button class="btn btn-sm btn-outline-secondary"
+                    (click)="copyToClipboard(row.value, row.label)" title="Copy">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="bi bi-clock-history"></i>
+              <p>Enter a timestamp or date on the left to see conversions.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

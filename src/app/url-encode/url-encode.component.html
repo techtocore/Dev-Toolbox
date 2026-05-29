@@ -1,1 +1,136 @@
-<app-two-way-io [context]="context" (processEvent)="encode($event)" (reverseEvent)="decode($event)"></app-two-way-io>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">URL Encode / Decode</h2>
+      <p class="text-muted mb-4">
+        Three modes: <strong>Component</strong> (single query value), <strong>Full URL</strong>
+        (preserves <code>:/?#&amp;=</code>), and <strong>Form</strong> (<code>application/x-www-form-urlencoded</code> with <code>+</code> for spaces).
+      </p>
+    </div>
+  </div>
+
+  <!-- Mode -->
+  <div class="row mb-3 g-2 align-items-center">
+    <div class="col-md-auto">
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="url-mode" id="url-mode-component"
+          [checked]="mode === 'component'" (change)="setMode('component')">
+        <label class="btn btn-outline-primary" for="url-mode-component">
+          <i class="bi bi-link me-1"></i>Component
+        </label>
+        <input type="radio" class="btn-check" name="url-mode" id="url-mode-full"
+          [checked]="mode === 'full-url'" (change)="setMode('full-url')">
+        <label class="btn btn-outline-primary" for="url-mode-full">
+          <i class="bi bi-link-45deg me-1"></i>Full URL
+        </label>
+        <input type="radio" class="btn-check" name="url-mode" id="url-mode-form"
+          [checked]="mode === 'form'" (change)="setMode('form')">
+        <label class="btn btn-outline-primary" for="url-mode-form">
+          <i class="bi bi-list-task me-1"></i>Form
+        </label>
+      </div>
+    </div>
+    <div class="col text-end">
+      <button class="btn btn-sm btn-outline-secondary me-1" (click)="loadSample()">
+        <i class="bi bi-file-earmark-text me-1"></i>Sample
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="clear()">
+        <i class="bi bi-x-circle me-1"></i>Clear
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="alert alert-danger mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-textarea-t me-2"></i>Plain</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="swap()" [disabled]="!encoded" title="Swap">
+              <i class="bi bi-arrow-left-right"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="copyDecoded()" [disabled]="!decoded" title="Copy">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" rows="12"
+            [(ngModel)]="decoded" (ngModelChange)="encode()"
+            [placeholder]="mode === 'form' ? 'key1=value 1\nkey2=value 2' : 'Type or paste text…'"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-link-45deg me-2"></i>Encoded</h5>
+          <button class="btn btn-sm btn-light" (click)="copyEncoded()" [disabled]="!encoded" title="Copy">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" rows="12"
+            [(ngModel)]="encoded" (ngModelChange)="decode()"
+            placeholder="Encoded output appears here, or paste to decode…"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (mode === 'full-url' && parsed) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-diagram-2 me-2"></i>URL Breakdown</h5>
+          </div>
+          <div class="card-body">
+            <table class="table url-table mb-0">
+              <tbody>
+                @if (parsed.protocol) {
+                  <tr><th>Protocol</th><td><code>{{ parsed.protocol }}</code></td></tr>
+                }
+                @if (parsed.host) {
+                  <tr><th>Host</th><td><code>{{ parsed.host }}</code></td></tr>
+                }
+                @if (parsed.pathname) {
+                  <tr><th>Pathname</th><td><code>{{ parsed.pathname }}</code></td></tr>
+                }
+                @if (parsed.hash) {
+                  <tr><th>Hash</th><td><code>{{ parsed.hash }}</code></td></tr>
+                }
+                @if (parsed.params.length > 0) {
+                  <tr>
+                    <th>Query params</th>
+                    <td>
+                      <table class="param-table">
+                        @for (p of parsed.params; track p.key) {
+                          <tr>
+                            <td><code class="param-key">{{ p.key }}</code></td>
+                            <td>{{ p.value }}</td>
+                          </tr>
+                        }
+                      </table>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

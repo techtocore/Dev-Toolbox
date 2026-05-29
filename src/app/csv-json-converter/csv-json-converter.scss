@@ -13,7 +13,70 @@
     font-size: 0.875rem;
     line-height: 1.5;
     margin: 0;
+    color: #212529;
   }
+}
+
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: 0.9rem;
+
+  &:hover {
+    border-color: #017cad;
+    background: #f1f7fb;
+    color: #017cad;
+  }
+
+  i {
+    font-size: 1.2rem;
+    vertical-align: middle;
+  }
+}
+
+.preview-wrap {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  color: #212529;
+
+  th {
+    background: #017cad;
+    color: #fff;
+    text-align: left;
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 6px 12px;
+    border-bottom: 1px solid #f1f3f5;
+    vertical-align: top;
+    white-space: nowrap;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  tr:nth-child(even) td { background: #fafbfc; }
 }
 
 .gap-2 {

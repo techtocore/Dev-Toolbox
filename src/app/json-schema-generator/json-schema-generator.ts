@@ -365,46 +365,67 @@ export class JsonSchemaGenerator {
     this.schemaDescription = '';
   }
 
-  importFromJSON(): void {
-    const input = prompt('Paste a sample JSON object:');
-    if (!input) return;
+  importPanelOpen = false;
+  importJsonInput = '';
+  importError = '';
 
+  toggleImportPanel(): void {
+    this.importPanelOpen = !this.importPanelOpen;
+    this.importError = '';
+  }
+
+  doImport(): void {
+    this.importError = '';
+    if (!this.importJsonInput.trim()) {
+      this.importError = 'Paste a sample JSON object first.';
+      return;
+    }
     try {
-      const obj = JSON.parse(input);
-      this.inferSchemaFromObject(obj);
-    } catch (e) {
-      alert('Invalid JSON');
+      const obj = JSON.parse(this.importJsonInput);
+      const sample = Array.isArray(obj)
+        ? (obj[0] ?? {})
+        : obj;
+      if (typeof sample !== 'object' || sample === null) {
+        this.importError = 'Expected an object (or array of objects). Got primitive.';
+        return;
+      }
+      this.inferSchemaFromObject(sample);
+      this.importPanelOpen = false;
+      this.importJsonInput = '';
+    } catch (e: any) {
+      this.importError = `Could not parse JSON: ${e?.message || 'invalid input'}`;
     }
   }
 
-  inferSchemaFromObject(obj: any, prefix: string = ''): void {
-    this.fields = [];
+  importFromJSON(): void {
+    // Legacy entry point — open the inline panel instead of using prompt().
+    this.toggleImportPanel();
+  }
 
-    Object.keys(obj).forEach(key => {
+  inferSchemaFromObject(obj: any): void {
+    this.fields = Object.keys(obj).map(key => {
       const value = obj[key];
-      const fieldName = prefix ? `${prefix}.${key}` : key;
-
-      let fieldType: string;
-      if (Array.isArray(value)) {
-        fieldType = 'array';
-      } else if (value === null) {
-        fieldType = 'string';
-      } else if (typeof value === 'object') {
-        fieldType = 'object';
-      } else if (typeof value === 'boolean') {
-        fieldType = 'boolean';
-      } else if (typeof value === 'number') {
-        fieldType = Number.isInteger(value) ? 'integer' : 'number';
-      } else {
-        fieldType = 'string';
-      }
-
-      this.fields.push({
-        name: fieldName,
+      const fieldType = this.inferType(value);
+      const field: SchemaField = {
+        name: key,
         type: fieldType,
         description: `Inferred ${fieldType} field`,
-        required: true
-      });
+        required: value !== null && value !== undefined
+      };
+      if (fieldType === 'array') {
+        const sample = Array.isArray(value) && value.length > 0 ? value[0] : null;
+        field.items = { type: this.inferType(sample) };
+      }
+      return field;
     });
+  }
+
+  private inferType(value: any): string {
+    if (value === null || value === undefined) return 'string';
+    if (Array.isArray(value)) return 'array';
+    if (typeof value === 'object') return 'object';
+    if (typeof value === 'boolean') return 'boolean';
+    if (typeof value === 'number') return Number.isInteger(value) ? 'integer' : 'number';
+    return 'string';
   }
 }

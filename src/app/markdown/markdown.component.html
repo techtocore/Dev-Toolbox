@@ -1,102 +1,124 @@
-<div>
-    <br />
-    <h2>Markdown Editor</h2>
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <div class="editor-header">
-                    <h5>Editor</h5>
-                    <div class="header-actions">
-                        <button class="btn btn-sm custom-btn" (click)="copyMarkdown()" title="Copy markdown">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
-                        <button class="btn btn-sm custom-btn" (click)="downloadMarkdown()" title="Download as .md">
-                            <i class="bi bi-download"></i>
-                        </button>
-                        <button class="btn btn-sm custom-btn" (click)="clear()" title="Clear all">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="toolbar">
-                    <div class="toolbar-group">
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(1)" title="Heading 1">
-                            <strong>H1</strong>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(2)" title="Heading 2">
-                            <strong>H2</strong>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(3)" title="Heading 3">
-                            <strong>H3</strong>
-                        </button>
-                    </div>
-
-                    <div class="toolbar-divider"></div>
-
-                    <div class="toolbar-group">
-                        <button class="btn btn-sm btn-outline-secondary" (click)="makeBold()" title="Bold (Ctrl+B)">
-                            <i class="bi bi-type-bold"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="makeItalic()" title="Italic (Ctrl+I)">
-                            <i class="bi bi-type-italic"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="makeStrikethrough()" title="Strikethrough">
-                            <i class="bi bi-type-strikethrough"></i>
-                        </button>
-                    </div>
-
-                    <div class="toolbar-divider"></div>
-
-                    <div class="toolbar-group">
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertLink()" title="Insert link">
-                            <i class="bi bi-link-45deg"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertImage()" title="Insert image">
-                            <i class="bi bi-image"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="makeCode()" title="Inline code">
-                            <i class="bi bi-code"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertCodeBlock()" title="Code block">
-                            <i class="bi bi-code-square"></i>
-                        </button>
-                    </div>
-
-                    <div class="toolbar-divider"></div>
-
-                    <div class="toolbar-group">
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertList()" title="Bullet list">
-                            <i class="bi bi-list-ul"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertNumberedList()" title="Numbered list">
-                            <i class="bi bi-list-ol"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertQuote()" title="Quote">
-                            <i class="bi bi-quote"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertTable()" title="Insert table">
-                            <i class="bi bi-table"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="insertHorizontalRule()" title="Horizontal rule">
-                            <i class="bi bi-dash-lg"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <textarea #markdownTextarea class="markdown-editor bg-light-custom" 
-                          [(ngModel)]="markdownText" 
-                          (ngModelChange)="updatePreview()"
-                          placeholder="Start typing or use the toolbar above to format your text..."></textarea>
-            </div>
-
-            <div class="col-lg-6 col-md-12">
-                <div class="preview-header">
-                    <h5>Live Preview</h5>
-                </div>
-                <div class="markdown-preview bg-light-custom" [innerHTML]="compiledMarkdown"></div>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Markdown Editor</h2>
+      <p class="text-muted mb-4">
+        Live preview, keyboard shortcuts (<kbd>Ctrl+B</kbd>, <kbd>Ctrl+I</kbd>,
+        <kbd>Ctrl+E</kbd>, <kbd>Ctrl+L</kbd>), auto table of contents, export to standalone HTML.
+      </p>
     </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="row mb-3">
+    <div class="col-12 d-flex align-items-center gap-3 flex-wrap md-stats">
+      <span><i class="bi bi-textarea-t me-1"></i>{{ wordCount.toLocaleString() }} words</span>
+      <span><i class="bi bi-type me-1"></i>{{ charCount.toLocaleString() }} chars</span>
+      <span><i class="bi bi-book me-1"></i>{{ readingTimeMin }} min read</span>
+      <button class="btn btn-sm btn-outline-secondary ms-auto" (click)="toggleToc()" [disabled]="toc.length === 0">
+        <i class="bi" [class.bi-list-task]="!showToc" [class.bi-x-circle]="showToc"></i>
+        {{ showToc ? 'Hide' : 'Show' }} TOC ({{ toc.length }})
+      </button>
+    </div>
+  </div>
+
+  @if (showToc && toc.length > 0) {
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-list-task me-2"></i>Table of Contents</h6>
+          </div>
+          <div class="card-body">
+            <ul class="toc-list mb-0">
+              @for (entry of toc; track $index) {
+                <li [style.padding-left.px]="(entry.level - 1) * 16">
+                  <span class="toc-level">H{{ entry.level }}</span>
+                  {{ entry.text }}
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editor</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="copyMarkdown()" title="Copy markdown">
+              <i class="bi bi-clipboard"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="downloadMarkdown()" title="Download .md">
+              <i class="bi bi-download"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="clear()" title="Clear">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(1)" title="Heading 1"><strong>H1</strong></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(2)" title="Heading 2"><strong>H2</strong></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertHeading(3)" title="Heading 3"><strong>H3</strong></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+              <button class="btn btn-sm btn-outline-secondary" (click)="makeBold()" title="Bold (Ctrl+B)"><i class="bi bi-type-bold"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="makeItalic()" title="Italic (Ctrl+I)"><i class="bi bi-type-italic"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="makeStrikethrough()" title="Strikethrough"><i class="bi bi-type-strikethrough"></i></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertLink()" title="Link (Ctrl+L)"><i class="bi bi-link-45deg"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertImage()" title="Image"><i class="bi bi-image"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="makeCode()" title="Inline code (Ctrl+E)"><i class="bi bi-code"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertCodeBlock()" title="Code block"><i class="bi bi-code-square"></i></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertList()" title="Bullet list"><i class="bi bi-list-ul"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertNumberedList()" title="Numbered list"><i class="bi bi-list-ol"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertQuote()" title="Quote"><i class="bi bi-quote"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertTable()" title="Table"><i class="bi bi-table"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="insertHorizontalRule()" title="Horizontal rule"><i class="bi bi-dash-lg"></i></button>
+            </div>
+          </div>
+
+          <textarea
+            #markdownTextarea
+            class="markdown-editor bg-light-custom"
+            [(ngModel)]="markdownText"
+            (ngModelChange)="updatePreview()"
+            (keydown)="onKey($event)"
+            placeholder="Start typing — Ctrl+B / Ctrl+I / Ctrl+K…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-eye me-2"></i>Live Preview</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="copyHtml()" title="Copy HTML">
+              <i class="bi bi-clipboard me-1"></i>HTML
+            </button>
+            <button class="btn btn-sm btn-light" (click)="downloadHtml()" title="Download standalone HTML">
+              <i class="bi bi-filetype-html me-1"></i>Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="markdown-preview" [innerHTML]="compiledMarkdown"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,0 +1,50 @@
+@if (open) {
+  <div class="cmdk-overlay" (click)="close()">
+    <div class="cmdk-dialog" (click)="$event.stopPropagation()">
+      <div class="cmdk-search">
+        <i class="bi bi-search"></i>
+        <input
+          #search
+          type="text"
+          [(ngModel)]="query"
+          (input)="onInput()"
+          placeholder="Search tools — try 'json', 'hash', 'color'…"
+          autocomplete="off"
+          spellcheck="false">
+        <kbd class="cmdk-esc">esc</kbd>
+      </div>
+
+      <div class="cmdk-results">
+        @if (results.length === 0) {
+          <div class="cmdk-empty">
+            <i class="bi bi-emoji-frown"></i>
+            <p>No tools matched "{{ query }}"</p>
+          </div>
+        } @else {
+          @for (tool of results; track tool.route; let i = $index) {
+            <div class="cmdk-result"
+              [class.is-active]="i === selectedIndex"
+              (mouseenter)="selectedIndex = i"
+              (click)="activate(tool)">
+              <div class="cmdk-result-icon">
+                <i class="bi" [class]="tool.icon || 'bi-tools'"></i>
+              </div>
+              <div class="cmdk-result-body">
+                <div class="cmdk-result-name">{{ tool.name }}</div>
+                <div class="cmdk-result-desc">{{ tool.description }}</div>
+              </div>
+              <div class="cmdk-result-meta">{{ tool.category }}</div>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="cmdk-footer">
+        <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+        <span><kbd>↵</kbd> open</span>
+        <span><kbd>esc</kbd> close</span>
+        <span class="ms-auto">{{ results.length }} of {{ allTools.length }} tools</span>
+      </div>
+    </div>
+  </div>
+}

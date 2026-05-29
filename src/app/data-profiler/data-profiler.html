@@ -52,15 +52,24 @@
 
             <div class="col-md-3">
               <label class="form-label">Quick Actions</label>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-outline-info btn-sm" (click)="loadSampleData()">
-                  <i class="bi bi-file-earmark-text me-1"></i> Sample
+                  <i class="bi bi-file-earmark-text me-1"></i>Sample
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" (click)="clearAll()">
-                  <i class="bi bi-x-circle me-1"></i> Clear
+                  <i class="bi bi-x-circle me-1"></i>Clear
                 </button>
               </div>
             </div>
+          </div>
+
+          <div class="file-dropzone mb-3"
+               (dragover)="onDragOver($event)"
+               (drop)="onFileDropped($event)"
+               (click)="dpFileInput.click()">
+            <input #dpFileInput type="file" hidden accept=".csv,.json,.tsv,.txt" (change)="onFileSelected($event)">
+            <i class="bi bi-cloud-arrow-up me-2"></i>
+            <strong>Drop a .csv / .tsv / .json file</strong> or click to browse.
           </div>
 
           <div class="mb-3">
@@ -72,9 +81,17 @@
               [placeholder]="format === 'csv' ? 'Paste CSV data here...' : 'Paste JSON array here...'"></textarea>
           </div>
 
-          <button class="btn btn-primary" (click)="analyzeData()">
-            <i class="bi bi-bar-chart-line me-2"></i>Analyze Data
-          </button>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary" (click)="analyzeData()">
+              <i class="bi bi-bar-chart-line me-2"></i>Analyze Data
+            </button>
+            <button class="btn btn-outline-secondary" (click)="exportJson()" [disabled]="profiles.length === 0">
+              <i class="bi bi-download me-1"></i>Export JSON
+            </button>
+            <button class="btn btn-outline-secondary" (click)="exportCsv()" [disabled]="profiles.length === 0">
+              <i class="bi bi-download me-1"></i>Export CSV
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -34,6 +34,7 @@ import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
 import { DataProfiler } from './data-profiler/data-profiler';
 import { IpInfo } from './ip-info/ip-info';
 import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
+import { CommandPaletteComponent } from './command-palette/command-palette.component';
 
 @NgModule({
   declarations: [
@@ -64,7 +65,8 @@ import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
     SqlQueryBuilder,
     DataProfiler,
     IpInfo,
-    ToastOutletComponent
+    ToastOutletComponent,
+    CommandPaletteComponent
   ],
   imports: [
     BrowserModule,

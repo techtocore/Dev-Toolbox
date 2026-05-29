@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { UtilityService } from '../services/utility.service';
+import { ToastService } from '../services/toast.service';
 
 interface ColumnProfile {
   name: string;
@@ -32,7 +34,88 @@ export class DataProfiler {
   totalRows: number = 0;
   errorMessage: string = '';
 
-  constructor() {}
+  constructor(
+    private utilityService: UtilityService,
+    private toastService: ToastService
+  ) {}
+
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    await this.loadFile(file);
+    input.value = '';
+  }
+
+  async onFileDropped(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    await this.loadFile(file);
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  private async loadFile(file: File): Promise<void> {
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.json')) {
+      this.format = 'json';
+    } else if (name.endsWith('.tsv')) {
+      this.format = 'csv';
+      this.delimiter = '\t';
+    } else {
+      this.format = 'csv';
+      this.delimiter = ',';
+    }
+    this.inputData = await file.text();
+    this.toastService.info(`Loaded ${file.name}`);
+    this.analyzeData();
+  }
+
+  exportJson(): void {
+    if (this.profiles.length === 0) return;
+    const payload = {
+      summary: {
+        totalRows: this.totalRows,
+        totalColumns: this.profiles.length,
+        generatedAt: new Date().toISOString()
+      },
+      profiles: this.profiles
+    };
+    this.utilityService.downloadFile(
+      JSON.stringify(payload, null, 2),
+      'application/json',
+      'profile.json'
+    );
+  }
+
+  exportCsv(): void {
+    if (this.profiles.length === 0) return;
+    const headers = ['column', 'type', 'count', 'null_count', 'null_percent', 'unique_count', 'unique_percent', 'min', 'max', 'mean', 'median', 'mode'];
+    const rows = this.profiles.map(p => [
+      p.name,
+      p.type,
+      p.count,
+      p.nullCount,
+      p.nullPercent.toFixed(2),
+      p.uniqueCount,
+      p.uniquePercent.toFixed(2),
+      p.min ?? '',
+      p.max ?? '',
+      p.mean?.toFixed(4) ?? '',
+      p.median?.toFixed(4) ?? '',
+      p.mode ?? ''
+    ]);
+    const csv = [headers, ...rows].map(r =>
+      r.map(v => {
+        const s = String(v);
+        return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+      }).join(',')
+    ).join('\n');
+    this.utilityService.downloadFile(csv, 'text/csv', 'profile.csv');
+  }
 
   analyzeData(): void {
     this.errorMessage = '';
@@ -61,7 +144,7 @@ export class DataProfiler {
   }
 
   parseCsv(): any[] {
-    const lines = this.inputData.trim().split('\n');
+    const lines = this.inputData.trim().split(/\r\n|\r|\n/);
     if (lines.length === 0) return [];
 
     let headers: string[] = [];

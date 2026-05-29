@@ -16,6 +16,15 @@
           <h5 class="mb-0">Input Data</h5>
         </div>
         <div class="card-body">
+          <div class="file-dropzone mb-3"
+               (dragover)="onDragOver($event)"
+               (drop)="onFileDropped($event)"
+               (click)="nsFileInput.click()">
+            <input #nsFileInput type="file" hidden accept=".csv,.txt,.tsv" (change)="onFileSelected($event)">
+            <i class="bi bi-cloud-arrow-up me-2"></i>
+            <strong>Drop a file</strong> with whitespace- or comma-separated numbers.
+          </div>
+
           <div class="mb-3">
             <label class="form-label">Numeric Values (comma or space separated)</label>
             <textarea
@@ -25,15 +34,21 @@
               placeholder="12, 15, 18, 20, 22, 25, 28, 30, 32, 35, 38, 40, 45, 50, 55"></textarea>
           </div>
 
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-success" (click)="process()">
               <i class="bi bi-calculator me-2"></i>Calculate Statistics
             </button>
             <button class="btn btn-outline-info" (click)="loadSample()">
-              <i class="bi bi-file-earmark-text me-1"></i> Load Sample
+              <i class="bi bi-file-earmark-text me-1"></i>Load Sample
+            </button>
+            <button class="btn btn-outline-secondary" (click)="exportJson()" [disabled]="!hasResults">
+              <i class="bi bi-download me-1"></i>Export JSON
+            </button>
+            <button class="btn btn-outline-secondary" (click)="exportCsv()" [disabled]="!hasResults">
+              <i class="bi bi-download me-1"></i>Export CSV
             </button>
             <button class="btn btn-outline-secondary" (click)="clearAll()">
-              <i class="bi bi-x-circle me-1"></i> Clear
+              <i class="bi bi-x-circle me-1"></i>Clear
             </button>
           </div>
         </div>

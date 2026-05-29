@@ -1,0 +1,21 @@
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 12px;
+  padding: 36px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: #f8f9fa;
+
+  &:hover {
+    border-color: #017cad;
+    background: #f1f7fb;
+  }
+
+  .file-icon {
+    font-size: 2.5rem;
+    color: #017cad;
+    display: block;
+    margin-bottom: 10px;
+  }
+}

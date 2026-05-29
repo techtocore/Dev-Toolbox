@@ -15,8 +15,8 @@
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Schema Builder</h5>
           <div>
-            <button class="btn btn-sm btn-light me-2" (click)="importFromJSON()" title="Import from JSON">
-              <i class="bi bi-upload"></i>
+            <button class="btn btn-sm btn-light me-2" (click)="toggleImportPanel()" title="Infer from sample JSON">
+              <i class="bi bi-magic me-1"></i>Infer from JSON
             </button>
             <button class="btn btn-sm btn-light" (click)="clearAll()" title="Clear">
               <i class="bi bi-x-circle"></i>
@@ -24,6 +24,27 @@
           </div>
         </div>
         <div class="card-body">
+          @if (importPanelOpen) {
+            <div class="alert alert-light border mb-3">
+              <label class="form-label small mb-1"><strong>Paste a sample JSON object or array.</strong> The tool infers field names, types (string/number/integer/boolean/array/object), and `required` from non-null values.</label>
+              <textarea class="form-control font-monospace mb-2" rows="6"
+                [(ngModel)]="importJsonInput"
+                placeholder='{"name": "Alice", "age": 30, "active": true, "tags": ["a", "b"]}'></textarea>
+              @if (importError) {
+                <div class="alert alert-danger py-2 mb-2 small">
+                  <i class="bi bi-exclamation-triangle me-1"></i>{{ importError }}
+                </div>
+              }
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" (click)="doImport()">
+                  <i class="bi bi-magic me-1"></i>Infer schema
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="toggleImportPanel()">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
           <!-- Schema Metadata -->
           <div class="mb-3">
             <label class="form-label">Schema Title</label>

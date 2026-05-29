@@ -1,6 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
+interface OutputRow {
+  key: string;
+  label: string;
+  value: string;
+  icon: string;
+}
+
 @Component({
   selector: 'app-timestamp-converter',
   standalone: false,
@@ -8,196 +15,177 @@ import { UtilityService } from '../services/utility.service';
   styleUrl: './timestamp-converter.scss',
 })
 export class TimestampConverter implements OnInit {
-  // Input fields
   unixInput = '';
   dateTimeInput = '';
   isoInput = '';
 
-  // Output fields
-  unixSeconds = '';
-  unixMilliseconds = '';
-  isoString = '';
-  localTimeString = '';
-  utcTimeString = '';
-  relativeTime = '';
+  selectedTz: string = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   hasValidInput = false;
   isMobile = false;
 
-  constructor(public utilityService: UtilityService) { }
+  // Output rows shown to the user.
+  outputs: OutputRow[] = [];
+  outputDate: Date | null = null;
+
+  // Curated common timezones — keeps the dropdown manageable.
+  timezones: string[] = [
+    'UTC',
+    'America/Los_Angeles', 'America/Denver', 'America/Chicago', 'America/New_York',
+    'America/Sao_Paulo',
+    'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Moscow',
+    'Africa/Cairo', 'Africa/Johannesburg',
+    'Asia/Dubai', 'Asia/Kolkata', 'Asia/Singapore', 'Asia/Shanghai', 'Asia/Tokyo',
+    'Australia/Sydney',
+    'Pacific/Auckland'
+  ];
+
+  constructor(public utilityService: UtilityService) {}
 
   ngOnInit(): void {
     this.isMobile = this.utilityService.getIsMobile();
-  }
-
-  onUnixInputChange() {
-    if (!this.unixInput || this.unixInput.trim() === '') {
-      this.clearOutputs();
-      return;
-    }
-
-    try {
-      const timestamp = parseInt(this.unixInput.trim());
-      if (isNaN(timestamp)) {
-        this.clearOutputs();
-        return;
-      }
-
-      // Auto-detect: if <= 10 digits, treat as seconds; otherwise milliseconds
-      const milliseconds = timestamp.toString().length <= 10 ? timestamp * 1000 : timestamp;
-      const date = new Date(milliseconds);
-
-      if (isNaN(date.getTime())) {
-        this.clearOutputs();
-        return;
-      }
-
-      this.updateFromDate(date);
-    } catch {
-      this.clearOutputs();
+    if (!this.timezones.includes(this.selectedTz)) {
+      this.timezones.unshift(this.selectedTz);
     }
   }
 
-  onDateTimeChange() {
-    if (!this.dateTimeInput || this.dateTimeInput.trim() === '') {
-      this.clearOutputs();
-      return;
-    }
-
-    try {
-      const date = new Date(this.dateTimeInput);
-      if (isNaN(date.getTime())) {
-        this.clearOutputs();
-        return;
-      }
-
-      this.updateFromDate(date);
-    } catch {
-      this.clearOutputs();
-    }
+  onUnixInputChange(): void {
+    if (!this.unixInput.trim()) return this.clearOutputs();
+    const num = Number(this.unixInput.trim());
+    if (Number.isNaN(num)) return this.clearOutputs();
+    // Detect by magnitude rather than digit count: a 10-digit ms value falls
+    // in early 1970, which would be misclassified as seconds by the length
+    // heuristic. Anything below 10^11 (year ~5138 as a seconds value, but
+    // only year 1973 as ms) we treat as seconds.
+    const abs = Math.abs(num);
+    const ms = abs < 1e11 ? num * 1000 : num;
+    const date = new Date(ms);
+    if (Number.isNaN(date.getTime())) return this.clearOutputs();
+    this.updateFromDate(date, 'unix');
   }
 
-  onIsoInputChange() {
-    if (!this.isoInput || this.isoInput.trim() === '') {
-      this.clearOutputs();
-      return;
-    }
-
-    try {
-      const date = new Date(this.isoInput.trim());
-      if (isNaN(date.getTime())) {
-        this.clearOutputs();
-        return;
-      }
-
-      this.updateFromDate(date);
-    } catch {
-      this.clearOutputs();
-    }
+  onDateTimeChange(): void {
+    if (!this.dateTimeInput.trim()) return this.clearOutputs();
+    const date = new Date(this.dateTimeInput);
+    if (Number.isNaN(date.getTime())) return this.clearOutputs();
+    this.updateFromDate(date, 'datetime');
   }
 
-  updateFromDate(date: Date) {
+  onIsoInputChange(): void {
+    if (!this.isoInput.trim()) return this.clearOutputs();
+    const date = new Date(this.isoInput.trim());
+    if (Number.isNaN(date.getTime())) return this.clearOutputs();
+    this.updateFromDate(date, 'iso');
+  }
+
+  onTzChange(): void {
+    if (this.outputDate) this.updateFromDate(this.outputDate, 'tz');
+  }
+
+  useCurrentTimestamp(): void {
+    this.updateFromDate(new Date(), 'unix');
+  }
+
+  private updateFromDate(date: Date, source: 'unix' | 'datetime' | 'iso' | 'tz'): void {
     this.hasValidInput = true;
+    this.outputDate = date;
 
-    // Update all output formats
-    this.unixSeconds = Math.floor(date.getTime() / 1000).toString();
-    this.unixMilliseconds = date.getTime().toString();
-    this.isoString = date.toISOString();
+    const unixSec = Math.floor(date.getTime() / 1000);
+    const unixMs = date.getTime();
 
-    // Format local time
-    const localOptions: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZoneName: 'short'
+    // Local datetime-local input always in user's local zone (HTML5 limitation).
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    const dateTimeLocal = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+
+    if (source !== 'datetime') this.dateTimeInput = dateTimeLocal;
+    if (source !== 'unix')     this.unixInput = String(unixSec);
+    if (source !== 'iso')      this.isoInput = date.toISOString();
+
+    const tzOpts: Intl.DateTimeFormatOptions = {
+      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      timeZone: this.selectedTz, timeZoneName: 'short'
     };
-    this.localTimeString = date.toLocaleString('en-US', localOptions);
-
-    // Format UTC time
-    const utcOptions: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'UTC',
-      timeZoneName: 'short'
+    const utcOpts: Intl.DateTimeFormatOptions = {
+      ...tzOpts, timeZone: 'UTC'
     };
-    this.utcTimeString = date.toLocaleString('en-US', utcOptions);
 
-    // Update datetime-local input
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    this.dateTimeInput = `${year}-${month}-${day}T${hours}:${minutes}`;
+    // Day of year, week of year (ISO).
+    const startOfYear = new Date(date.getFullYear(), 0, 0);
+    const diffMs = date.getTime() - startOfYear.getTime();
+    const dayOfYear = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const weekOfYear = this.getISOWeek(date);
 
-    // Update relative time
-    this.calculateRelativeTime(date);
-
-    // Sync inputs
-    this.unixInput = this.unixSeconds;
-    this.isoInput = this.isoString;
+    this.outputs = [
+      { key: 'unixSec',  label: 'Unix (seconds)',     value: String(unixSec), icon: 'bi-clock' },
+      { key: 'unixMs',   label: 'Unix (milliseconds)',value: String(unixMs),  icon: 'bi-clock' },
+      { key: 'iso',      label: 'ISO 8601 (UTC)',     value: date.toISOString(), icon: 'bi-code-slash' },
+      { key: 'tz',       label: `In ${this.selectedTz}`, value: date.toLocaleString('en-US', tzOpts), icon: 'bi-geo-alt' },
+      { key: 'utc',      label: 'UTC',                value: date.toLocaleString('en-US', utcOpts), icon: 'bi-globe' },
+      { key: 'rfc',      label: 'RFC 2822',           value: date.toUTCString(), icon: 'bi-envelope' },
+      { key: 'relative', label: 'Relative',           value: this.relativeTime(date), icon: 'bi-hourglass-split' },
+      { key: 'dow',      label: 'Day of week',        value: date.toLocaleDateString('en-US', { weekday: 'long', timeZone: this.selectedTz }), icon: 'bi-calendar-day' },
+      { key: 'doy',      label: 'Day of year',        value: `${dayOfYear} / ${this.isLeapYear(date.getFullYear()) ? 366 : 365}`, icon: 'bi-calendar3' },
+      { key: 'woy',      label: 'ISO week',           value: `W${String(weekOfYear).padStart(2, '0')}`, icon: 'bi-calendar-week' },
+    ];
   }
 
-  calculateRelativeTime(date: Date) {
+  private getISOWeek(date: Date): number {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  }
+
+  private isLeapYear(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  }
+
+  private relativeTime(date: Date): string {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffSeconds = Math.abs(Math.floor(diffMs / 1000));
-    
+    const seconds = Math.abs(Math.floor(diffMs / 1000));
     const isPast = diffMs > 0;
     const suffix = isPast ? 'ago' : 'from now';
 
-    if (diffSeconds < 60) {
-      this.relativeTime = `${diffSeconds} second${diffSeconds !== 1 ? 's' : ''} ${suffix}`;
-    } else if (diffSeconds < 3600) {
-      const minutes = Math.floor(diffSeconds / 60);
-      this.relativeTime = `${minutes} minute${minutes !== 1 ? 's' : ''} ${suffix}`;
-    } else if (diffSeconds < 86400) {
-      const hours = Math.floor(diffSeconds / 3600);
-      this.relativeTime = `${hours} hour${hours !== 1 ? 's' : ''} ${suffix}`;
-    } else if (diffSeconds < 2592000) {
-      const days = Math.floor(diffSeconds / 86400);
-      this.relativeTime = `${days} day${days !== 1 ? 's' : ''} ${suffix}`;
-    } else if (diffSeconds < 31536000) {
-      const months = Math.floor(diffSeconds / 2592000);
-      this.relativeTime = `${months} month${months !== 1 ? 's' : ''} ${suffix}`;
-    } else {
-      const years = Math.floor(diffSeconds / 31536000);
-      this.relativeTime = `${years} year${years !== 1 ? 's' : ''} ${suffix}`;
+    const units: { limit: number; div: number; name: string }[] = [
+      { limit: 60,       div: 1,        name: 'second' },
+      { limit: 3600,     div: 60,       name: 'minute' },
+      { limit: 86400,    div: 3600,     name: 'hour' },
+      { limit: 604800,   div: 86400,    name: 'day' },
+      { limit: 2629800,  div: 604800,   name: 'week' },
+      { limit: 31557600, div: 2629800,  name: 'month' },
+      { limit: Infinity, div: 31557600, name: 'year' },
+    ];
+
+    for (const u of units) {
+      if (seconds < u.limit) {
+        const v = Math.floor(seconds / u.div);
+        return `${v} ${u.name}${v !== 1 ? 's' : ''} ${suffix}`;
+      }
     }
+    return '';
   }
 
-  useCurrentTimestamp() {
-    const now = new Date();
-    this.updateFromDate(now);
-  }
-
-  clearOutputs() {
+  clearOutputs(): void {
     this.hasValidInput = false;
-    this.unixSeconds = '';
-    this.unixMilliseconds = '';
-    this.isoString = '';
-    this.localTimeString = '';
-    this.utcTimeString = '';
-    this.relativeTime = '';
+    this.outputs = [];
+    this.outputDate = null;
   }
 
-  clear() {
+  clear(): void {
     this.unixInput = '';
     this.dateTimeInput = '';
     this.isoInput = '';
     this.clearOutputs();
   }
 
-  async copyToClipboard(text: string): Promise<void> {
-    await this.utilityService.copyToClipboard(text);
+  copyToClipboard(text: string, label: string): void {
+    this.utilityService.copyToClipboard(text, { label: `${label} copied` });
   }
 }

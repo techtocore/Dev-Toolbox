@@ -1,78 +1,85 @@
-.output-section {
-    margin-bottom: 20px;
+.json-pane {
+  background: #f8f9fa;
+  margin: 0;
+  padding: 12px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  color: #212529;
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
-    label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .output-box {
-        position: relative;
-
-        .data-output {
-            margin: 0;
-            padding: 15px;
-            border-radius: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            color: black;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
-        input {
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-    }
+.signature {
+  display: block;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: #6c757d;
+  word-break: break-all;
 }
 
 .empty-state {
-    padding: 40px 20px;
-    text-align: center;
-    border-radius: 4px;
-    
-    i {
-        font-size: 3rem;
-        opacity: 0.3;
-        display: block;
-        margin-bottom: 10px;
-    }
+  padding: 60px 20px;
+  text-align: center;
+  color: #6c757d;
 
-    p {
-        color: #6c757d;
-        margin: 0;
-    }
+  i {
+    font-size: 3rem;
+    opacity: 0.35;
+    display: block;
+    margin-bottom: 12px;
+  }
 }
 
-.info-box {
-    padding: 10px 15px;
-    background-color: #e7f3ff;
-    border-left: 4px solid #2196F3;
+.claims-table {
+  font-size: 0.88rem;
+  color: #212529;
+
+  th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    vertical-align: top;
+  }
+
+  .claim-key {
+    background: #e7f5ff;
+    color: #015a82;
+    padding: 2px 8px;
     border-radius: 4px;
-    margin-top: 15px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
 
-    i {
-        margin-right: 5px;
-        color: #2196F3;
-    }
+  .claim-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    word-break: break-word;
+  }
 
-    small {
-        color: #555;
-    }
+  .claim-desc {
+    color: #6c757d;
+    font-size: 0.82rem;
+  }
+
+  .claim-success td { background-color: rgba(25, 135, 84, 0.06); }
+  .claim-danger  td { background-color: rgba(220, 53, 69, 0.07); }
+  .claim-warning td { background-color: rgba(255, 193, 7, 0.10); }
 }
 
 @media (max-width: 768px) {
-    .output-section .output-box .data-output {
-        font-size: 0.8rem;
-        padding: 10px;
-    }
-
-    .info-box {
-        font-size: 0.85rem;
-    }
+  .claims-table {
+    .claim-value { font-size: 0.75rem; }
+    .claim-desc  { font-size: 0.75rem; }
+  }
 }

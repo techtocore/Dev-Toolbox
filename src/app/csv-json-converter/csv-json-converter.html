@@ -3,7 +3,8 @@
     <div class="col-12">
       <h2 class="mb-3">CSV ⇄ JSON Converter</h2>
       <p class="text-muted mb-4">
-        Convert between CSV and JSON formats with customizable options.
+        Convert between CSV, TSV, and JSON. Drag a file in or paste raw text — auto-detects
+        format from the extension. Preview shows the first 10 rows.
       </p>
     </div>
   </div>
@@ -124,14 +125,26 @@
             <i class="bi" [class.bi-file-earmark-text]="mode === 'csv-to-json'" [class.bi-braces]="mode === 'json-to-csv'"></i>
             Input @if (mode === 'csv-to-json') { (CSV) } @else { (JSON) }
           </h5>
-          <button class="btn btn-sm btn-light" (click)="clearAll()">
-            <i class="bi bi-x-circle"></i>
-          </button>
+          <div class="d-flex align-items-center gap-2">
+            <small>{{ formatBytes(inputBytes) }}</small>
+            <button class="btn btn-sm btn-light" (click)="clearAll()" title="Clear all">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
         </div>
         <div class="card-body">
+          <div class="file-dropzone mb-3"
+               (dragover)="onDragOver($event)"
+               (drop)="onFileDropped($event)"
+               (click)="fileInput.click()">
+            <input #fileInput type="file" hidden accept=".csv,.json,.tsv,.txt" (change)="onFileSelected($event)">
+            <i class="bi bi-cloud-arrow-up me-2"></i>
+            <strong>Drop a .csv / .tsv / .json file</strong> or click to browse.
+          </div>
+
           <textarea
             class="form-control font-monospace mb-3"
-            rows="16"
+            rows="13"
             [(ngModel)]="inputText"
             [placeholder]="mode === 'csv-to-json' ? 'Paste CSV data here...' : 'Paste JSON data here...'"></textarea>
 
@@ -150,11 +163,15 @@
             <i class="bi" [class.bi-braces]="mode === 'csv-to-json'" [class.bi-file-earmark-text]="mode === 'json-to-csv'"></i>
             Output @if (mode === 'csv-to-json') { (JSON) } @else { (CSV) }
           </h5>
-          <div>
-            <button class="btn btn-sm btn-light me-2" (click)="copyOutput()" [disabled]="!outputText">
+          <div class="d-flex align-items-center gap-2">
+            @if (outputRowCount > 0) {
+              <span class="badge bg-dark">{{ outputRowCount.toLocaleString() }} rows</span>
+            }
+            <small>{{ formatBytes(outputBytes) }}</small>
+            <button class="btn btn-sm btn-light" (click)="copyOutput()" [disabled]="!outputText" title="Copy">
               <i class="bi bi-clipboard"></i>
             </button>
-            <button class="btn btn-sm btn-light" (click)="downloadOutput()" [disabled]="!outputText">
+            <button class="btn btn-sm btn-light" (click)="downloadOutput()" [disabled]="!outputText" title="Download">
               <i class="bi bi-download"></i>
             </button>
           </div>
@@ -175,38 +192,39 @@
     </div>
   </div>
 
-  <!-- Info -->
-  <div class="row">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-info text-white">
-          <h5 class="mb-0">Features</h5>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <h6>CSV to JSON</h6>
-              <ul class="small">
-                <li>Handles quoted fields with delimiters</li>
-                <li>Supports custom delimiters (comma, semicolon, tab, pipe)</li>
-                <li>Optional header row detection</li>
-                <li>Output as objects or arrays</li>
-                <li>Pretty print formatting</li>
-              </ul>
-            </div>
-            <div class="col-md-6">
-              <h6>JSON to CSV</h6>
-              <ul class="small">
-                <li>Converts JSON arrays to CSV format</li>
-                <li>Auto-detects headers from object keys</li>
-                <li>Handles nested objects (stringifies them)</li>
-                <li>Properly escapes special characters</li>
-                <li>Optional header row</li>
-              </ul>
+  <!-- Preview -->
+  @if (previewHeaders.length > 0) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>Preview (first 10 rows)</h5>
+            <small>{{ outputRowCount.toLocaleString() }} total rows × {{ previewHeaders.length }} columns</small>
+          </div>
+          <div class="card-body p-0">
+            <div class="preview-wrap">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    @for (h of previewHeaders; track h) {
+                      <th>{{ h }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of previewRows; track $index) {
+                    <tr>
+                      @for (cell of row; track $index) {
+                        <td>{{ cell }}</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>

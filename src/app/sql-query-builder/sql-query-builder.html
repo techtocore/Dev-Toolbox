@@ -26,6 +26,9 @@
             <button class="btn btn-outline-primary" (click)="loadExample('aggregate')">
               Aggregate Query
             </button>
+            <button class="btn btn-outline-primary" (click)="loadExample('paginated')">
+              Paginated SELECT
+            </button>
             <button class="btn btn-outline-secondary" (click)="clearAll()">
               Clear All
             </button>
@@ -112,10 +115,24 @@
               }
             </div>
 
+            <!-- DISTINCT -->
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="distinct" [(ngModel)]="distinct">
+              <label class="form-check-label" for="distinct">
+                <strong>DISTINCT</strong> — remove duplicate rows
+              </label>
+            </div>
+
             <!-- GROUP BY -->
             <div class="mb-3">
               <label class="form-label">GROUP BY</label>
               <input type="text" class="form-control" [(ngModel)]="groupBy" placeholder="category">
+            </div>
+
+            <!-- HAVING -->
+            <div class="mb-3">
+              <label class="form-label">HAVING <small class="text-muted">(filter on aggregates)</small></label>
+              <input type="text" class="form-control" [(ngModel)]="having" placeholder="COUNT(*) > 1">
             </div>
 
             <!-- ORDER BY -->
@@ -133,10 +150,16 @@
               </div>
             </div>
 
-            <!-- LIMIT -->
-            <div class="mb-3">
-              <label class="form-label">LIMIT</label>
-              <input type="number" class="form-control" [(ngModel)]="limit" placeholder="10">
+            <!-- LIMIT + OFFSET -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">LIMIT</label>
+                <input type="number" class="form-control" [(ngModel)]="limit" placeholder="10">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">OFFSET <small class="text-muted">(needs LIMIT)</small></label>
+                <input type="number" class="form-control" [(ngModel)]="offset" placeholder="0">
+              </div>
             </div>
           }
 

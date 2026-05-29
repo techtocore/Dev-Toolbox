@@ -1,1 +1,132 @@
-<app-two-way-io [context]="context" (processEvent)="encode($event)" (reverseEvent)="decode($event)"></app-two-way-io>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Base64 Encode / Decode</h2>
+      <p class="text-muted mb-4">
+        Encode text or binary files to Base64 (standard or URL-safe). Decode in either direction.
+        Files never leave your browser — encoding happens locally.
+      </p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="row mb-3 g-2 align-items-center">
+    <div class="col-md-auto">
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="b64-mode" id="b64-mode-text"
+          [checked]="mode === 'text'" (change)="setMode('text')">
+        <label class="btn btn-outline-primary" for="b64-mode-text">
+          <i class="bi bi-textarea-t me-1"></i>Text
+        </label>
+        <input type="radio" class="btn-check" name="b64-mode" id="b64-mode-file"
+          [checked]="mode === 'file'" (change)="setMode('file')">
+        <label class="btn btn-outline-primary" for="b64-mode-file">
+          <i class="bi bi-file-earmark me-1"></i>File
+        </label>
+      </div>
+    </div>
+
+    <div class="col-md-auto">
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="b64-variant" id="b64-variant-std"
+          [checked]="variant === 'standard'" (change)="setVariant('standard')">
+        <label class="btn btn-outline-secondary" for="b64-variant-std">Standard</label>
+        <input type="radio" class="btn-check" name="b64-variant" id="b64-variant-url"
+          [checked]="variant === 'urlsafe'" (change)="setVariant('urlsafe')">
+        <label class="btn btn-outline-secondary" for="b64-variant-url">URL-safe</label>
+      </div>
+    </div>
+
+    <div class="col text-end">
+      @if (mode === 'text') {
+        <button class="btn btn-sm btn-outline-secondary me-1" (click)="loadSample()">
+          <i class="bi bi-file-earmark-text me-1"></i>Sample text
+        </button>
+        <button class="btn btn-sm btn-outline-secondary me-1" (click)="loadSampleEncoded()">
+          <i class="bi bi-file-earmark-code me-1"></i>Sample b64
+        </button>
+      }
+      <button class="btn btn-sm btn-outline-secondary" (click)="clear()">
+        <i class="bi bi-x-circle me-1"></i>Clear
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="alert alert-danger mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row">
+    <!-- Decoded -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-textarea-t me-2"></i>Plain</h5>
+          @if (mode === 'text') {
+            <button class="btn btn-sm btn-light" (click)="copyDecoded()" [disabled]="!decoded" title="Copy">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          }
+        </div>
+        <div class="card-body">
+          @if (mode === 'text') {
+            <textarea class="form-control font-monospace" rows="12"
+              [(ngModel)]="decoded" (ngModelChange)="encode()"
+              placeholder="Type or paste plain text…"></textarea>
+          } @else {
+            <div class="file-dropzone"
+                 (dragover)="onDragOver($event)"
+                 (drop)="onFileDropped($event)"
+                 (click)="fileInput.click()">
+              <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+              <i class="bi bi-cloud-arrow-up file-icon"></i>
+              <p class="mb-1"><strong>Drop a file</strong> or click to browse.</p>
+              <small class="text-muted">Encoded locally. The file is never uploaded.</small>
+            </div>
+
+            @if (fileName) {
+              <div class="alert alert-info mt-3 mb-0">
+                <i class="bi bi-file-earmark me-2"></i>
+                <strong>{{ fileName }}</strong>
+                <span class="text-muted ms-2">{{ fileMime }} · {{ formatBytes(fileSize) }}</span>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Encoded -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-file-earmark-code me-2"></i>Base64</h5>
+          <div class="d-flex gap-2">
+            @if (mode === 'file' && encoded) {
+              <button class="btn btn-sm btn-light" (click)="copyDataUrl()" title="Copy data: URL">
+                <i class="bi bi-link-45deg me-1"></i>Data URL
+              </button>
+            }
+            <button class="btn btn-sm btn-light" (click)="swap()" [disabled]="!encoded || mode === 'file'" title="Swap">
+              <i class="bi bi-arrow-left-right"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="copyEncoded()" [disabled]="!encoded" title="Copy">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" rows="12"
+            [(ngModel)]="encoded" (ngModelChange)="decode()"
+            [placeholder]="mode === 'file' ? 'Encoded output appears here…' : 'Paste Base64 to decode…'"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,87 +1,168 @@
-<div>
-  <br />
-  <h2>Diff Checker</h2>
-  <br />
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-lg-5 col-md-12">
-        <h5>Original Text</h5>
-        <textarea class="data-input bg-light-custom" [(ngModel)]="text1"
-          (ngModelChange)="compareTexts()"
-        placeholder="Paste original text here..."></textarea>
-      </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Diff Checker</h2>
+      <p class="text-muted mb-4">
+        Compare two texts with line-level diff + inline word-level highlighting. Toggle between unified and side-by-side views.
+      </p>
+    </div>
+  </div>
 
-      <div class="col-lg-2 col-md-12 text-center button-column">
-        <button class="btn custom-btn" (click)="compareTexts()">
-          <i class="bi bi-arrow-left-right"></i>
-          Compare
-        </button>
-        <button class="btn custom-btn" (click)="clear()">
-          Clear
-        </button>
-      </div>
+  <!-- Controls -->
+  <div class="row mb-3 g-2 align-items-center">
+    <div class="col-md-auto">
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="viewMode" id="view-unified"
+          [checked]="viewMode === 'unified'" (change)="setViewMode('unified')">
+        <label class="btn btn-outline-primary" for="view-unified">
+          <i class="bi bi-list me-1"></i>Unified
+        </label>
 
-      <div class="col-lg-5 col-md-12">
-        <h5>Modified Text</h5>
-        <textarea class="data-input bg-light-custom" [(ngModel)]="text2"
-          (ngModelChange)="compareTexts()"
-        placeholder="Paste modified text here..."></textarea>
+        <input type="radio" class="btn-check" name="viewMode" id="view-side"
+          [checked]="viewMode === 'side-by-side'" (change)="setViewMode('side-by-side')">
+        <label class="btn btn-outline-primary" for="view-side">
+          <i class="bi bi-layout-split me-1"></i>Side-by-side
+        </label>
       </div>
     </div>
 
-    <div class="row margin-top-20px">
-      <div class="col-12">
-        <div class="stats-section">
-          <h5>Difference Statistics</h5>
-          <div class="stats-grid">
-            <div class="stat-item added">
-              <i class="bi bi-plus-circle"></i>
-              <span class="stat-label">Added:</span>
-              <span class="stat-value">{{ addedCount }}</span>
-            </div>
-            <div class="stat-item removed">
-              <i class="bi bi-dash-circle"></i>
-              <span class="stat-label">Removed:</span>
-              <span class="stat-value">{{ removedCount }}</span>
-            </div>
-            <div class="stat-item unchanged">
-              <i class="bi bi-check-circle"></i>
-              <span class="stat-label">Unchanged:</span>
-              <span class="stat-value">{{ unchangedCount }}</span>
-            </div>
-          </div>
-        </div>
+    <div class="col-md-auto">
+      <div class="form-check form-check-inline">
+        <input type="checkbox" class="form-check-input" id="ignoreWs"
+          [(ngModel)]="ignoreWhitespace" (change)="compareTexts()">
+        <label class="form-check-label" for="ignoreWs">Ignore whitespace</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input type="checkbox" class="form-check-input" id="ignoreCase"
+          [(ngModel)]="ignoreCase" (change)="compareTexts()">
+        <label class="form-check-label" for="ignoreCase">Ignore case</label>
+      </div>
+    </div>
 
-        @if (diffLines.length > 0) {
-          <div class="diff-section">
-            <div class="diff-header">
-              <h5>Comparison Result</h5>
-              <button class="btn btn-sm custom-btn" (click)="copyDiff()">
-                <i class="bi bi-clipboard"></i> Copy Diff
-              </button>
+    <div class="col text-end">
+      <button class="btn btn-sm btn-outline-secondary me-1" (click)="loadSample()">
+        <i class="bi bi-file-earmark-text me-1"></i>Sample
+      </button>
+      <button class="btn btn-sm btn-outline-secondary me-1" (click)="swap()" [disabled]="!text1 && !text2" title="Swap">
+        <i class="bi bi-arrow-left-right"></i>
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="clear()" [disabled]="!text1 && !text2">
+        <i class="bi bi-x-circle me-1"></i>Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Inputs -->
+  <div class="row">
+    <div class="col-lg-6 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+          <h6 class="mb-0"><i class="bi bi-file-earmark-minus me-2"></i>Original</h6>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" rows="10" [(ngModel)]="text1"
+            (ngModelChange)="compareTexts()" placeholder="Paste original text…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Modified</h6>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" rows="10" [(ngModel)]="text2"
+            (ngModelChange)="compareTexts()" placeholder="Paste modified text…"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="stats-strip">
+        <span class="stat-pill stat-added"><i class="bi bi-plus-circle"></i> {{ addedCount }} added</span>
+        <span class="stat-pill stat-removed"><i class="bi bi-dash-circle"></i> {{ removedCount }} removed</span>
+        <span class="stat-pill stat-unchanged"><i class="bi bi-check-circle"></i> {{ unchangedCount }} unchanged</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-file-diff me-2"></i>Diff</h5>
+          <button class="btn btn-sm btn-light" (click)="copyDiff()" [disabled]="diffLines.length === 0">
+            <i class="bi bi-clipboard me-1"></i>Copy diff
+          </button>
+        </div>
+        <div class="card-body p-0">
+          @if (diffLines.length === 0) {
+            <div class="empty-state">
+              <i class="bi bi-file-diff"></i>
+              <p>Enter text in both fields to see the diff.</p>
             </div>
+          } @else if (viewMode === 'unified') {
             <div class="diff-output">
-              @for (line of diffLines; track line) {
-                <div
-                  [class]="'diff-line ' + line.type">
+              @for (line of diffLines; track $index) {
+                <div [class]="'diff-line ' + line.type">
                   <span class="line-numbers">
                     <span class="line-num">{{ line.lineNumber1 || '' }}</span>
                     <span class="line-num">{{ line.lineNumber2 || '' }}</span>
                   </span>
                   <span class="line-prefix">{{ line.type === 'added' ? '+' : line.type === 'removed' ? '-' : ' ' }}</span>
-                  <span class="line-content">{{ line.content || '(empty line)' }}</span>
+                  <span class="line-content">
+                    @if (line.segments) {
+                      @for (seg of line.segments; track $index) {
+                        <span [class]="'seg-' + seg.kind">{{ seg.text }}</span>
+                      }
+                    } @else {
+                      {{ line.content || ' ' }}
+                    }
+                  </span>
                 </div>
               }
             </div>
-          </div>
-        }
-
-        @if (diffLines.length === 0) {
-          <div class="empty-state bg-light-custom">
-            <i class="bi bi-file-diff"></i>
-            <p>Enter text in both fields to compare</p>
-          </div>
-        }
+          } @else {
+            <div class="diff-output side-by-side">
+              @for (row of sideBySideRows; track $index) {
+                <div class="diff-row">
+                  <div [class]="'diff-cell ' + (row.left?.type || 'empty')">
+                    <span class="line-num">{{ row.left?.lineNumber1 || '' }}</span>
+                    <span class="line-content">
+                      @if (row.left) {
+                        @if (row.left.segments) {
+                          @for (seg of row.left.segments; track $index) {
+                            <span [class]="'seg-' + seg.kind">{{ seg.text }}</span>
+                          }
+                        } @else {
+                          {{ row.left.content || ' ' }}
+                        }
+                      }
+                    </span>
+                  </div>
+                  <div [class]="'diff-cell ' + (row.right?.type || 'empty')">
+                    <span class="line-num">{{ row.right?.lineNumber2 || '' }}</span>
+                    <span class="line-content">
+                      @if (row.right) {
+                        @if (row.right.segments) {
+                          @for (seg of row.right.segments; track $index) {
+                            <span [class]="'seg-' + seg.kind">{{ seg.text }}</span>
+                          }
+                        } @else {
+                          {{ row.right.content || ' ' }}
+                        }
+                      }
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
     </div>
   </div>

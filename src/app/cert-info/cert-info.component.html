@@ -1,27 +1,213 @@
-<div>
-    <br />
-    <h2> {{ context['title'] }} </h2>
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <textarea class="data-input bg-light-custom" [(ngModel)]="encodedCert"> </textarea>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-12 text-center">
-                <br>
-                <button class="btn custom-btn btn-margin" (click)="decode()">
-                    Cert Info
-                    <i class="bi" [ngClass]="{'bi-arrow-right': !isMobile, 'bi-arrow-down': isMobile}"></i>
-                </button>
-                <br>
-            </div>
-            <div class="col-lg-5 col-md-4 col-sm-12">
-                <pre class="data-input bg-light-custom">{{certInfo | json }}</pre>
-                <button class="btn custom-btn float-right" (click)="saveAsFile()">
-                    Save
-                    <i class="bi bi-download padding-left-5px"></i>
-                </button>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">{{ context.title }}</h2>
+      <p class="text-muted mb-4">
+        Parse a PEM-encoded X.509 certificate to view its subject, issuer, validity, fingerprints,
+        public key, SANs, and key usage. Everything runs locally.
+      </p>
     </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>PEM Certificate</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="loadSample()" title="Load sample">
+              <i class="bi bi-file-earmark-text me-1"></i>Sample
+            </button>
+            <button class="btn btn-sm btn-light" (click)="clear()" title="Clear">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" rows="16"
+            [(ngModel)]="encodedCert"
+            placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"></textarea>
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            @if (certInfo.pemBytes) {
+              <small class="text-muted">{{ certInfo.pemBytes }} bytes</small>
+            }
+            <button class="btn btn-primary ms-auto" (click)="decode()">
+              <i class="bi bi-arrow-right-circle me-1"></i>Parse certificate
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      @if (certInfo.error) {
+        <div class="card shadow-sm border-danger">
+          <div class="card-header bg-danger text-white">
+            <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>{{ certInfo.message || 'Parse error' }}</h6>
+          </div>
+          <div class="card-body">
+            <code>{{ certInfo.error }}</code>
+          </div>
+        </div>
+      } @else if (!certInfo.serialNumber) {
+        <div class="card shadow-sm h-100">
+          <div class="card-body empty-state">
+            <i class="bi bi-file-earmark-lock"></i>
+            <p>Paste a PEM certificate and click Parse to see details.</p>
+          </div>
+        </div>
+      } @else {
+        <!-- Validity banner -->
+        <div class="card shadow-sm mb-3">
+          <div class="card-body validity-banner" [class.expired]="isExpired" [class.warning]="isExpiringSoon" [class.notyet]="isNotYetValid" [class.valid]="!isExpired && !isExpiringSoon && !isNotYetValid">
+            @if (isExpired) {
+              <i class="bi bi-x-circle"></i>
+              <strong>Expired</strong>
+              <span>{{ certInfo.validTill?.toLocaleString() }}</span>
+            } @else if (isNotYetValid) {
+              <i class="bi bi-hourglass-split"></i>
+              <strong>Not yet valid</strong>
+              <span>becomes active {{ certInfo.validFrom?.toLocaleString() }}</span>
+            } @else if (isExpiringSoon) {
+              <i class="bi bi-exclamation-triangle"></i>
+              <strong>Expiring soon</strong>
+              <span>{{ daysRemaining }} day{{ daysRemaining === 1 ? '' : 's' }} remaining</span>
+            } @else {
+              <i class="bi bi-check-circle"></i>
+              <strong>Valid</strong>
+              <span>{{ daysRemaining }} day{{ daysRemaining === 1 ? '' : 's' }} remaining</span>
+            }
+          </div>
+        </div>
+
+        <!-- Identity -->
+        <div class="card shadow-sm mb-3">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>Subject / Issuer</h6>
+          </div>
+          <div class="card-body p-0">
+            <table class="table cert-table mb-0">
+              <tbody>
+                <tr>
+                  <th>Subject</th>
+                  <td>
+                    @for (entry of certInfo.subject | keyvalue; track entry.key) {
+                      <div><strong>{{ entry.key }}:</strong> {{ entry.value }}</div>
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <th>Issuer</th>
+                  <td>
+                    @for (entry of certInfo.issuer | keyvalue; track entry.key) {
+                      <div><strong>{{ entry.key }}:</strong> {{ entry.value }}</div>
+                    }
+                  </td>
+                </tr>
+                @if (certInfo.subjectAltNames?.length) {
+                  <tr>
+                    <th>Subject Alt Names</th>
+                    <td>
+                      @for (san of certInfo.subjectAltNames; track san) {
+                        <span class="badge bg-light text-dark me-1 mb-1">{{ san }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Crypto details -->
+        <div class="card shadow-sm mb-3">
+          <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-key me-2"></i>Cryptography</h6>
+            <button class="btn btn-sm btn-light" (click)="saveAsFile()" title="Download full info">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <table class="table cert-table mb-0">
+              <tbody>
+                <tr>
+                  <th>Serial Number</th>
+                  <td>
+                    <code class="break">{{ certInfo.serialNumber }}</code>
+                    <button class="btn btn-sm btn-link p-0 ms-2" (click)="copyField(certInfo.serialNumber, 'Serial number')">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Valid From</th>
+                  <td>{{ certInfo.validFrom?.toLocaleString() }}</td>
+                </tr>
+                <tr>
+                  <th>Valid Until</th>
+                  <td>{{ certInfo.validTill?.toLocaleString() }}</td>
+                </tr>
+                @if (certInfo.publicKeyType) {
+                  <tr>
+                    <th>Public Key</th>
+                    <td>{{ certInfo.publicKeyType }}@if (certInfo.publicKeyBits) {, {{ certInfo.publicKeyBits }} bits}</td>
+                  </tr>
+                }
+                @if (certInfo.signatureOid) {
+                  <tr>
+                    <th>Signature Algorithm</th>
+                    <td><code>{{ certInfo.signatureOid }}</code></td>
+                  </tr>
+                }
+                @if (certInfo.isCa !== undefined) {
+                  <tr>
+                    <th>CA</th>
+                    <td>{{ certInfo.isCa ? 'Yes (Certificate Authority)' : 'No (end-entity)' }}</td>
+                  </tr>
+                }
+                @if (certInfo.keyUsage?.length) {
+                  <tr>
+                    <th>Key Usage</th>
+                    <td>
+                      @for (u of certInfo.keyUsage; track u) {
+                        <span class="badge bg-light text-dark me-1 mb-1">{{ u }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+                @if (certInfo.extKeyUsage?.length) {
+                  <tr>
+                    <th>Extended Key Usage</th>
+                    <td>
+                      @for (u of certInfo.extKeyUsage; track u) {
+                        <span class="badge bg-light text-dark me-1 mb-1">{{ u }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+                <tr>
+                  <th>SHA-1 Fingerprint</th>
+                  <td>
+                    <code class="break">{{ certInfo.thumbprintSha1 }}</code>
+                    <button class="btn btn-sm btn-link p-0 ms-2" (click)="copyField(certInfo.thumbprintSha1, 'SHA-1')">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <th>SHA-256 Fingerprint</th>
+                  <td>
+                    <code class="break">{{ certInfo.thumbprintSha256 }}</code>
+                    <button class="btn btn-sm btn-link p-0 ms-2" (click)="copyField(certInfo.thumbprintSha256, 'SHA-256')">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
 </div>

@@ -8,7 +8,14 @@
     <span class="navbar-toggler-icon"></span>
   </button>
   <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
-  <ul class="navbar-nav px-3">
+  <ul class="navbar-nav px-3 d-flex flex-row align-items-center">
+    <li class="nav-item text-nowrap d-none d-md-block me-3">
+      <button class="cmdk-hint" (click)="paletteService.open()" title="Search tools (Ctrl + K)">
+        <i class="bi bi-search"></i>
+        <span>Search tools</span>
+        <kbd>Ctrl</kbd><kbd>K</kbd>
+      </button>
+    </li>
     <li class="nav-item text-nowrap">
       <a class="nav-link" href="#" [ngClass]="{'padding-right-75px': isMobile}">
         <i class="bi-github" role="img" aria-label="GitHub"></i>
@@ -31,3 +38,4 @@
 </footer>
 
 <app-toast-outlet></app-toast-outlet>
+<app-command-palette></app-command-palette>

@@ -149,14 +149,13 @@ export class NumericSummaryComponent implements OnInit {
       this.max = arr[arr.length - 1];
       this.range = this.max - this.min;
 
-      // Median
+      // Median, Q1, Q3 — use type-7 linear interpolation directly (matches
+      // NumPy `np.percentile`, R default, Excel QUARTILE.INC). The previous
+      // half-split-around-median approach gave degenerate results for small
+      // arrays like [1, 2, 3] (Q1 became min, Q3 became max).
       this.median = this.getPercentile(arr, 0.5);
-
-      // Quartiles
-      const lowerHalf = arr.filter(a => a < this.median);
-      const upperHalf = arr.filter(a => a > this.median);
-      this.q1 = this.getPercentile(lowerHalf.length > 0 ? lowerHalf : arr, 0.5);
-      this.q3 = this.getPercentile(upperHalf.length > 0 ? upperHalf : arr, 0.5);
+      this.q1 = this.getPercentile(arr, 0.25);
+      this.q3 = this.getPercentile(arr, 0.75);
       this.iqr = this.q3 - this.q1;
 
       // Mode
@@ -170,8 +169,10 @@ export class NumericSummaryComponent implements OnInit {
       const variancePop = arr.reduce((acc, val) => acc + Math.pow(val - this.mean, 2), 0) / this.count;
       this.stdDevPop = Math.sqrt(variancePop);
 
-      // Coefficient of Variation
-      this.coefficientOfVariation = (this.stdDev / Math.abs(this.mean)) * 100;
+      // Coefficient of Variation — undefined when mean is 0 (avoids NaN in UI).
+      this.coefficientOfVariation = this.mean === 0
+        ? 0
+        : (this.stdDev / Math.abs(this.mean)) * 100;
 
       // Skewness and Kurtosis (only if enough data)
       if (this.count >= 3) {
@@ -207,5 +208,69 @@ export class NumericSummaryComponent implements OnInit {
   formatNumber(num: number, decimals: number = 2): string {
     if (num === undefined || num === null || isNaN(num)) return 'N/A';
     return num.toFixed(decimals);
+  }
+
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.inputTxt = await file.text();
+    input.value = '';
+    this.process();
+  }
+
+  async onFileDropped(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    this.inputTxt = await file.text();
+    this.process();
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  private currentStats(): { key: string; label: string; value: number | string }[] {
+    return [
+      { key: 'count', label: 'Count', value: this.count },
+      { key: 'sum', label: 'Sum', value: this.sum },
+      { key: 'mean', label: 'Mean', value: this.mean },
+      { key: 'median', label: 'Median', value: this.median },
+      { key: 'mode', label: 'Mode', value: this.mode },
+      { key: 'min', label: 'Min', value: this.min },
+      { key: 'max', label: 'Max', value: this.max },
+      { key: 'range', label: 'Range', value: this.range },
+      { key: 'q1', label: 'Q1', value: this.q1 },
+      { key: 'q3', label: 'Q3', value: this.q3 },
+      { key: 'iqr', label: 'IQR', value: this.iqr },
+      { key: 'variance', label: 'Variance (sample)', value: this.variance },
+      { key: 'stdDev', label: 'Std Dev (sample)', value: this.stdDev },
+      { key: 'stdDevPop', label: 'Std Dev (population)', value: this.stdDevPop },
+      { key: 'cv', label: 'Coefficient of variation %', value: this.coefficientOfVariation },
+      { key: 'skewness', label: 'Skewness', value: this.skewness },
+      { key: 'kurtosis', label: 'Excess kurtosis', value: this.kurtosis },
+      { key: 'outliers', label: 'Outlier count', value: this.outlierCount },
+    ];
+  }
+
+  exportJson(): void {
+    if (!this.hasResults) return;
+    const payload = {
+      stats: this.currentStats().reduce((acc, s) => {
+        acc[s.key] = s.value;
+        return acc;
+      }, {} as Record<string, any>),
+      outliers: this.outliers,
+      generatedAt: new Date().toISOString()
+    };
+    this.utilityService.downloadFile(JSON.stringify(payload, null, 2), 'application/json', 'stats.json');
+  }
+
+  exportCsv(): void {
+    if (!this.hasResults) return;
+    const rows = this.currentStats().map(s => `${s.label},${s.value}`);
+    rows.push(`Outliers,"${this.outliers.join(', ')}"`);
+    this.utilityService.downloadFile('Statistic,Value\n' + rows.join('\n'), 'text/csv', 'stats.csv');
   }
 }
