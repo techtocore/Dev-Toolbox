@@ -99,12 +99,21 @@ export class ColorConverter implements OnInit {
   }
 
   hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    if (!hex) return null;
+    const clean = hex.trim().replace(/^#/, '');
+    // 6-digit form (RRGGBB).
+    const m6 = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(clean);
+    if (m6) return { r: parseInt(m6[1], 16), g: parseInt(m6[2], 16), b: parseInt(m6[3], 16) };
+    // 3-digit shorthand (#abc → #aabbcc).
+    const m3 = /^([a-f\d])([a-f\d])([a-f\d])$/i.exec(clean);
+    if (m3) {
+      return {
+        r: parseInt(m3[1] + m3[1], 16),
+        g: parseInt(m3[2] + m3[2], 16),
+        b: parseInt(m3[3] + m3[3], 16)
+      };
+    }
+    return null;
   }
 
   rgbToHex(r: number, g: number, b: number): string {
@@ -197,10 +206,27 @@ export class ColorConverter implements OnInit {
     return 0.2126 * norm(rgb.r) + 0.7152 * norm(rgb.g) + 0.0722 * norm(rgb.b);
   }
 
-  get contrast(): ContrastResult | null {
+  // The "compare against" textbox is bound directly to a string; while the
+  // user is mid-typing (`#abc12` etc.) `hexToRgb` returns null. We must not
+  // collapse the whole card in that case — show an "invalid" placeholder so
+  // the section stays in the layout.
+  get contrastInputValid(): boolean {
+    return !!this.hexToRgb(this.contrastAgainst);
+  }
+
+  get contrast(): ContrastResult {
     const fg = this.hexToRgb(this.hexInput);
     const bg = this.hexToRgb(this.contrastAgainst);
-    if (!fg || !bg) return null;
+    if (!fg || !bg) {
+      return {
+        ratio: 0,
+        ratioLabel: '—',
+        aaLarge: false,
+        aaNormal: false,
+        aaaLarge: false,
+        aaaNormal: false
+      };
+    }
     const L1 = Math.max(this.relativeLuminance(fg), this.relativeLuminance(bg));
     const L2 = Math.min(this.relativeLuminance(fg), this.relativeLuminance(bg));
     const ratio = (L1 + 0.05) / (L2 + 0.05);

@@ -8,6 +8,11 @@
   gap: 10px;
   pointer-events: none;
   max-width: min(380px, calc(100vw - 40px));
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
 }
 
 .toast-item {
@@ -80,9 +85,15 @@
 
 @media (max-width: 576px) {
   .toast-stack {
-    bottom: 60px;
+    bottom: 55px;
     right: 10px;
     left: 10px;
     max-width: none;
+    max-height: calc(100vh - 100px);
+  }
+
+  .toast-item {
+    font-size: 0.82rem;
+    padding: 9px 12px;
   }
 }

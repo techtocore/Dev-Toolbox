@@ -35,8 +35,11 @@ footer {
 }
 
 .navbar .navbar-toggler {
-  top: 0.25rem;
-  right: 1rem;
+  // Hamburger now flows inline at the start of the navbar (order-first) on
+  // mobile, so the GitHub icon on the far right no longer overlaps it.
+  margin-left: 0.75rem;
+  border: none;
+  padding: 0.5rem 0.6rem;
 }
 
 .navbar .form-control {

@@ -68,7 +68,7 @@
         <br>
           <div class="categories-grid">
             @for (category of categories; track category) {
-              <div class="category-card" (click)="navigateToFirstTool(category)">
+              <div class="category-card" data-sidebar-trigger (click)="navigateToFirstTool(category)">
                 <div class="category-icon">
                   <i [class]="getCategoryIcon(category)"></i>
                 </div>

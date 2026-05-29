@@ -122,6 +122,44 @@ body {
   background-color: #eef2f7 !important;
 }
 
+// ---- Global mobile polish ----------------------------------------------------
+// Applied across every tool. Keeps individual components from each having to
+// re-declare the same responsive rules.
+@media (max-width: 575.98px) {
+
+  // Card headers that mix a title + button cluster — let the buttons drop
+  // to a second row cleanly instead of crashing into the title.
+  .card-header.d-flex {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  // Icon-only small buttons fall below the 40-44px touch-target guideline.
+  // Bump them up so they're tappable. Buttons with text are already large
+  // enough thanks to their padding, so we only widen when content is just an
+  // icon (<i> as the only child).
+  .btn-sm > i.bi:only-child {
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Long monospace content (JSON output, JWT signatures, hash hex strings)
+  // must wrap rather than force horizontal scroll out of its container.
+  pre, code, .font-monospace {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  // Stat cards and grid layouts often look chunky at full title size on
+  // narrow phones. Trim heading sizes globally.
+  h2 { font-size: 1.4rem; }
+  h5 { font-size: 1.05rem; }
+  h6 { font-size: 0.95rem; }
+}
+
 .bg-dark-custom {
   background-color: #343a40 !important;
 }

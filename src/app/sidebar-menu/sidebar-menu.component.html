@@ -1,3 +1,5 @@
+<div class="sidebar-backdrop d-md-none" [class.is-visible]="isOpen()" (click)="onBackdropClick()"></div>
+
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light-custom sidebar collapse">
     <div class="position-sticky pt-3">
         <app-json-tree #jsonTreeComponent [data]="menuData" (leafSelected)="onCustomTreeSelection($event)"></app-json-tree>

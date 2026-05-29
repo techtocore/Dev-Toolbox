@@ -67,37 +67,13 @@ export class HomeComponent implements OnInit {
   }
 
   navigateToFirstTool(category: string): void {
-    // Check if we're on mobile (sidebar is collapsed)
-    const sidebarElement = document.getElementById('sidebarMenu');
-    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-
-    if (isMobile && sidebarElement && !sidebarElement.classList.contains('show')) {
-      // First, open the sidebar by adding the 'show' class
-      sidebarElement.classList.add('show');
-
-      // Also update the toggler button state
-      const togglerButton = document.querySelector('.navbar-toggler');
-      if (togglerButton) {
-        togglerButton.classList.remove('collapsed');
-        togglerButton.setAttribute('aria-expanded', 'true');
-      }
-
-      // Wait for sidebar to open, then expand the category
-      setTimeout(() => {
-        const event = new CustomEvent('expandCategory', {
-          detail: { category },
-          bubbles: true
-        });
-        window.dispatchEvent(event);
-      }, SIDEBAR_ANIMATION_DELAY); // Allow time for animation
-    } else {
-      // Desktop or sidebar already open: just expand the category
-      const event = new CustomEvent('expandCategory', {
-        detail: { category },
-        bubbles: true
-      });
-      window.dispatchEvent(event);
-    }
+    // The sidebar component listens for this event and handles both opening
+    // itself (on mobile) and expanding the matching category in its tree.
+    const event = new CustomEvent('expandCategory', {
+      detail: { category },
+      bubbles: true
+    });
+    window.dispatchEvent(event);
   }
 
   getCategoryIcon(category: string): string {

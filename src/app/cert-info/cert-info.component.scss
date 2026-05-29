@@ -61,3 +61,22 @@
     }
   }
 }
+
+// Below the sm breakpoint, the fixed key column eats too much room. Stack
+// each row label-above-value so long fingerprints and SANs can use the full
+// width.
+@media (max-width: 575.98px) {
+  .cert-table {
+    th, td { display: block; width: 100%; padding: 6px 12px; }
+    th {
+      background: transparent;
+      color: #6c757d;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding-bottom: 2px;
+    }
+    tr td:last-child { padding-bottom: 12px; border-bottom: 1px solid #f1f3f5; }
+    tr:last-child td:last-child { border-bottom: none; }
+  }
+}

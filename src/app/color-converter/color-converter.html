@@ -101,40 +101,44 @@
   </div>
 
   <!-- Contrast Checker -->
-  @if (contrast) {
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-circle-half me-2"></i>WCAG Contrast Checker</h5>
-            <button class="btn btn-sm btn-light" (click)="swapContrast()" title="Swap colors">
-              <i class="bi bi-arrow-left-right"></i>
-            </button>
-          </div>
-          <div class="card-body">
-            <div class="row g-3 align-items-center">
-              <div class="col-md-4">
-                <label class="form-label small mb-1">Compare against</label>
-                <div class="input-group">
-                  <input type="color" class="form-control form-control-color" [(ngModel)]="contrastAgainst">
-                  <input type="text" class="form-control font-monospace" [(ngModel)]="contrastAgainst">
-                </div>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-circle-half me-2"></i>WCAG Contrast Checker</h5>
+          <button class="btn btn-sm btn-light" (click)="swapContrast()" title="Swap colors">
+            <i class="bi bi-arrow-left-right"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+              <label class="form-label small mb-1">Compare against</label>
+              <div class="input-group">
+                <input type="color" class="form-control form-control-color" [(ngModel)]="contrastAgainst">
+                <input type="text" class="form-control font-monospace" [(ngModel)]="contrastAgainst"
+                  [class.is-invalid]="!contrastInputValid">
               </div>
-              <div class="col-md-4">
-                <div class="contrast-sample" [style.color]="hexInput" [style.background-color]="contrastAgainst">
-                  <div class="big">Aa</div>
-                  <div class="small">The quick brown fox</div>
-                </div>
+              @if (!contrastInputValid) {
+                <small class="text-danger d-block mt-1">
+                  <i class="bi bi-exclamation-circle me-1"></i>Enter a 3- or 6-digit hex like #fff or #abc123
+                </small>
+              }
+            </div>
+            <div class="col-md-4">
+              <div class="contrast-sample" [style.color]="hexInput" [style.background-color]="contrastInputValid ? contrastAgainst : '#ffffff'">
+                <div class="big">Aa</div>
+                <div class="small">The quick brown fox</div>
               </div>
-              <div class="col-md-4">
-                <div class="contrast-score">
-                  <div class="ratio">{{ contrast.ratioLabel }}</div>
-                  <div class="badges">
-                    <span class="badge" [class.bg-success]="contrast.aaNormal" [class.bg-secondary]="!contrast.aaNormal">AA normal</span>
-                    <span class="badge" [class.bg-success]="contrast.aaLarge"  [class.bg-secondary]="!contrast.aaLarge">AA large</span>
-                    <span class="badge" [class.bg-success]="contrast.aaaNormal" [class.bg-secondary]="!contrast.aaaNormal">AAA normal</span>
-                    <span class="badge" [class.bg-success]="contrast.aaaLarge"  [class.bg-secondary]="!contrast.aaaLarge">AAA large</span>
-                  </div>
+            </div>
+            <div class="col-md-4">
+              <div class="contrast-score">
+                <div class="ratio">{{ contrast.ratioLabel }}</div>
+                <div class="badges">
+                  <span class="badge" [class.bg-success]="contrast.aaNormal" [class.bg-secondary]="!contrast.aaNormal">AA normal</span>
+                  <span class="badge" [class.bg-success]="contrast.aaLarge"  [class.bg-secondary]="!contrast.aaLarge">AA large</span>
+                  <span class="badge" [class.bg-success]="contrast.aaaNormal" [class.bg-secondary]="!contrast.aaaNormal">AAA normal</span>
+                  <span class="badge" [class.bg-success]="contrast.aaaLarge"  [class.bg-secondary]="!contrast.aaaLarge">AAA large</span>
                 </div>
               </div>
             </div>
@@ -142,7 +146,7 @@
         </div>
       </div>
     </div>
-  }
+  </div>
 
   <!-- CSS snippet -->
   <div class="row">

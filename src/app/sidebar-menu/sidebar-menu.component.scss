@@ -66,6 +66,26 @@
     padding-bottom: 60px;
     max-height: calc(100vh - 48px);
     background-color: #eef2f7;
+    width: min(80vw, 320px);
+    z-index: 102; // above the backdrop
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Dimmed backdrop shown only when the drawer is open on mobile. Tapping it
+// dismisses the menu (wired up via the component).
+.sidebar-backdrop {
+  position: fixed;
+  inset: 48px 0 0 0;     // sits below the sticky navbar
+  background: rgba(15, 23, 42, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  z-index: 101;
+
+  &.is-visible {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 

@@ -166,3 +166,28 @@
     }
   }
 }
+
+@media (max-width: 575.98px) {
+  .diff-line {
+    .line-numbers {
+      min-width: 48px;
+      padding: 0 4px;
+      gap: 4px;
+      font-size: 0.7rem;
+      .line-num { width: 18px; }
+    }
+    .line-prefix { padding: 0 4px; }
+    .line-content { font-size: 0.78rem; }
+  }
+
+  .diff-output.side-by-side .diff-cell .line-num {
+    width: 22px;
+    padding-right: 4px;
+    font-size: 0.7rem;
+  }
+
+  .stats-strip .stat-pill {
+    font-size: 0.78rem;
+    padding: 3px 9px;
+  }
+}

@@ -114,3 +114,13 @@
   }
   .contrast-sample .big { font-size: 1.4rem; }
 }
+
+@media (max-width: 575.98px) {
+  // RGB/HSL number-input rows: keep them inline but smaller so all four cells
+  // (R, G, B, copy button) fit on one row at 360px width without breaking.
+  .row.g-2 > .col input.form-control { padding: 6px 6px; font-size: 0.85rem; }
+  .row.g-2 > .col-auto .btn { padding: 6px 8px; }
+
+  .contrast-score .ratio { font-size: 1.25rem; }
+  .contrast-score .badges .badge { font-size: 0.65rem; padding: 2px 5px; }
+}
