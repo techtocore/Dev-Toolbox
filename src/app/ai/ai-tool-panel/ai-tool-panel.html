@@ -1,0 +1,115 @@
+<!-- Unsupported hardware gate -->
+@if (isUnsupported) {
+  <div class="card shadow-sm border-danger mb-4">
+    <div class="card-header bg-danger text-white d-flex align-items-center">
+      <i class="bi bi-gpu-card me-2"></i>
+      <h5 class="mb-0">Local AI can't run on this device</h5>
+    </div>
+    <div class="card-body">
+      <p class="mb-2">{{ llm.error()?.message }}</p>
+      <p class="text-muted small mb-0">
+        Local AI needs WebGPU. Try the latest Chrome or Edge on desktop, or Safari 18+.
+        Everything else in Dev Toolbox works without it.
+      </p>
+    </div>
+  </div>
+} @else {
+  <!-- Model manager (hidden once ready to keep the tool focused) -->
+  @if (!isReady) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-7">
+            <label class="form-label fw-semibold">Model</label>
+            <select
+              class="form-select"
+              [(ngModel)]="selectedModelId"
+              (ngModelChange)="onModelChange()"
+              [disabled]="isLoading">
+              @for (m of models; track m.id) {
+                <option [value]="m.id">{{ m.label }} · {{ m.downloadSize }}</option>
+              }
+            </select>
+            @if (selectedModel) {
+              <small class="text-muted d-block mt-1">{{ selectedModel.note }}</small>
+            }
+          </div>
+          <div class="col-md-5 d-flex gap-2">
+            <button class="btn btn-primary" (click)="load()" [disabled]="isLoading">
+              @if (isLoading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                {{ downloadedSelected ? 'Loading…' : 'Downloading…' }}
+              } @else if (downloadedSelected) {
+                <i class="bi bi-lightning-charge me-1"></i>Start (cached)
+              } @else {
+                <i class="bi bi-download me-1"></i>Download &amp; start
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Hardware-fit advisory -->
+        @if (!isLoading && fit()?.warning) {
+          <div class="alert alert-warning mt-3 mb-0 d-flex">
+            <i class="bi bi-exclamation-triangle me-2 mt-1"></i>
+            <span>{{ fit()?.warning }}</span>
+          </div>
+        }
+
+        <!-- Download / compile progress -->
+        @if (isLoading) {
+          <div class="mt-3">
+            <div
+              class="progress"
+              role="progressbar"
+              [attr.aria-valuenow]="progressPercent"
+              aria-valuemin="0"
+              aria-valuemax="100">
+              <div
+                class="progress-bar progress-bar-striped progress-bar-animated"
+                [style.width.%]="progressPercent">
+                {{ progressPercent }}%
+              </div>
+            </div>
+            <small class="text-muted d-block mt-1">{{ llm.progressText() }}</small>
+            @if (!downloadedSelected) {
+              <small class="text-muted d-block">
+                First load downloads {{ selectedModel?.downloadSize }} of model weights
+                (one-time, cached in your browser). It then runs fully offline.
+              </small>
+            }
+          </div>
+        }
+
+        <!-- Error with retry -->
+        @if (hasError && llm.error()) {
+          <div class="alert alert-danger mt-3 mb-0">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <span>{{ llm.error()?.message }}</span>
+              <button class="btn btn-sm btn-outline-danger flex-shrink-0" (click)="load()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Retry
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Ready: tool body + a compact status strip -->
+  @if (isReady) {
+    <div class="d-flex align-items-center gap-2 mb-3 small text-muted">
+      <span class="badge text-bg-success">
+        <i class="bi bi-check-circle me-1"></i>{{ selectedModel?.label }}
+      </span>
+      <span>running locally · nothing leaves your browser</span>
+      <button
+        class="btn btn-sm btn-link text-decoration-none ms-auto"
+        (click)="llm.unload()"
+        title="Unload model and free memory">
+        <i class="bi bi-power me-1"></i>Unload
+      </button>
+    </div>
+    <ng-content></ng-content>
+  }
+}

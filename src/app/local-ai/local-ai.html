@@ -1,0 +1,82 @@
+<div class="container py-4">
+  <div class="mb-4">
+    <h2 class="mb-1"><i class="bi bi-cpu me-2"></i>Local AI</h2>
+    <p class="text-muted mb-0">
+      A small language model running entirely in your browser. No accounts, no servers —
+      your conversation never leaves this device.
+    </p>
+  </div>
+
+  <app-ai-tool-panel>
+    <!-- Conversation (rendered only when a model is ready) -->
+    <div class="card shadow-sm chat-card">
+      <div class="card-body chat-scroll">
+        @if (messages.length === 0) {
+          <div class="text-center text-muted py-5">
+            <i class="bi bi-chat-dots fs-1 d-block mb-2"></i>
+            Ask anything to get started.
+          </div>
+        }
+
+        @for (m of messages; track $index) {
+          <div class="chat-row" [class.user]="m.role === 'user'">
+            <div class="chat-bubble" [class.bubble-user]="m.role === 'user'">
+              @if (m.role === 'assistant' && m.thinking) {
+                <details class="thinking mb-2">
+                  <summary><i class="bi bi-lightbulb me-1"></i>Reasoning</summary>
+                  <pre class="thinking-body">{{ m.thinking }}</pre>
+                </details>
+              }
+              @if (m.html) {
+                <div class="markdown" [innerHTML]="m.html"></div>
+              } @else {
+                <div class="markdown streaming">{{ m.text }}<span class="cursor"></span></div>
+              }
+            </div>
+          </div>
+        }
+        <div #scrollAnchor></div>
+      </div>
+
+      <!-- Composer -->
+      <div class="card-footer bg-white">
+        <div class="d-flex align-items-end gap-2">
+          <textarea
+            class="form-control"
+            rows="2"
+            placeholder="Send a message…  (Enter to send, Shift+Enter for newline)"
+            [(ngModel)]="prompt"
+            (keydown)="onKeydown($event)"
+            [disabled]="generating"></textarea>
+          @if (generating) {
+            <button class="btn btn-outline-danger" (click)="stop()" title="Stop">
+              <i class="bi bi-stop-fill"></i>
+            </button>
+          } @else {
+            <button class="btn btn-primary" (click)="send()" [disabled]="!canSend" title="Send">
+              <i class="bi bi-send"></i>
+            </button>
+          }
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <div class="form-check form-switch mb-0">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="thinkingToggle"
+              [(ngModel)]="thinking"
+              [disabled]="generating" />
+            <label class="form-check-label small text-muted" for="thinkingToggle">
+              Show reasoning
+            </label>
+          </div>
+          @if (messages.length > 0) {
+            <button class="btn btn-sm btn-link text-decoration-none text-muted" (click)="clear()">
+              <i class="bi bi-trash me-1"></i>Clear chat
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </app-ai-tool-panel>
+</div>

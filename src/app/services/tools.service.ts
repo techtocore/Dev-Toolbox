@@ -216,6 +216,14 @@ export class ToolsService {
       category: 'AI & Machine Learning',
       icon: 'bi-lightbulb',
       keywords: ['prompt', 'optimize', 'improve', 'llm', 'ai', 'best', 'practices']
+    },
+    {
+      name: 'Local AI (Chat)',
+      description: 'Run a small language model fully in your browser via WebGPU — no server, fully private',
+      route: '/localAi',
+      category: 'AI & Machine Learning',
+      icon: 'bi-cpu',
+      keywords: ['local', 'ai', 'llm', 'webgpu', 'offline', 'private', 'on-device', 'slm', 'qwen', 'chat', 'webllm']
     }
   ];
 

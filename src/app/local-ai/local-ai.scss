@@ -1,0 +1,87 @@
+:host {
+  display: block;
+}
+
+.chat-card {
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+
+.chat-scroll {
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.chat-row {
+  display: flex;
+  margin-bottom: 0.75rem;
+
+  &.user {
+    justify-content: flex-end;
+  }
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.9rem;
+  background: var(--bs-tertiary-bg, #f1f3f5);
+
+  &.bubble-user {
+    background: var(--bs-primary, #0d6efd);
+    color: #fff;
+  }
+}
+
+.markdown {
+  word-wrap: break-word;
+
+  :last-child {
+    margin-bottom: 0;
+  }
+
+  pre {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 0.6rem;
+    border-radius: 0.4rem;
+    overflow-x: auto;
+  }
+
+  code {
+    font-size: 0.875em;
+  }
+}
+
+.streaming .cursor {
+  display: inline-block;
+  width: 0.5rem;
+  height: 1rem;
+  margin-left: 2px;
+  background: currentColor;
+  vertical-align: text-bottom;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.thinking {
+  font-size: 0.85rem;
+
+  summary {
+    cursor: pointer;
+    color: var(--bs-secondary-color, #6c757d);
+  }
+
+  .thinking-body {
+    white-space: pre-wrap;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 0.5rem;
+    border-radius: 0.4rem;
+    margin-top: 0.4rem;
+  }
+}

@@ -47,7 +47,11 @@ const routes: Routes = [
   { path: 'csvJsonConverter', component: CsvJsonConverter },
   { path: 'sqlQueryBuilder', component: SqlQueryBuilder },
   { path: 'dataProfiler', component: DataProfiler },
-  { path: 'ipInfo', component: IpInfo }
+  { path: 'ipInfo', component: IpInfo },
+  {
+    path: 'localAi',
+    loadComponent: () => import('./local-ai/local-ai').then((m) => m.LocalAi),
+  },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
