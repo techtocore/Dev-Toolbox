@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+.not-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.nf-card {
+  max-width: 32rem;
+}
+
+.nf-code {
+  font-size: clamp(4rem, 18vw, 9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  background: linear-gradient(135deg, var(--bs-primary, #0d6efd), #6610f2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.nf-icon {
+  display: block;
+  font-size: 2.5rem;
+  color: var(--bs-secondary-color, #6c757d);
+  margin: 0.5rem 0 1rem;
+}
+
+.nf-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.nf-subtitle {
+  color: var(--bs-secondary-color, #6c757d);
+  margin-bottom: 1.75rem;
+}

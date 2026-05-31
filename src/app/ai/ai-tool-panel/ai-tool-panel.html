@@ -30,11 +30,8 @@
                 <option [value]="m.id">{{ m.label }} · {{ m.downloadSize }}</option>
               }
             </select>
-            @if (selectedModel) {
-              <small class="text-muted d-block mt-1">{{ selectedModel.note }}</small>
-            }
           </div>
-          <div class="col-md-5 d-flex gap-2">
+          <div class="col-md-5 d-grid">
             <button class="btn btn-primary" (click)="load()" [disabled]="isLoading">
               @if (isLoading) {
                 <span class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -47,6 +44,9 @@
             </button>
           </div>
         </div>
+        @if (selectedModel) {
+          <small class="text-muted d-block mt-2">{{ selectedModel.note }}</small>
+        }
 
         <!-- Hardware-fit advisory -->
         @if (!isLoading && fit()?.warning) {
@@ -98,18 +98,123 @@
 
   <!-- Ready: tool body + a compact status strip -->
   @if (isReady) {
-    <div class="d-flex align-items-center gap-2 mb-3 small text-muted">
+    <div class="d-flex align-items-center gap-2 mb-3 small text-muted flex-wrap">
       <span class="badge text-bg-success">
         <i class="bi bi-check-circle me-1"></i>{{ selectedModel?.label }}
       </span>
       <span>running locally · nothing leaves your browser</span>
-      <button
-        class="btn btn-sm btn-link text-decoration-none ms-auto"
-        (click)="llm.unload()"
-        title="Unload model and free memory">
-        <i class="bi bi-power me-1"></i>Unload
-      </button>
+      <div class="ms-auto d-flex gap-1">
+        <button
+          class="btn btn-sm btn-link text-decoration-none"
+          [class.fw-semibold]="showSettings"
+          (click)="toggleSettings()"
+          title="Tune how the model responds">
+          <i class="bi bi-sliders me-1"></i>Tuning
+        </button>
+        <button
+          class="btn btn-sm btn-link text-decoration-none"
+          (click)="llm.unload()"
+          title="Unload model and free memory">
+          <i class="bi bi-power me-1"></i>Unload
+        </button>
+      </div>
     </div>
+
+    <!-- Tuning drawer -->
+    @if (showSettings) {
+      <div class="card shadow-sm border-0 settings-card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0"><i class="bi bi-sliders2 me-2"></i>Model tuning</h6>
+            <button class="btn btn-sm btn-outline-secondary" (click)="resetSettings()">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
+          </div>
+
+          <!-- System prompt -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold mb-1">System prompt</label>
+            <textarea
+              class="form-control form-control-sm"
+              rows="3"
+              placeholder="Give the model a persona or rules, e.g. “You are a terse senior engineer. Answer in bullet points.”"
+              [ngModel]="llm.settings().system"
+              (ngModelChange)="setSetting('system', $event)"></textarea>
+            <small class="text-muted">Applied to every conversation unless a tool sets its own.</small>
+          </div>
+
+          <div class="row g-3">
+            <!-- Temperature -->
+            <div class="col-md-6">
+              <label class="form-label d-flex justify-content-between mb-1">
+                <span class="fw-semibold">Temperature</span>
+                <span class="badge text-bg-light">{{ llm.settings().temperature.toFixed(2) }}</span>
+              </label>
+              <input
+                type="range"
+                class="form-range"
+                min="0"
+                max="2"
+                step="0.05"
+                [ngModel]="llm.settings().temperature"
+                (ngModelChange)="setSetting('temperature', +$event)" />
+              <small class="text-muted">Lower = focused & deterministic · Higher = creative</small>
+            </div>
+
+            <!-- Top-p -->
+            <div class="col-md-6">
+              <label class="form-label d-flex justify-content-between mb-1">
+                <span class="fw-semibold">Top-p</span>
+                <span class="badge text-bg-light">{{ llm.settings().topP.toFixed(2) }}</span>
+              </label>
+              <input
+                type="range"
+                class="form-range"
+                min="0.1"
+                max="1"
+                step="0.05"
+                [ngModel]="llm.settings().topP"
+                (ngModelChange)="setSetting('topP', +$event)" />
+              <small class="text-muted">Nucleus sampling cutoff</small>
+            </div>
+
+            <!-- Max tokens -->
+            <div class="col-md-6">
+              <label class="form-label d-flex justify-content-between mb-1">
+                <span class="fw-semibold">Max response tokens</span>
+                <span class="badge text-bg-light">{{ llm.settings().maxTokens }}</span>
+              </label>
+              <input
+                type="range"
+                class="form-range"
+                min="128"
+                max="4096"
+                step="128"
+                [ngModel]="llm.settings().maxTokens"
+                (ngModelChange)="setSetting('maxTokens', +$event)" />
+              <small class="text-muted">Caps how long each answer can be</small>
+            </div>
+
+            <!-- Reasoning -->
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch mt-2">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="panelThinking"
+                  [ngModel]="llm.settings().thinking"
+                  (ngModelChange)="setSetting('thinking', $event)" />
+                <label class="form-check-label fw-semibold" for="panelThinking">
+                  Show reasoning
+                </label>
+                <small class="text-muted d-block">Expose the model's chain-of-thought</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
     <ng-content></ng-content>
   }
 }

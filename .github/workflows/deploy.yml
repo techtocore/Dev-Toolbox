@@ -35,6 +35,11 @@ jobs:
       - name: Build Angular app
         run: npm run build -- --base-href /Dev-Toolbox/
 
+      - name: Add SPA 404 fallback
+        # GitHub Pages serves 404.html for unknown paths. Copying index.html
+        # lets the Angular router handle deep links and show our 404 page.
+        run: cp ./dist/dev-toolbox/browser/index.html ./dist/dev-toolbox/browser/404.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

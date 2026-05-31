@@ -56,6 +56,34 @@ export interface LlmResult {
   modelId: string;
 }
 
+/**
+ * User-tunable generation defaults, surfaced by the shared settings UI and
+ * applied to every call unless a tool overrides them per-request. Persisted
+ * across sessions so a user's preferences stick.
+ */
+export interface LlmSettings {
+  /** System instruction prepended to conversations. Empty = none. */
+  system: string;
+  /** Sampling temperature (0–2). */
+  temperature: number;
+  /** Nucleus sampling cutoff (0–1). */
+  topP: number;
+  /** Max tokens to generate per response. */
+  maxTokens: number;
+  /** Expose the model's chain-of-thought reasoning. */
+  thinking: boolean;
+}
+
+/** Built-in, sensible defaults for a fresh install. */
+export const DEFAULT_SETTINGS: LlmSettings = {
+  system: '',
+  temperature: 0.7,
+  topP: 0.95,
+  maxTokens: 1024,
+  thinking: false,
+};
+
+
 /** Categories of failure, so the UI can respond appropriately. */
 export type LlmErrorKind =
   | 'unsupported' // no WebGPU / hardware too limited

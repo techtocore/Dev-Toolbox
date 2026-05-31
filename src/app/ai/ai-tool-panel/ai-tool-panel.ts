@@ -39,6 +39,8 @@ export class AiToolPanel implements OnInit {
   readonly models = LOCAL_MODELS;
   selectedModelId = DEFAULT_MODEL_ID;
   readonly fit = signal<ModelFit | null>(null);
+  /** Whether the tuning drawer is expanded. */
+  showSettings = false;
 
   constructor(
     public llm: LlmService,
@@ -108,5 +110,21 @@ export class AiToolPanel implements OnInit {
     } catch {
       // Error is reflected via llm.error(); the template shows retry.
     }
+  }
+
+  toggleSettings(): void {
+    this.showSettings = !this.showSettings;
+  }
+
+  /** Patch a single setting (two-way bound from the tuning UI). */
+  setSetting<K extends keyof import('../llm.types').LlmSettings>(
+    key: K,
+    value: import('../llm.types').LlmSettings[K],
+  ): void {
+    this.llm.updateSettings({ [key]: value });
+  }
+
+  resetSettings(): void {
+    this.llm.resetSettings();
   }
 }

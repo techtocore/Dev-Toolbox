@@ -33,7 +33,6 @@ export class LocalAi {
 
   messages: DisplayMessage[] = [];
   prompt = '';
-  thinking = false;
   generating = false;
   private abort?: AbortController;
 
@@ -62,7 +61,6 @@ export class LocalAi {
 
     try {
       const result = await this.llm.chat(history, {
-        thinking: this.thinking,
         signal: this.abort.signal,
         onToken: (_delta, full) => {
           const split = splitThinking(full);

@@ -52,6 +52,10 @@ const routes: Routes = [
     path: 'localAi',
     loadComponent: () => import('./local-ai/local-ai').then((m) => m.LocalAi),
   },
+  {
+    path: '**',
+    loadComponent: () => import('./not-found/not-found').then((m) => m.NotFound),
+  },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

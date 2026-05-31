@@ -61,6 +61,29 @@
       </div>
     </div>
 
+    <!-- Featured Tools Section -->
+    <div class="featured-section">
+      <div class="section-container">
+        <h2 class="section-title white-text">Featured Tools</h2>
+        <p class="section-subtitle">A taste of what Dev Toolbox can do — from on-device AI to everyday essentials</p>
+        <div class="featured-grid">
+          @for (tool of featuredTools; track tool.route) {
+            <div class="featured-card" (click)="selectTool(tool)">
+              <div class="featured-icon">
+                <i [class]="tool.icon || 'bi-tools'"></i>
+              </div>
+              <div class="featured-body">
+                <h3 class="featured-name">{{ tool.name }}</h3>
+                <p class="featured-description">{{ tool.description }}</p>
+                <span class="featured-category">{{ tool.category }}</span>
+              </div>
+              <i class="bi bi-arrow-right featured-arrow"></i>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
     <!-- Categories Section -->
     <div class="categories-section">
       <div class="section-container">

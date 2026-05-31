@@ -16,6 +16,7 @@ const SIDEBAR_ANIMATION_DELAY = 350;
 export class HomeComponent implements OnInit {
   searchQuery = '';
   filteredTools: Tool[] = [];
+  featuredTools: Tool[] = [];
   showResults = false;
   categories: string[] = [];
   totalTools = 0;
@@ -28,6 +29,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.filteredTools = this.toolsService.getAllTools();
+    this.featuredTools = this.toolsService.getFeaturedTools();
     this.categories = this.toolsService.getCategories();
     this.totalTools = this.filteredTools.length;
   }
@@ -78,10 +80,11 @@ export class HomeComponent implements OnInit {
 
   getCategoryIcon(category: string): string {
     const icons: { [key: string]: string } = {
-      'Cryptography': 'bi-shield-lock',
-      'Text Processing': 'bi-file-text',
+      'AI & Machine Learning': 'bi-cpu',
       'Parsing & Formatting': 'bi-code-slash',
-      'Statistics': 'bi-graph-up',
+      'Encoding & Security': 'bi-shield-lock',
+      'Data Analysis': 'bi-bar-chart-line',
+      'Text Processing': 'bi-file-text',
       'Development Tools': 'bi-wrench'
     };
     return icons[category] || 'bi-tools';

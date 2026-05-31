@@ -4,14 +4,17 @@ import { CapabilitiesService } from './capabilities.service';
 import { DEFAULT_MODEL_ID } from './model-registry';
 import {
   ChatMessage,
+  DEFAULT_SETTINGS,
   GenerationOptions,
   LlmError,
   LlmResult,
+  LlmSettings,
   LlmStatus,
 } from './llm.types';
 import { splitThinking } from './output-parser';
 
 const DOWNLOADED_KEY = 'ai:downloadedModels';
+const SETTINGS_KEY = 'ai:settings';
 
 /**
  * LlmService — the single, reusable entry point for in-browser AI.
@@ -34,6 +37,8 @@ export class LlmService {
   readonly error = signal<LlmError | null>(null);
   /** Model ids known to be fully downloaded & cached in this browser. */
   readonly downloadedModels = signal<string[]>(this.readDownloaded());
+  /** User-tunable generation defaults, persisted across sessions. */
+  readonly settings = signal<LlmSettings>(this.readSettings());
 
   readonly isReady = computed(
     () => this.status() === 'ready' || this.status() === 'generating',
@@ -160,16 +165,29 @@ export class LlmService {
     this.zone.run(() => this.status.set('generating'));
     let full = '';
 
+    // Fall back to the user's saved settings for any unspecified option.
+    const s = this.settings();
+    const temperature = options.temperature ?? s.temperature;
+    const topP = options.topP ?? s.topP;
+    const maxTokens = options.maxTokens ?? s.maxTokens;
+    const enableThinking = options.thinking ?? s.thinking;
+
+    // Inject the configured system prompt if the caller didn't supply one.
+    let outgoing = messages;
+    if (s.system.trim() && !messages.some((m) => m.role === 'system')) {
+      outgoing = [{ role: 'system', content: s.system.trim() }, ...messages];
+    }
+
     try {
       const request: Record<string, unknown> = {
         stream: true,
-        messages,
-        temperature: options.temperature ?? 0.7,
+        messages: outgoing,
+        temperature,
+        top_p: topP,
         // Reasoning off by default for fast, focused tool output.
-        enable_thinking: options.thinking ?? false,
+        enable_thinking: enableThinking,
       };
-      if (options.maxTokens) request['max_tokens'] = options.maxTokens;
-      if (options.topP != null) request['top_p'] = options.topP;
+      if (maxTokens) request['max_tokens'] = maxTokens;
       if (options.json) request['response_format'] = { type: 'json_object' };
 
       const stream = await this.engine.chat.completions.create(request as never);
@@ -259,6 +277,39 @@ export class LlmService {
     this.zone.run(() => this.downloadedModels.set(next));
     try {
       localStorage.setItem(DOWNLOADED_KEY, JSON.stringify(next));
+    } catch {
+      /* storage may be unavailable (private mode); non-fatal */
+    }
+  }
+
+  // ---- Settings persistence -------------------------------------------------
+  /** Merge a partial settings patch and persist. */
+  updateSettings(patch: Partial<LlmSettings>): void {
+    const next = { ...this.settings(), ...patch };
+    this.settings.set(next);
+    this.persistSettings(next);
+  }
+
+  /** Restore built-in defaults. */
+  resetSettings(): void {
+    this.settings.set({ ...DEFAULT_SETTINGS });
+    this.persistSettings(DEFAULT_SETTINGS);
+  }
+
+  private readSettings(): LlmSettings {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      return raw
+        ? { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<LlmSettings>) }
+        : { ...DEFAULT_SETTINGS };
+    } catch {
+      return { ...DEFAULT_SETTINGS };
+    }
+  }
+
+  private persistSettings(settings: LlmSettings): void {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     } catch {
       /* storage may be unavailable (private mode); non-fatal */
     }

@@ -7,6 +7,8 @@ export interface Tool {
   category: string;
   icon?: string;
   keywords?: string[];
+  /** Highlighted on the homepage as a flagship/representative tool. */
+  featured?: boolean;
 }
 
 /**
@@ -41,27 +43,84 @@ export interface Tool {
 })
 export class ToolsService {
   private tools: Tool[] = [
+    // ── AI & Machine Learning ───────────────────────────────────────────────
+    // Led by the flagship on-device LLM — the app's standout capability.
+    {
+      name: 'Local AI (Chat)',
+      description: 'Run a small language model fully in your browser via WebGPU — no server, fully private',
+      route: '/localAi',
+      category: 'AI & Machine Learning',
+      icon: 'bi-cpu',
+      keywords: ['local', 'ai', 'llm', 'webgpu', 'offline', 'private', 'on-device', 'slm', 'qwen', 'chat', 'webllm'],
+      featured: true
+    },
+    {
+      name: 'Token Counter & Cost Estimator',
+      description: 'Estimate token counts and API costs for different LLM providers',
+      route: '/tokenCounter',
+      category: 'AI & Machine Learning',
+      icon: 'bi-calculator',
+      keywords: ['token', 'cost', 'llm', 'openai', 'anthropic', 'pricing', 'estimate']
+    },
+    {
+      name: 'Prompt Optimizer',
+      description: 'Analyze and improve your LLM prompts using best practices',
+      route: '/promptOptimizer',
+      category: 'AI & Machine Learning',
+      icon: 'bi-lightbulb',
+      keywords: ['prompt', 'optimize', 'improve', 'llm', 'ai', 'best', 'practices']
+    },
+    {
+      name: 'Prompt Template Builder',
+      description: 'Create reusable prompt templates with variables for LLM interactions',
+      route: '/promptTemplate',
+      category: 'AI & Machine Learning',
+      icon: 'bi-chat-left-text',
+      keywords: ['prompt', 'template', 'llm', 'ai', 'gpt', 'claude', 'variables']
+    },
+    {
+      name: 'JSON Schema Generator',
+      description: 'Generate JSON schemas to constrain LLM outputs and function calling',
+      route: '/jsonSchemaGenerator',
+      category: 'AI & Machine Learning',
+      icon: 'bi-diagram-3',
+      keywords: ['json', 'schema', 'llm', 'function', 'calling', 'structured', 'output']
+    },
+
+    // ── Parsing & Formatting ────────────────────────────────────────────────
+    {
+      name: 'JSON Formatter',
+      description: 'Validate and pretty-print JSON with syntax highlighting',
+      route: '/jsonFormatter',
+      category: 'Parsing & Formatting',
+      icon: 'bi-braces',
+      keywords: ['json', 'format', 'pretty', 'validate', 'parse'],
+      featured: true
+    },
+    {
+      name: 'Timestamp Converter',
+      description: 'Convert between Unix timestamps, ISO 8601, and human-readable formats',
+      route: '/timestampConverter',
+      category: 'Parsing & Formatting',
+      icon: 'bi-clock-history',
+      keywords: ['timestamp', 'unix', 'epoch', 'date', 'time', 'iso', 'convert']
+    },
+
+    // ── Encoding & Security ─────────────────────────────────────────────────
     {
       name: 'Base64 Encode/Decode',
       description: 'Convert text to/from Base64 encoding',
       route: '/base64',
-      category: 'Cryptography',
+      category: 'Encoding & Security',
       icon: 'bi-file-earmark-binary',
-      keywords: ['base64', 'encode', 'decode', 'encoding']
-    },
-    {
-      name: 'URL Encode/Decode',
-      description: 'Encode/decode URL parameters and strings',
-      route: '/urlEncode',
-      category: 'Cryptography',
-      icon: 'bi-link-45deg',
-      keywords: ['url', 'encode', 'decode', 'uri', 'percent']
+      keywords: ['base64', 'encode', 'decode', 'encoding'],
+      featured: true
     },
     {
       name: 'Hash Generator',
       description: 'Generate MD5, SHA-1, SHA-256, and SHA-512 hashes',
       route: '/hashGenerator',
-      category: 'Cryptography',
+      category: 'Encoding & Security',
       icon: 'bi-hash',
       keywords: ['hash', 'md5', 'sha', 'sha1', 'sha256', 'sha512', 'checksum']
     },
@@ -69,17 +128,71 @@ export class ToolsService {
       name: 'JWT Decoder',
       description: 'Decode and inspect JWT tokens',
       route: '/jwtDecoder',
-      category: 'Cryptography',
+      category: 'Encoding & Security',
       icon: 'bi-shield-lock',
       keywords: ['jwt', 'json', 'web', 'token', 'decode', 'bearer']
+    },
+    {
+      name: 'URL Encode/Decode',
+      description: 'Encode/decode URL parameters and strings',
+      route: '/urlEncode',
+      category: 'Encoding & Security',
+      icon: 'bi-link-45deg',
+      keywords: ['url', 'encode', 'decode', 'uri', 'percent']
     },
     {
       name: 'Certificate Information',
       description: 'Extract and view X.509 certificate details',
       route: '/certinfo',
-      category: 'Cryptography',
+      category: 'Encoding & Security',
       icon: 'bi-award',
       keywords: ['certificate', 'cert', 'x509', 'ssl', 'tls', 'pem']
+    },
+
+    // ── Data Analysis ───────────────────────────────────────────────────────
+    {
+      name: 'CSV/JSON Converter',
+      description: 'Convert between CSV and JSON formats with customizable options',
+      route: '/csvJsonConverter',
+      category: 'Data Analysis',
+      icon: 'bi-arrow-left-right',
+      keywords: ['csv', 'json', 'convert', 'data', 'transform', 'format'],
+      featured: true
+    },
+    {
+      name: 'Data Profiler',
+      description: 'Analyze data quality, statistics, and patterns in your datasets',
+      route: '/dataProfiler',
+      category: 'Data Analysis',
+      icon: 'bi-bar-chart-line',
+      keywords: ['data', 'profile', 'quality', 'statistics', 'analysis', 'insights']
+    },
+    {
+      name: 'SQL Query Builder',
+      description: 'Build SQL queries visually without writing code',
+      route: '/sqlQueryBuilder',
+      category: 'Data Analysis',
+      icon: 'bi-database',
+      keywords: ['sql', 'query', 'builder', 'database', 'select', 'where', 'join']
+    },
+    {
+      name: 'Numeric Summary',
+      description: 'Statistical analysis of numeric data',
+      route: '/numericSummary',
+      category: 'Data Analysis',
+      icon: 'bi-graph-up',
+      keywords: ['statistics', 'numeric', 'mean', 'median', 'mode', 'stats', 'analysis']
+    },
+
+    // ── Text Processing ─────────────────────────────────────────────────────
+    {
+      name: 'Diff Checker',
+      description: 'Compare two text blocks with side-by-side difference highlighting',
+      route: '/diffChecker',
+      category: 'Text Processing',
+      icon: 'bi-file-diff',
+      keywords: ['diff', 'compare', 'difference', 'text', 'compare'],
+      featured: true
     },
     {
       name: 'Markdown Editor',
@@ -97,61 +210,16 @@ export class ToolsService {
       icon: 'bi-calculator',
       keywords: ['word', 'count', 'character', 'text', 'statistics']
     },
+
+    // ── Development Tools ───────────────────────────────────────────────────
     {
-      name: 'Diff Checker',
-      description: 'Compare two text blocks with side-by-side difference highlighting',
-      route: '/diffChecker',
-      category: 'Text Processing',
-      icon: 'bi-file-diff',
-      keywords: ['diff', 'compare', 'difference', 'text', 'compare']
-    },
-    {
-      name: 'JSON Formatter',
-      description: 'Validate and pretty-print JSON with syntax highlighting',
-      route: '/jsonFormatter',
-      category: 'Parsing & Formatting',
-      icon: 'bi-braces',
-      keywords: ['json', 'format', 'pretty', 'validate', 'parse']
-    },
-    {
-      name: 'Timestamp Converter',
-      description: 'Convert between Unix timestamps, ISO 8601, and human-readable formats',
-      route: '/timestampConverter',
-      category: 'Parsing & Formatting',
-      icon: 'bi-clock-history',
-      keywords: ['timestamp', 'unix', 'epoch', 'date', 'time', 'iso', 'convert']
-    },
-    {
-      name: 'Numeric Summary',
-      description: 'Statistical analysis of numeric data',
-      route: '/numericSummary',
-      category: 'Data Analysis',
-      icon: 'bi-graph-up',
-      keywords: ['statistics', 'numeric', 'mean', 'median', 'mode', 'stats', 'analysis']
-    },
-    {
-      name: 'CSV/JSON Converter',
-      description: 'Convert between CSV and JSON formats with customizable options',
-      route: '/csvJsonConverter',
-      category: 'Data Analysis',
-      icon: 'bi-arrow-left-right',
-      keywords: ['csv', 'json', 'convert', 'data', 'transform', 'format']
-    },
-    {
-      name: 'SQL Query Builder',
-      description: 'Build SQL queries visually without writing code',
-      route: '/sqlQueryBuilder',
-      category: 'Data Analysis',
-      icon: 'bi-database',
-      keywords: ['sql', 'query', 'builder', 'database', 'select', 'where', 'join']
-    },
-    {
-      name: 'Data Profiler',
-      description: 'Analyze data quality, statistics, and patterns in your datasets',
-      route: '/dataProfiler',
-      category: 'Data Analysis',
-      icon: 'bi-bar-chart-line',
-      keywords: ['data', 'profile', 'quality', 'statistics', 'analysis', 'insights']
+      name: 'Regex Tester',
+      description: 'Test regular expressions with live matching and highlighting',
+      route: '/regexTester',
+      category: 'Development Tools',
+      icon: 'bi-regex',
+      keywords: ['regex', 'regexp', 'regular', 'expression', 'pattern', 'match', 'test'],
+      featured: true
     },
     {
       name: 'UUID Generator',
@@ -170,60 +238,12 @@ export class ToolsService {
       keywords: ['color', 'hex', 'rgb', 'hsl', 'convert', 'picker']
     },
     {
-      name: 'Regex Tester',
-      description: 'Test regular expressions with live matching and highlighting',
-      route: '/regexTester',
-      category: 'Development Tools',
-      icon: 'bi-regex',
-      keywords: ['regex', 'regexp', 'regular', 'expression', 'pattern', 'match', 'test']
-    },
-    {
       name: 'IP & Browser Info',
       description: 'View your public IP, ISP, location, timezone, and browser details',
       route: '/ipInfo',
       category: 'Development Tools',
       icon: 'bi-globe',
       keywords: ['ip', 'address', 'isp', 'hostname', 'location', 'timezone', 'browser', 'user agent', 'geolocation', 'network']
-    },
-    {
-      name: 'Prompt Template Builder',
-      description: 'Create reusable prompt templates with variables for LLM interactions',
-      route: '/promptTemplate',
-      category: 'AI & Machine Learning',
-      icon: 'bi-chat-left-text',
-      keywords: ['prompt', 'template', 'llm', 'ai', 'gpt', 'claude', 'variables']
-    },
-    {
-      name: 'Token Counter & Cost Estimator',
-      description: 'Estimate token counts and API costs for different LLM providers',
-      route: '/tokenCounter',
-      category: 'AI & Machine Learning',
-      icon: 'bi-calculator',
-      keywords: ['token', 'cost', 'llm', 'openai', 'anthropic', 'pricing', 'estimate']
-    },
-    {
-      name: 'JSON Schema Generator',
-      description: 'Generate JSON schemas to constrain LLM outputs and function calling',
-      route: '/jsonSchemaGenerator',
-      category: 'AI & Machine Learning',
-      icon: 'bi-diagram-3',
-      keywords: ['json', 'schema', 'llm', 'function', 'calling', 'structured', 'output']
-    },
-    {
-      name: 'Prompt Optimizer',
-      description: 'Analyze and improve your LLM prompts using best practices',
-      route: '/promptOptimizer',
-      category: 'AI & Machine Learning',
-      icon: 'bi-lightbulb',
-      keywords: ['prompt', 'optimize', 'improve', 'llm', 'ai', 'best', 'practices']
-    },
-    {
-      name: 'Local AI (Chat)',
-      description: 'Run a small language model fully in your browser via WebGPU — no server, fully private',
-      route: '/localAi',
-      category: 'AI & Machine Learning',
-      icon: 'bi-cpu',
-      keywords: ['local', 'ai', 'llm', 'webgpu', 'offline', 'private', 'on-device', 'slm', 'qwen', 'chat', 'webllm']
     }
   ];
 
@@ -231,6 +251,11 @@ export class ToolsService {
 
   getAllTools(): Tool[] {
     return this.tools;
+  }
+
+  /** Flagship tools highlighted on the homepage (one per category). */
+  getFeaturedTools(): Tool[] {
+    return this.tools.filter(tool => tool.featured);
   }
 
   searchTools(query: string): Tool[] {

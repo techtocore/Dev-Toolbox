@@ -1,6 +1,6 @@
 # Dev Toolbox
 
-A collection of web-based developer utilities. These tools help with common tasks like encoding/decoding, JSON formatting, text processing, and cryptography operations.
+A collection of web-based developer utilities. These tools help with common tasks like encoding/decoding, JSON formatting, text processing, and cryptography operations — all running entirely in your browser, with no servers and no data leaving your device.
 
 ## 🛠️ Available Tools
 
@@ -26,11 +26,15 @@ A collection of web-based developer utilities. These tools help with common task
 - **Color Converter** - Convert between HEX, RGB, and HSL color formats with visual color picker
 - **Regex Tester** - Test regular expressions with live matching and highlighting
 
+### AI & Machine Learning
+- **Local AI (Chat)** - A small language model that runs fully on-device via WebGPU. No accounts, no servers — your conversation never leaves the browser. Includes a hardware-aware model picker, one-time cached downloads, and tunable generation settings (system prompt, temperature, top-p, max tokens, reasoning).
+
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18.x or higher
-- npm 9.x or higher
+- Node.js 20.x or higher
+- npm 10.x or higher
+- For **Local AI**: a WebGPU-capable browser (recent Chrome/Edge on desktop, or Safari 18+)
 
 ### Installation
 
@@ -71,15 +75,16 @@ npm test
 
 ## 📦 Tech Stack
 
-- **Angular 21.0.8** - Latest modern web framework with new control flow syntax (@if, @for)
+- **Angular 21.2** - Modern web framework with new control flow syntax (@if, @for), standalone components, and lazy-loaded routes
 - **TypeScript 5.9** - Type-safe development
 - **Bootstrap 5.3** - Responsive UI components
 - **RxJS 7.8** - Reactive programming
 - **ESLint 9.39** - Code quality and consistency
 - **Zone.js 0.16** - Change detection with event coalescing
 - **Marked 16.4** - Markdown parsing
-- **Node-Forge 1.3** - Certificate parsing
+- **Node-Forge 1.4** - Certificate parsing
 - **Crypto-JS 4.2** - Cryptographic functions
+- **@mlc-ai/web-llm 0.2** - In-browser LLM inference over WebGPU (Web Worker backed, lazy-loaded)
 
 ## 📄 License
 
