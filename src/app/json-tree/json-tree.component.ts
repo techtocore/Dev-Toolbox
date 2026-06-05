@@ -45,6 +45,15 @@ export class JsonTreeComponent implements OnInit {
     }
   }
 
+  onLeafClick(event: MouseEvent, ind) {
+    // Let the browser handle new-tab gestures (Ctrl/Cmd/Shift or middle-click)
+    // natively via the anchor's href; don't trigger in-app navigation.
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) {
+      return;
+    }
+    this.emitEvent(ind);
+  }
+
   onTreeSelection(val) {
     this.leafSelected.emit(val);
   }

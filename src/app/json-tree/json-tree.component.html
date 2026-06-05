@@ -1,23 +1,28 @@
 <ul class="nav flex-column">
   @for (itm of processedData; track itm; let i = $index) {
     <li class="list-item nav-item">
-      <span (click)="toggleOpen(i); emitEvent(i);" class="nav-link tree-item"
-        [ngClass]="{'text-bold': checkIfActive(data[i])}">
-        @if (!data[i].items) {
+      @if (data[i].items) {
+        <span (click)="toggleOpen(i)" class="nav-link tree-item"
+          [ngClass]="{'text-bold': checkIfActive(data[i])}">
+          @if (checkExpand(i)) {
+            <span class="bi bi-plus-circle list-arrows"> </span>
+          }
+          @if (checkClose(i)) {
+            <span class="bi bi-dash-circle list-arrows"> </span>
+          }
+          {{itm}}
+        </span>
+        @if (isOpen[i]) {
+          <div>
+            <app-json-tree [data]="data[i].items" (leafSelected)="onTreeSelection($event)"></app-json-tree>
+          </div>
+        }
+      } @else {
+        <a [routerLink]="data[i].link" (click)="onLeafClick($event, i)" class="nav-link tree-item"
+          [ngClass]="{'text-bold': checkIfActive(data[i])}">
           <span [ngClass]="data[i].icon" class="list-arrows"> </span>
-        }
-        @if (checkExpand(i) && data[i].items) {
-          <span class="bi bi-plus-circle list-arrows"> </span>
-        }
-        @if (checkClose(i) && data[i].items) {
-          <span class="bi bi-dash-circle list-arrows"> </span>
-        }
-        {{itm}}
-      </span>
-      @if (isOpen[i]) {
-        <div>
-          <app-json-tree [data]="data[i].items" (leafSelected)="onTreeSelection($event)"></app-json-tree>
-        </div>
+          {{itm}}
+        </a>
       }
     </li>
   }
