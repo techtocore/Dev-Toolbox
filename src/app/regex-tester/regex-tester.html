@@ -72,6 +72,27 @@
     </div>
   }
 
+  <!-- AI: describe → regex (on-device) -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <app-ai-assist
+        heading="Generate a regex with AI"
+        icon="bi-stars"
+        description="Describe what you want to match in plain English; a small on-device model writes the pattern. It loads into the field below so you can test and tweak it."
+        placeholder="e.g. match email addresses, or US phone numbers like (555) 123-4567"
+        [examples]="['Email addresses', 'IPv4 addresses', 'Dates like 2026-03-14', 'Hex colors', 'URLs']"
+        actionLabel="Generate regex"
+        applyLabel="Use this pattern"
+        resultLabel="Suggested pattern"
+        [monospaceResult]="true"
+        [system]="aiSystem"
+        [temperature]="0.15"
+        [maxTokens]="200"
+        (apply)="applyAiPattern($event)">
+      </app-ai-assist>
+    </div>
+  </div>
+
   <div class="row">
     <!-- Pattern + test input -->
     <div class="col-lg-6 mb-4">

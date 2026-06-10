@@ -35,6 +35,7 @@ import { DataProfiler } from './data-profiler/data-profiler';
 import { IpInfo } from './ip-info/ip-info';
 import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
 import { CommandPaletteComponent } from './command-palette/command-palette.component';
+import { AiAssist } from './ai/ai-assist/ai-assist';
 
 @NgModule({
   declarations: [
@@ -71,7 +72,9 @@ import { CommandPaletteComponent } from './command-palette/command-palette.compo
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    // Standalone AI co-pilot panel, shared by the SLM-powered tools below.
+    AiAssist
   ],
   providers: [
     UtilityService

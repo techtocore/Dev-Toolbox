@@ -142,6 +142,26 @@
       </div>
     </div>
 
+    <!-- AI insights (on-device) -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <app-ai-assist
+          heading="Explain this dataset with AI"
+          icon="bi-stars"
+          description="A small on-device model reads the computed profile above and writes a plain-English briefing — overview, data-quality risks, and notable patterns. Your data never leaves the browser."
+          [showComposer]="false"
+          [inputText]="aiInput"
+          emptyInputMessage="Analyze a dataset first, then generate insights."
+          actionLabel="Generate insights"
+          resultLabel="Analyst briefing"
+          [renderResultMarkdown]="true"
+          [system]="aiSystem"
+          [temperature]="0.4"
+          [maxTokens]="800">
+        </app-ai-assist>
+      </div>
+    </div>
+
     <!-- Column Profiles -->
     <div class="row">
       <div class="col-12">

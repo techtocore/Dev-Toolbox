@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ToastService } from '../services/toast.service';
 
 interface AnalysisResult {
   category: string;
@@ -47,8 +48,62 @@ export class PromptOptimizer {
     politeness:['please', 'kindly', 'thanks', 'thank you']
   };
 
-  constructor() {
+  constructor(private toastService: ToastService) {
     this.analyzePrompt();
+  }
+
+  /**
+   * System prompt for the on-device "Rewrite with AI" feature. Tailors the
+   * guidance to the selected provider so the rewrite matches how that model
+   * family is best prompted.
+   */
+  get aiSystem(): string {
+    const provider: Record<TargetModel, string> = {
+      generic: 'a general-purpose LLM',
+      claude:
+        'Anthropic Claude (which responds best to XML tags such as <task>, <context>, ' +
+        '<output_format> and <rules>)',
+      gpt:
+        'OpenAI GPT / o-series (favour a clear instruction split and an explicit output schema)',
+      gemini:
+        'Google Gemini (favour an explicit JSON output schema for extraction or classification tasks)',
+    };
+    return [
+      'You are a world-class prompt engineer.',
+      `Rewrite the user's prompt so it follows prompt-engineering best practices for ${provider[this.targetModel]}.`,
+      'Apply, where appropriate: a concrete role/persona, an explicit task statement, relevant',
+      'context, a clearly specified output format, necessary constraints/guardrails, and isolation',
+      'of any untrusted input.',
+      "Preserve the user's original intent and keep any concrete details, examples or {{placeholders}} they included.",
+      'Do NOT answer or execute the prompt — only improve the prompt itself.',
+      'Output ONLY the improved prompt as plain text: no preamble, no commentary, no code fences,',
+      'and no surrounding quotes.',
+    ].join(' ');
+  }
+
+  /** Apply an AI-generated rewrite: clean it up, replace, and re-score. */
+  applyAiRewrite(raw: string): void {
+    let text = (raw ?? '').trim();
+    // Strip a single wrapping pair of code fences, if present.
+    const fence = text.match(/^```[a-z]*\s*([\s\S]*?)\s*```$/i);
+    if (fence) {
+      text = fence[1].trim();
+    }
+    // Strip a single pair of matching surrounding quotes.
+    if (
+      (text.startsWith('"') && text.endsWith('"')) ||
+      (text.startsWith('“') && text.endsWith('”')) ||
+      (text.startsWith("'") && text.endsWith("'"))
+    ) {
+      text = text.slice(1, -1).trim();
+    }
+    if (!text) {
+      this.toastService.error('The model returned an empty rewrite. Try again.');
+      return;
+    }
+    this.prompt = text;
+    this.analyzePrompt();
+    this.toastService.success(`Prompt rewritten — re-scored at ${this.score}%`);
   }
 
   analyzePrompt(): void {

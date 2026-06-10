@@ -34,7 +34,19 @@ export interface LocalModel {
   lowResource: boolean;
 }
 
+/**
+ * A curated, multi-vendor selection — not just one model family — so users can
+ * pick the trade-off (and the vendor) that suits them. Every entry is verified
+ * against `@mlc-ai/web-llm`'s `prebuiltAppConfig`; `vramMb` and `lowResource`
+ * are the engine's own `vram_required_MB` / `low_resource_required` values, and
+ * each `contextTokens` matches the config's `context_window_size`.
+ *
+ * Vendors: Alibaba (Qwen), Google (Gemma), Meta (Llama), Microsoft (Phi).
+ * Tiers ascend by capability and footprint; `recommendModel()` auto-picks the
+ * most capable one that fits the detected hardware.
+ */
 export const LOCAL_MODELS: LocalModel[] = [
+  // ── Tiny — phones, integrated GPUs, low-end laptops ──────────────────────
   {
     id: 'Qwen3-0.6B-q4f16_1-MLC',
     label: 'Qwen3 0.6B',
@@ -43,31 +55,57 @@ export const LOCAL_MODELS: LocalModel[] = [
     minMemoryGb: 4,
     downloadSize: '~0.4 GB',
     contextTokens: 4096,
-    note: 'Smallest option. Best for low-end devices and phones.',
+    note: 'Alibaba · smallest download. Reasoning-capable; best for phones and low-end devices.',
     lowResource: true,
   },
+  {
+    id: 'gemma3-1b-it-q4f16_1-MLC',
+    label: 'Gemma 3 1B',
+    tier: 'tiny',
+    vramMb: 711,
+    minMemoryGb: 4,
+    downloadSize: '~0.6 GB',
+    contextTokens: 4096,
+    note: 'Google · ultra-light and quick. Lowest memory footprint here; great for modest hardware.',
+    lowResource: true,
+  },
+  {
+    id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
+    label: 'Llama 3.2 1B',
+    tier: 'tiny',
+    vramMb: 879,
+    minMemoryGb: 4,
+    downloadSize: '~0.8 GB',
+    contextTokens: 4096,
+    note: 'Meta · light and broadly compatible. A dependable general-purpose assistant.',
+    lowResource: true,
+  },
+
+  // ── Small — the sweet spot for most laptops ──────────────────────────────
   {
     id: 'Qwen3.5-0.8B-q4f16_1-MLC',
     label: 'Qwen3.5 0.8B',
     tier: 'small',
     vramMb: 1629,
-    minMemoryGb: 6,
+    minMemoryGb: 4,
     downloadSize: '~0.6 GB',
     contextTokens: 4096,
-    note: 'Newest small Qwen. Fast, capable, low memory. Recommended.',
+    note: 'Alibaba · newest small Qwen. Fast, capable, low memory. Recommended default.',
     lowResource: true,
   },
   {
-    id: 'Qwen3.5-0.8B-q4f32_1-MLC',
-    label: 'Qwen3.5 0.8B (f32)',
+    id: 'gemma-2-2b-it-q4f16_1-MLC',
+    label: 'Gemma 2 2B',
     tier: 'small',
-    vramMb: 1894,
+    vramMb: 1895,
     minMemoryGb: 6,
-    downloadSize: '~0.7 GB',
+    downloadSize: '~1.6 GB',
     contextTokens: 4096,
-    note: 'Higher-precision activations. Slightly slower, a bit more accurate.',
-    lowResource: true,
+    note: 'Google · strong all-rounder, especially for writing and structured output.',
+    lowResource: false,
   },
+
+  // ── Medium — capable discrete/Apple-silicon GPUs ─────────────────────────
   {
     id: 'Qwen3.5-2B-q4f16_1-MLC',
     label: 'Qwen3.5 2B',
@@ -76,12 +114,38 @@ export const LOCAL_MODELS: LocalModel[] = [
     minMemoryGb: 8,
     downloadSize: '~1.3 GB',
     contextTokens: 4096,
-    note: 'Stronger reasoning and writing. Needs a capable GPU.',
+    note: 'Alibaba · stronger reasoning and writing than the small tier. Needs a capable GPU.',
+    lowResource: false,
+  },
+  {
+    id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',
+    label: 'Llama 3.2 3B',
+    tier: 'medium',
+    vramMb: 2264,
+    minMemoryGb: 8,
+    downloadSize: '~1.9 GB',
+    contextTokens: 4096,
+    note: 'Meta · the widely-benchmarked 3B. Excellent, well-rounded general quality.',
+    lowResource: false,
+  },
+  {
+    id: 'Phi-4-mini-instruct-q4f16_1-MLC',
+    label: 'Phi-4 mini',
+    tier: 'medium',
+    vramMb: 3438,
+    minMemoryGb: 8,
+    downloadSize: '~2.3 GB',
+    contextTokens: 4096,
+    note: 'Microsoft (MIT) · best-in-class reasoning and math for its size. Largest download.',
     lowResource: false,
   },
 ];
 
-/** Loaded by default when a user first opens a local AI tool. */
+/**
+ * Loaded by default when a user first opens a local AI tool (and when hardware
+ * memory is unknown). Small, fast, low-memory, yet capable — a safe pick that
+ * `recommendModel()` upgrades on roomier devices.
+ */
 export const DEFAULT_MODEL_ID = 'Qwen3.5-0.8B-q4f16_1-MLC';
 
 export function findModel(id: string): LocalModel | undefined {

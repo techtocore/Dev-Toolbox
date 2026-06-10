@@ -1,0 +1,206 @@
+<div class="ai-assist card border-0 shadow-sm">
+  <!-- Disclosure header — opt-in, collapsed by default -->
+  <button
+    type="button"
+    class="ai-assist-toggle"
+    [class.open]="expanded"
+    [attr.aria-expanded]="expanded"
+    [attr.aria-controls]="'ai-assist-body-' + uid"
+    (click)="toggle()">
+    <span class="d-flex align-items-center gap-2 text-start">
+      <span class="ai-spark"><i class="bi" [ngClass]="icon"></i></span>
+      <span class="fw-semibold">{{ heading }}</span>
+      <span class="badge rounded-pill ai-badge">
+        <i class="bi bi-shield-lock me-1"></i>Local &amp; private
+      </span>
+    </span>
+    <i class="bi chevron" [class.bi-chevron-down]="!expanded" [class.bi-chevron-up]="expanded"></i>
+  </button>
+
+  @if (expanded) {
+    <div class="card-body pt-3" [id]="'ai-assist-body-' + uid">
+      @if (description) {
+        <p class="text-muted small mb-3">{{ description }}</p>
+      }
+
+      <!-- Hardware gate: AI is optional, so this never blocks the host tool -->
+      @if (webgpu === false) {
+        <div class="alert alert-warning d-flex mb-0">
+          <i class="bi bi-gpu-card me-2 mt-1 flex-shrink-0"></i>
+          <div>
+            <div class="fw-semibold">AI assist needs WebGPU</div>
+            <div class="small">
+              {{ webgpuReason || 'WebGPU is unavailable in this browser.' }}
+              Try the latest Chrome or Edge on desktop, or Safari 18+. Everything else in this
+              tool keeps working without it.
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Composer (the user describes what they want) -->
+        @if (showComposer) {
+          <textarea
+            class="form-control mb-2"
+            rows="3"
+            [placeholder]="placeholder"
+            [(ngModel)]="composer"
+            (keydown)="onKeydown($event)"
+            [disabled]="generating"></textarea>
+
+          @if (examples.length) {
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <span class="text-muted small align-self-center">Try:</span>
+              @for (ex of examples; track ex) {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-light example-chip"
+                  (click)="fillExample(ex)"
+                  [disabled]="generating">
+                  {{ ex }}
+                </button>
+              }
+            </div>
+          }
+        } @else if (!inputText.trim() && !generating && !output) {
+          <!-- State-driven mode with nothing to work on yet -->
+          <div class="alert alert-light border small mb-2">
+            <i class="bi bi-info-circle me-1"></i>{{ emptyInputMessage }}
+          </div>
+        }
+
+        <!-- Action row -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          @if (!generating) {
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              (click)="generate()"
+              [disabled]="!canGenerate">
+              <i class="bi me-1" [ngClass]="icon"></i>{{ actionLabel }}
+            </button>
+          } @else {
+            <button type="button" class="btn btn-outline-danger btn-sm" (click)="stop()">
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              Stop
+            </button>
+          }
+
+          @if (showComposer) {
+            <span class="text-muted small d-none d-sm-inline">
+              <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to run
+            </span>
+          }
+
+          <button
+            type="button"
+            class="btn btn-sm btn-link text-decoration-none ms-auto text-muted"
+            (click)="showAdvanced = !showAdvanced"
+            [disabled]="generating"
+            title="Choose which on-device model to use">
+            <i class="bi bi-cpu me-1"></i>{{ modelLabel }}
+            <i class="bi" [class.bi-caret-down-fill]="!showAdvanced" [class.bi-caret-up-fill]="showAdvanced"></i>
+          </button>
+        </div>
+
+        <!-- Model picker (advanced, collapsed) -->
+        @if (showAdvanced) {
+          <div class="model-picker mt-2">
+            <label class="form-label small fw-semibold mb-1 d-block">
+              On-device model
+              <select
+                class="form-select form-select-sm mt-1"
+                [(ngModel)]="selectedModelId"
+                [disabled]="generating">
+                @for (m of models; track m.id) {
+                  <option [value]="m.id">
+                    {{ m.label }} · {{ m.downloadSize }}{{ llm.isDownloaded(m.id) ? ' · cached' : '' }}
+                  </option>
+                }
+              </select>
+            </label>
+            @if (selectedModel) {
+              <small class="text-muted d-block mt-1">{{ selectedModel.note }}</small>
+            }
+          </div>
+        }
+
+        <!-- Download / compile progress -->
+        @if (isLoadingModel) {
+          <div class="mt-3">
+            <div
+              class="progress"
+              role="progressbar"
+              [attr.aria-valuenow]="progressPercent"
+              aria-valuemin="0"
+              aria-valuemax="100">
+              <div
+                class="progress-bar progress-bar-striped progress-bar-animated"
+                [style.width.%]="progressPercent">
+                {{ progressPercent }}%
+              </div>
+            </div>
+            <small class="text-muted d-block mt-1">{{ llm.progressText() }}</small>
+            @if (!downloadedSelected) {
+              <small class="text-muted d-block">
+                First run downloads {{ selectedModel?.downloadSize }} of model weights
+                (one-time, cached in your browser). It then runs fully offline.
+              </small>
+            }
+          </div>
+        }
+
+        <!-- Error with retry -->
+        @if (errorMsg) {
+          <div class="alert alert-danger mt-3 mb-0">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <span><i class="bi bi-exclamation-octagon me-1"></i>{{ errorMsg }}</span>
+              <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" (click)="generate()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Retry
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Result -->
+        @if (output || (generating && isStreaming)) {
+          <div class="mt-3">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="form-label small fw-semibold mb-0">{{ resultLabel }}</span>
+              @if (output && !generating) {
+                <div class="d-flex gap-1">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copyResult()" title="Copy">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                  @if (applyLabel) {
+                    <button type="button" class="btn btn-sm btn-primary" (click)="applyResult()">
+                      <i class="bi bi-box-arrow-in-down me-1"></i>{{ applyLabel }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (thinking) {
+              <details class="thinking mb-2">
+                <summary><i class="bi bi-lightbulb me-1"></i>Reasoning</summary>
+                <pre class="thinking-body">{{ thinking }}</pre>
+              </details>
+            }
+
+            @if (renderResultMarkdown && outputHtml && !generating) {
+              <div class="result-md" [innerHTML]="outputHtml"></div>
+            } @else if (monospaceResult) {
+              <pre class="result-mono mb-0">{{ output }}<span class="cursor" [class.d-none]="!generating"></span></pre>
+            } @else {
+              <div class="result-text">{{ output }}<span class="cursor" [class.d-none]="!generating"></span></div>
+            }
+
+            @if (aborted) {
+              <small class="text-muted d-block mt-1"><i class="bi bi-stop-circle me-1"></i>Stopped.</small>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

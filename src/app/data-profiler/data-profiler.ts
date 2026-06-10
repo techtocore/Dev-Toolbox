@@ -34,10 +34,48 @@ export class DataProfiler {
   totalRows: number = 0;
   errorMessage: string = '';
 
+  /** System prompt for the on-device "AI insights" feature. */
+  readonly aiSystem =
+    'You are a senior data analyst. You are given a JSON profile of a tabular dataset: the row ' +
+    'count and, per column, its inferred type, null percentage, uniqueness, min/max, ' +
+    'mean/median/mode, and most frequent values. Write a concise, plain-English briefing for a ' +
+    'developer. Use short Markdown bullet points grouped under bold headings for: Overview (what ' +
+    'the data likely represents), Data quality (high null %, low or near-unique cardinality, ' +
+    'type inconsistencies, possible outliers), and Notable patterns. Be specific and reference ' +
+    'real column names. Never invent columns or values that are not present in the profile.';
+
   constructor(
     private utilityService: UtilityService,
     private toastService: ToastService
   ) {}
+
+  /**
+   * Compact, model-friendly serialization of the computed profile. Trims heavy
+   * fields (e.g. long top-value lists) so the prompt stays small and focused.
+   */
+  get aiInput(): string {
+    if (this.profiles.length === 0) {
+      return '';
+    }
+    const summary = {
+      totalRows: this.totalRows,
+      totalColumns: this.profiles.length,
+      columns: this.profiles.map(p => ({
+        name: p.name,
+        type: p.type,
+        nullPercent: Math.round(p.nullPercent),
+        uniqueCount: p.uniqueCount,
+        uniquePercent: Math.round(p.uniquePercent),
+        min: p.min,
+        max: p.max,
+        mean: p.mean != null ? Number(p.mean.toFixed(2)) : undefined,
+        median: p.median != null ? Number(p.median.toFixed(2)) : undefined,
+        mode: p.mode,
+        topValues: p.topValues?.slice(0, 3).map(t => `${t.value} (×${t.count})`),
+      })),
+    };
+    return JSON.stringify(summary);
+  }
 
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;

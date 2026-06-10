@@ -8,6 +8,28 @@
     </div>
   </div>
 
+  <!-- AI: describe → fields (on-device) -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <app-ai-assist
+        heading="Describe your data in plain English"
+        icon="bi-stars"
+        description="A small on-device model turns a description of your data into schema fields. They populate the builder below, where you can refine them and export to any format."
+        placeholder="e.g. a blog post with a title, author, list of tags, and a publish date"
+        [examples]="['A blog post with title, author, tags and publish date', 'A customer support ticket', 'An e-commerce order with line items']"
+        actionLabel="Generate fields"
+        applyLabel="Use these fields"
+        resultLabel="Suggested fields (JSON)"
+        [monospaceResult]="true"
+        [json]="true"
+        [system]="aiSystem"
+        [temperature]="0.1"
+        [maxTokens]="700"
+        (apply)="applyAiFields($event)">
+      </app-ai-assist>
+    </div>
+  </div>
+
   <div class="row">
     <!-- Schema Builder -->
     <div class="col-lg-6 mb-4">

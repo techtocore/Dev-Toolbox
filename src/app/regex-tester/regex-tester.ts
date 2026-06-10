@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
+import { ToastService } from '../services/toast.service';
 
 type Mode = 'test' | 'replace';
 
@@ -118,10 +119,69 @@ export class RegexTester implements OnInit {
     }
   ];
 
-  constructor(public utilityService: UtilityService) { }
+  /** System prompt for the on-device "describe → regex" feature. */
+  readonly aiSystem =
+    'You are a regular-expression expert. Convert the user\'s description into a single ' +
+    'JavaScript-compatible regular expression. Output ONLY the raw regex pattern itself — ' +
+    'no surrounding slashes, no flags, no quotes, no code fences, and no explanation. ' +
+    'Prefer a practical, readable pattern over an exhaustive one.';
+
+  constructor(
+    public utilityService: UtilityService,
+    private toastService: ToastService,
+  ) { }
 
   ngOnInit(): void {
     this.isMobile = this.utilityService.getIsMobile();
+  }
+
+  /**
+   * Apply an AI-generated pattern: tolerate the model wrapping it in fences,
+   * slashes, or quotes, set it (with any embedded flags), and run.
+   */
+  applyAiPattern(raw: string): void {
+    let p = (raw ?? '').trim();
+
+    // Unwrap a ```code fence``` if the model added one.
+    const fence = p.match(/```[a-z]*\s*([\s\S]*?)\s*```/i);
+    if (fence) {
+      p = fence[1].trim();
+    }
+    // Keep only the first non-empty line (drop any stray explanation).
+    p = (p.split(/\r?\n/).find(line => line.trim().length) ?? '').trim();
+
+    // Accept a /pattern/flags literal and lift the flags into the toggles.
+    const slashed = p.match(/^\/(.+)\/([gimsuy]*)$/);
+    if (slashed) {
+      p = slashed[1];
+      this.applyFlagString(slashed[2]);
+    }
+    // Strip any leftover surrounding backticks/quotes.
+    p = p.replace(/^[`'"]+|[`'"]+$/g, '').trim();
+
+    if (!p) {
+      this.isValid = false;
+      this.errorMessage = 'The model did not return a usable pattern. Try rephrasing your request.';
+      return;
+    }
+
+    this.regexPattern = p;
+    this.run();
+
+    if (this.isValid) {
+      this.toastService.success('Pattern applied');
+    } else {
+      this.toastService.warning('Applied, but the pattern looks invalid — see the error above.');
+    }
+  }
+
+  private applyFlagString(flags: string): void {
+    this.flags.global = flags.includes('g');
+    this.flags.caseInsensitive = flags.includes('i');
+    this.flags.multiline = flags.includes('m');
+    this.flags.dotAll = flags.includes('s');
+    this.flags.unicode = flags.includes('u');
+    this.flags.sticky = flags.includes('y');
   }
 
   setMode(m: Mode): void {

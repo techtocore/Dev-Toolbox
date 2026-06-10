@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
+import { ToastService } from '../services/toast.service';
 
 interface QueryCondition {
   field: string;
@@ -58,8 +59,34 @@ export class SqlQueryBuilder {
     { value: 'IS NOT NULL', label: 'IS NOT NULL' }
   ];
 
-  constructor(private utilityService: UtilityService) {
+  /** System prompt for the on-device "describe → SQL" feature. */
+  readonly aiSystem =
+    'You are an expert SQL developer. Convert the user\'s request into a single, standard ' +
+    'ANSI SQL query. Output ONLY the SQL statement — no markdown code fences, no explanation, ' +
+    'and no comments. Use uppercase SQL keywords. If the request is ambiguous, make reasonable ' +
+    'assumptions about table and column names.';
+
+  constructor(
+    private utilityService: UtilityService,
+    private toastService: ToastService,
+  ) {
     this.addCondition();
+  }
+
+  /** Place an AI-generated query into the output panel (fences stripped). */
+  applyAiQuery(raw: string): void {
+    let sql = (raw ?? '').trim();
+    const fence = sql.match(/```(?:sql)?\s*([\s\S]*?)\s*```/i);
+    if (fence) {
+      sql = fence[1].trim();
+    }
+    sql = sql.trim();
+    if (!sql) {
+      this.toastService.error('The model returned an empty query. Try rephrasing.');
+      return;
+    }
+    this.generatedQuery = sql;
+    this.toastService.success('Query applied — review before running it');
   }
 
   addCondition(): void {

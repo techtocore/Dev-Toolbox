@@ -24,10 +24,11 @@ A collection of web-based developer utilities. These tools help with common task
 ### Development Tools
 - **UUID Generator** - Generate multiple UUIDs (v4) at once
 - **Color Converter** - Convert between HEX, RGB, and HSL color formats with visual color picker
-- **Regex Tester** - Test regular expressions with live matching and highlighting
+- **Regex Tester** - Test regular expressions with live matching and highlighting, or generate a pattern from a plain-English description (on-device AI)
 
 ### AI & Machine Learning
-- **Local AI (Chat)** - A small language model that runs fully on-device via WebGPU. No accounts, no servers — your conversation never leaves the browser. Includes a hardware-aware model picker, one-time cached downloads, and tunable generation settings (system prompt, temperature, top-p, max tokens, reasoning).
+- **Local AI (Chat)** - A small language model that runs fully on-device via WebGPU. No accounts, no servers — your conversation never leaves the browser. Includes a hardware-aware model picker spanning **Qwen (Alibaba), Gemma (Google), Llama (Meta), and Phi (Microsoft)** — from a 0.4 GB tiny model for phones up to Phi-4-mini for capable GPUs — plus one-time cached downloads and tunable generation settings (system prompt, temperature, top-p, max tokens, reasoning).
+- **On-device AI Assist** *(across tools)* - The same WebGPU model is embedded as an **optional, private co-pilot** inside several existing tools — collapsed by default, so the tools keep working without it (and gracefully degrade when WebGPU is unavailable). It powers: **Prompt Optimizer** (rewrite a prompt to best practices), **Regex Tester** (plain English → pattern), **SQL Query Builder** (plain English → SQL), **JSON Schema Generator** (describe data → fields), and **Data Profiler** (plain-English insights over a dataset). The model loads once and is shared across every tool, so the first download benefits all of them.
 
 ## 🚀 Getting Started
 

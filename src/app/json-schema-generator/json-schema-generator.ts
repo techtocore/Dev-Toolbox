@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
+import { ToastService } from '../services/toast.service';
+import { extractJson } from '../ai/output-parser';
 
 interface SchemaField {
   name: string;
@@ -87,7 +89,120 @@ export class JsonSchemaGenerator {
     }
   ];
 
-  constructor(private utilityService: UtilityService) {}
+  /** System prompt for the on-device "describe → fields" feature. */
+  readonly aiSystem =
+    'You convert a plain-English description of a data structure into JSON. Output ONLY a JSON ' +
+    'array of field objects — no markdown, no prose. Each object has: "name" (a camelCase ' +
+    'identifier), "type" (one of: string, integer, number, boolean, array, object, enum), ' +
+    '"description" (a short string), and "required" (boolean). For type "enum", also include ' +
+    '"values" (an array of allowed string values). For type "array", you may include ' +
+    '"itemType" (one of: string, integer, number, boolean, object).';
+
+  private readonly validTypes = new Set([
+    'string', 'integer', 'number', 'boolean', 'array', 'object', 'enum',
+  ]);
+
+  constructor(
+    private utilityService: UtilityService,
+    private toastService: ToastService,
+  ) {}
+
+  /**
+   * Replace the field list from an AI-generated description. Tolerates the model
+   * returning a bare array, a `{ fields: [...] }` wrapper, or an object map, and
+   * sanitises every field so an odd response can never corrupt the builder.
+   */
+  applyAiFields(raw: string): void {
+    const parsed = extractJson<unknown>(raw);
+    const arr = this.coerceFieldArray(parsed);
+
+    if (!arr || arr.length === 0) {
+      this.toastService.error('Could not read fields from the model output. Try rephrasing.');
+      return;
+    }
+
+    const fields: SchemaField[] = [];
+    for (const item of arr) {
+      if (!item || typeof item !== 'object') {
+        continue;
+      }
+      const f = item as Record<string, any>;
+      const name = String(f['name'] ?? '').trim();
+      if (!name) {
+        continue;
+      }
+
+      let type = String(f['type'] ?? 'string').toLowerCase();
+      if (!this.validTypes.has(type)) {
+        type = 'string';
+      }
+
+      const field: SchemaField = {
+        name,
+        type,
+        description: String(f['description'] ?? '').trim(),
+        required: f['required'] === true || f['required'] === 'true',
+      };
+
+      if (type === 'enum') {
+        const values = Array.isArray(f['values'])
+          ? f['values']
+          : Array.isArray(f['enum'])
+            ? f['enum']
+            : [];
+        const cleaned = values.map((v: any) => String(v).trim()).filter((v: string) => v.length > 0);
+        if (cleaned.length) {
+          field.enum = cleaned;
+        } else {
+          field.type = 'string'; // enum with no values is meaningless
+        }
+      }
+
+      if (field.type === 'array') {
+        const itemType = String(f['itemType'] ?? f['items']?.type ?? 'string').toLowerCase();
+        field.items = {
+          type: this.validTypes.has(itemType) && itemType !== 'enum' ? itemType : 'string',
+        };
+      }
+
+      fields.push(field);
+    }
+
+    if (!fields.length) {
+      this.toastService.error('No usable fields were found in the model output.');
+      return;
+    }
+
+    this.fields = fields;
+    this.toastService.success(`Generated ${fields.length} field${fields.length === 1 ? '' : 's'}`);
+  }
+
+  /** Normalise whatever shape the model returned into an array of candidates. */
+  private coerceFieldArray(parsed: unknown): any[] | null {
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+    if (parsed && typeof parsed === 'object') {
+      const obj = parsed as Record<string, any>;
+      if (Array.isArray(obj['fields'])) {
+        return obj['fields'];
+      }
+      if (Array.isArray(obj['properties'])) {
+        return obj['properties'];
+      }
+      // A JSON-Schema-style `properties` map → flatten to field objects.
+      if (obj['properties'] && typeof obj['properties'] === 'object') {
+        return Object.entries(obj['properties']).map(([name, def]: [string, any]) => ({
+          name,
+          type: def?.type ?? 'string',
+          description: def?.description ?? '',
+          required: Array.isArray(obj['required']) ? obj['required'].includes(name) : false,
+          values: def?.enum,
+        }));
+      }
+    }
+    return null;
+  }
 
   addField(): void {
     this.fields.push({

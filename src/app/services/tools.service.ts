@@ -64,11 +64,11 @@ export class ToolsService {
     },
     {
       name: 'Prompt Optimizer',
-      description: 'Analyze and improve your LLM prompts using best practices',
+      description: 'Score prompts against best practices, then rewrite them with an on-device AI',
       route: '/promptOptimizer',
       category: 'AI & Machine Learning',
       icon: 'bi-lightbulb',
-      keywords: ['prompt', 'optimize', 'improve', 'llm', 'ai', 'best', 'practices']
+      keywords: ['prompt', 'optimize', 'improve', 'llm', 'ai', 'best', 'practices', 'rewrite', 'slm', 'local', 'on-device']
     },
     {
       name: 'Prompt Template Builder',
@@ -80,11 +80,11 @@ export class ToolsService {
     },
     {
       name: 'JSON Schema Generator',
-      description: 'Generate JSON schemas to constrain LLM outputs and function calling',
+      description: 'Generate JSON schemas for LLM outputs — or describe your data and let on-device AI build the fields',
       route: '/jsonSchemaGenerator',
       category: 'AI & Machine Learning',
       icon: 'bi-diagram-3',
-      keywords: ['json', 'schema', 'llm', 'function', 'calling', 'structured', 'output']
+      keywords: ['json', 'schema', 'llm', 'function', 'calling', 'structured', 'output', 'ai', 'describe', 'generate', 'slm']
     },
 
     // ── Parsing & Formatting ────────────────────────────────────────────────
@@ -161,19 +161,19 @@ export class ToolsService {
     },
     {
       name: 'Data Profiler',
-      description: 'Analyze data quality, statistics, and patterns in your datasets',
+      description: 'Analyze data quality, statistics, and patterns — with optional on-device AI insights',
       route: '/dataProfiler',
       category: 'Data Analysis',
       icon: 'bi-bar-chart-line',
-      keywords: ['data', 'profile', 'quality', 'statistics', 'analysis', 'insights']
+      keywords: ['data', 'profile', 'quality', 'statistics', 'analysis', 'insights', 'ai', 'explain', 'slm']
     },
     {
       name: 'SQL Query Builder',
-      description: 'Build SQL queries visually without writing code',
+      description: 'Build SQL queries visually, or describe them in plain English with on-device AI',
       route: '/sqlQueryBuilder',
       category: 'Data Analysis',
       icon: 'bi-database',
-      keywords: ['sql', 'query', 'builder', 'database', 'select', 'where', 'join']
+      keywords: ['sql', 'query', 'builder', 'database', 'select', 'where', 'join', 'ai', 'natural language', 'text to sql', 'generate', 'slm']
     },
     {
       name: 'Numeric Summary',
@@ -214,11 +214,11 @@ export class ToolsService {
     // ── Development Tools ───────────────────────────────────────────────────
     {
       name: 'Regex Tester',
-      description: 'Test regular expressions with live matching and highlighting',
+      description: 'Test regex with live highlighting — or generate one from plain English with on-device AI',
       route: '/regexTester',
       category: 'Development Tools',
       icon: 'bi-regex',
-      keywords: ['regex', 'regexp', 'regular', 'expression', 'pattern', 'match', 'test'],
+      keywords: ['regex', 'regexp', 'regular', 'expression', 'pattern', 'match', 'test', 'ai', 'generate', 'natural language', 'describe', 'slm'],
       featured: true
     },
     {

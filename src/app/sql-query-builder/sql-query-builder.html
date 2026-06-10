@@ -38,6 +38,27 @@
     </div>
   </div>
 
+  <!-- AI: describe → SQL (on-device) -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <app-ai-assist
+        heading="Describe your query in plain English"
+        icon="bi-stars"
+        description="A small on-device model turns a plain-English request into SQL. Always review generated SQL before running it against a real database."
+        placeholder="e.g. top 10 customers by total order value in 2025"
+        [examples]="['Top 10 customers by total order value', 'Users who signed up in the last 30 days', 'Average salary per department, highest first']"
+        actionLabel="Generate SQL"
+        applyLabel="Use this query"
+        resultLabel="Suggested SQL"
+        [monospaceResult]="true"
+        [system]="aiSystem"
+        [temperature]="0.15"
+        [maxTokens]="400"
+        (apply)="applyAiQuery($event)">
+      </app-ai-assist>
+    </div>
+  </div>
+
   <div class="row">
     <!-- Query Builder -->
     <div class="col-lg-6 mb-4">

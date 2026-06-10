@@ -45,6 +45,28 @@
     </div>
   </div>
 
+  <!-- AI rewrite (on-device) -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <app-ai-assist
+        heading="Rewrite with AI"
+        icon="bi-stars"
+        description="Let a small on-device model rewrite your prompt to follow best practices for the selected target model. Nothing leaves your browser."
+        [showComposer]="false"
+        [inputText]="prompt"
+        emptyInputMessage="Write or paste a prompt below, then let the on-device model rewrite it."
+        actionLabel="Rewrite my prompt"
+        applyLabel="Replace my prompt"
+        resultLabel="Suggested rewrite"
+        [monospaceResult]="true"
+        [system]="aiSystem"
+        [temperature]="0.4"
+        [maxTokens]="1200"
+        (apply)="applyAiRewrite($event)">
+      </app-ai-assist>
+    </div>
+  </div>
+
   <div class="row">
     <!-- Prompt Input -->
     <div class="col-lg-6 mb-4">

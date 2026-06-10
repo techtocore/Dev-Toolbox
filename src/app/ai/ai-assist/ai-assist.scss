@@ -1,0 +1,153 @@
+:host {
+  display: block;
+}
+
+.ai-assist {
+  // Subtle AI-flavoured frame that reads as "assistant", not a primary card.
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bs-primary, #6610f2) 5%, var(--bs-body-bg, #fff)),
+    var(--bs-body-bg, #fff)
+  );
+  border: 1px solid color-mix(in srgb, var(--bs-primary, #6610f2) 18%, transparent) !important;
+  overflow: hidden;
+}
+
+.ai-assist-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--bs-primary, #6610f2) 6%, transparent);
+  }
+
+  &.open {
+    border-bottom: 1px solid color-mix(in srgb, var(--bs-primary, #6610f2) 14%, transparent);
+  }
+
+  .chevron {
+    color: var(--bs-secondary-color, #6c757d);
+    flex-shrink: 0;
+  }
+}
+
+.ai-spark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  color: #fff;
+  background: linear-gradient(135deg, #6610f2, #0d6efd);
+  box-shadow: 0 2px 6px rgba(102, 16, 242, 0.35);
+  flex-shrink: 0;
+}
+
+.ai-badge {
+  font-weight: 500;
+  font-size: 0.7rem;
+  color: var(--bs-primary, #6610f2);
+  background: color-mix(in srgb, var(--bs-primary, #6610f2) 12%, transparent);
+}
+
+.example-chip {
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  font-size: 0.8rem;
+}
+
+.model-picker {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border-left: 3px solid var(--bs-primary, #6610f2);
+}
+
+.result-mono,
+.result-text,
+.result-md {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #e9ecef);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.result-mono {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--bs-font-monospace, monospace);
+  font-size: 0.85rem;
+}
+
+.result-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.result-md {
+  :last-child {
+    margin-bottom: 0;
+  }
+
+  pre {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 0.6rem;
+    border-radius: 0.4rem;
+    overflow-x: auto;
+  }
+
+  code {
+    font-size: 0.875em;
+  }
+}
+
+// Streaming caret, mirrors the chat tool's affordance.
+.cursor {
+  display: inline-block;
+  width: 0.5rem;
+  height: 1rem;
+  margin-left: 2px;
+  background: currentColor;
+  vertical-align: text-bottom;
+  animation: ai-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ai-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.thinking {
+  font-size: 0.85rem;
+
+  summary {
+    cursor: pointer;
+    color: var(--bs-secondary-color, #6c757d);
+  }
+
+  .thinking-body {
+    white-space: pre-wrap;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 0.5rem;
+    border-radius: 0.4rem;
+    margin-top: 0.4rem;
+    max-height: 14rem;
+    overflow-y: auto;
+  }
+}
+
+kbd {
+  font-size: 0.7rem;
+}
