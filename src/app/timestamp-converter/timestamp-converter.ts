@@ -114,11 +114,19 @@ export class TimestampConverter implements OnInit {
       ...tzOpts, timeZone: 'UTC'
     };
 
-    // Day of year, week of year (ISO).
-    const startOfYear = new Date(date.getFullYear(), 0, 0);
-    const diffMs = date.getTime() - startOfYear.getTime();
-    const dayOfYear = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const weekOfYear = this.getISOWeek(date);
+    // Day of year and ISO week, resolved in the SELECTED timezone so they stay
+    // consistent with the "Day of week" row (which already uses selectedTz).
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: this.selectedTz, year: 'numeric', month: 'numeric', day: 'numeric',
+    }).formatToParts(date);
+    const part = (t: string) => Number(parts.find(p => p.type === t)?.value);
+    const tzYear = part('year');
+    const tzMonth = part('month');
+    const tzDay = part('day');
+    const dayOfYear = Math.floor(
+      (Date.UTC(tzYear, tzMonth - 1, tzDay) - Date.UTC(tzYear, 0, 0)) / 86400000,
+    );
+    const weekOfYear = this.getISOWeek(tzYear, tzMonth, tzDay);
 
     this.outputs = [
       { key: 'unixSec',  label: 'Unix (seconds)',     value: String(unixSec), icon: 'bi-clock' },
@@ -129,13 +137,13 @@ export class TimestampConverter implements OnInit {
       { key: 'rfc',      label: 'RFC 2822',           value: date.toUTCString(), icon: 'bi-envelope' },
       { key: 'relative', label: 'Relative',           value: this.relativeTime(date), icon: 'bi-hourglass-split' },
       { key: 'dow',      label: 'Day of week',        value: date.toLocaleDateString('en-US', { weekday: 'long', timeZone: this.selectedTz }), icon: 'bi-calendar-day' },
-      { key: 'doy',      label: 'Day of year',        value: `${dayOfYear} / ${this.isLeapYear(date.getFullYear()) ? 366 : 365}`, icon: 'bi-calendar3' },
+      { key: 'doy',      label: 'Day of year',        value: `${dayOfYear} / ${this.isLeapYear(tzYear) ? 366 : 365}`, icon: 'bi-calendar3' },
       { key: 'woy',      label: 'ISO week',           value: `W${String(weekOfYear).padStart(2, '0')}`, icon: 'bi-calendar-week' },
     ];
   }
 
-  private getISOWeek(date: Date): number {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  private getISOWeek(year: number, month: number, day: number): number {
+    const d = new Date(Date.UTC(year, month - 1, day));
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));

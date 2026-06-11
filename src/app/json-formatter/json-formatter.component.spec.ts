@@ -1,4 +1,6 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 
 import { JsonFormatterComponent } from './json-formatter.component';
 
@@ -8,7 +10,9 @@ describe('JsonFormatterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ JsonFormatterComponent ]
+      imports: [ FormsModule ],
+      declarations: [ JsonFormatterComponent ],
+      schemas: [ NO_ERRORS_SCHEMA ]
     })
     .compileComponents();
   });

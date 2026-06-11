@@ -14,6 +14,8 @@ interface DisplayMessage {
   html?: string;
   /** Optional chain-of-thought, shown collapsed. */
   thinking?: string;
+  /** True for an error/empty-stopped turn — shown in the UI but not replayed to the model. */
+  error?: boolean;
 }
 
 /**
@@ -55,8 +57,10 @@ export class LocalAi {
     this.abort = new AbortController();
     this.scrollSoon();
 
+    // Exclude the in-progress placeholder and any previously-failed/empty-stopped
+    // turns so broken assistant text is never replayed to the model as real history.
     const history: ChatMessage[] = this.messages
-      .filter((m) => m === assistant ? false : true)
+      .filter((m) => m !== assistant && !m.error)
       .map((m) => ({ role: m.role, content: m.text }));
 
     try {
@@ -75,11 +79,15 @@ export class LocalAi {
     } catch (err) {
       const e = err as LlmError;
       if (e?.kind === 'aborted') {
+        const hadPartial = assistant.text.trim().length > 0;
         assistant.text = assistant.text || '_(stopped)_';
         assistant.html = renderMarkdown(assistant.text);
+        // Keep a genuinely partial answer in history; drop an empty stop.
+        if (!hadPartial) assistant.error = true;
       } else {
         assistant.text = e?.message ?? 'Something went wrong.';
         assistant.html = renderMarkdown(`⚠️ ${assistant.text}`);
+        assistant.error = true;
       }
     } finally {
       this.generating = false;

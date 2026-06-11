@@ -137,18 +137,29 @@ export class LlmService {
     modelId: string,
     onProgress: (r: InitProgressReport) => void,
   ): Promise<MLCEngineInterface> {
+    // Only fall back to the main thread when the WORKER itself is unavailable
+    // (e.g. module workers unsupported). A genuine load failure (OOM, network,
+    // compile) must NOT silently re-download and retry on the main thread.
     try {
       this.worker = new Worker(new URL('./llm-engine.worker', import.meta.url), {
         type: 'module',
       });
+    } catch {
+      this.worker = null;
+    }
+    if (!this.worker) {
+      return webllm.CreateMLCEngine(modelId, { initProgressCallback: onProgress });
+    }
+    try {
       return await webllm.CreateWebWorkerMLCEngine(this.worker, modelId, {
         initProgressCallback: onProgress,
       });
-    } catch {
-      // Worker path failed — clean up and run on the main thread instead.
-      this.worker?.terminate();
+    } catch (err) {
+      // Tear down the worker so a retry doesn't leak it, then let doLoad's
+      // catch classify the real failure via LlmError.from.
+      this.worker.terminate();
       this.worker = null;
-      return webllm.CreateMLCEngine(modelId, { initProgressCallback: onProgress });
+      throw err;
     }
   }
 
@@ -184,8 +195,9 @@ export class LlmService {
         messages: outgoing,
         temperature,
         top_p: topP,
-        // Reasoning off by default for fast, focused tool output.
-        enable_thinking: enableThinking,
+        // Reasoning off by default for fast, focused tool output. web-llm reads
+        // this from `extra_body` (Qwen chat-template kwarg), not the top level.
+        extra_body: { enable_thinking: enableThinking },
       };
       if (maxTokens) request['max_tokens'] = maxTokens;
       if (options.json) request['response_format'] = { type: 'json_object' };

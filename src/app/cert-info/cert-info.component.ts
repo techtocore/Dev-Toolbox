@@ -59,18 +59,30 @@ export class CertInfoComponent implements OnInit {
 
       this.certInfo.issuer = {};
       parsedCert?.issuer?.attributes?.forEach(a => {
-        this.certInfo.issuer![a.name!] = a.value as any;
+        const key = a.name || a.type || 'unknown';
+        const existing = this.certInfo.issuer![key];
+        this.certInfo.issuer![key] = existing === undefined
+          ? (a.value as any)
+          : ([] as any[]).concat(existing, a.value);
       });
 
       this.certInfo.subject = {};
       parsedCert?.subject?.attributes?.forEach(a => {
-        this.certInfo.subject![a.name!] = a.value as any;
+        const key = a.name || a.type || 'unknown';
+        const existing = this.certInfo.subject![key];
+        this.certInfo.subject![key] = existing === undefined
+          ? (a.value as any)
+          : ([] as any[]).concat(existing, a.value);
       });
 
       this.certInfo.serialNumber = parsedCert?.serialNumber;
       this.certInfo.validFrom = parsedCert?.validity?.notBefore;
       this.certInfo.validTill = parsedCert?.validity?.notAfter;
-      this.certInfo.signatureOid = parsedCert?.signatureOid;
+      const sigOid = parsedCert?.signatureOid;
+      // Resolve the OID to a friendly algorithm name (e.g. sha256WithRSAEncryption),
+      // falling back to the raw OID when unknown.
+      this.certInfo.signatureOid =
+        (sigOid && (Forge.pki.oids as Record<string, string>)[sigOid]) || sigOid;
       this.certInfo.signAlgorithmOid = parsedCert?.siginfo?.algorithmOid;
       this.certInfo.signParameters = parsedCert?.siginfo?.parameters as any;
 

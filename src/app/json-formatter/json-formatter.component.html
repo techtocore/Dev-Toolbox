@@ -43,7 +43,7 @@
                 <option [ngValue]="2">2 spaces</option>
                 <option [ngValue]="4">4 spaces</option>
                 <option [ngValue]="8">8 spaces</option>
-                <option [ngValue]="0">Tab</option>
+                <option [ngValue]="'tab'">Tab</option>
               </select>
             </div>
 
@@ -92,6 +92,7 @@
           <textarea
             class="form-control font-monospace"
             rows="18"
+            aria-label="JSON input"
             [(ngModel)]="input"
             (input)="inputBytes = input.length"
             placeholder='Paste JSON here, e.g. {"key": "value"}'></textarea>

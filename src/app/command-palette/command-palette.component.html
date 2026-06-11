@@ -1,6 +1,6 @@
 @if (open) {
   <div class="cmdk-overlay" (click)="close()">
-    <div class="cmdk-dialog" (click)="$event.stopPropagation()">
+    <div class="cmdk-dialog" role="dialog" aria-modal="true" aria-label="Command palette" (click)="$event.stopPropagation()">
       <div class="cmdk-search">
         <i class="bi bi-search"></i>
         <input

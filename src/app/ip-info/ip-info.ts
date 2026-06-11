@@ -141,8 +141,19 @@ export class IpInfo implements OnInit {
     this.loading = false;
   }
 
+  /** fetch() with an abort-based timeout so a hung provider can't stall the chain. */
+  private async fetchWithTimeout(url: string, ms = 8000): Promise<Response> {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+      return await fetch(url, { signal: ctrl.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   private async lookupIpapiCo(): Promise<NetworkInfo> {
-    const response = await fetch('https://ipapi.co/json/');
+    const response = await this.fetchWithTimeout('https://ipapi.co/json/');
     if (!response.ok) {
       throw new Error(`ipapi.co HTTP ${response.status}`);
     }
@@ -182,7 +193,7 @@ export class IpInfo implements OnInit {
   }
 
   private async lookupFreeipapi(): Promise<NetworkInfo> {
-    const response = await fetch('https://freeipapi.com/api/json/');
+    const response = await this.fetchWithTimeout('https://freeipapi.com/api/json/');
     if (!response.ok) {
       throw new Error(`freeipapi HTTP ${response.status}`);
     }

@@ -1,8 +1,14 @@
 <ul class="nav flex-column">
-  @for (itm of processedData; track itm; let i = $index) {
+  @for (itm of processedData; track $index; let i = $index) {
     <li class="list-item nav-item">
       @if (data[i].items) {
-        <span (click)="toggleOpen(i)" class="nav-link tree-item"
+        <span (click)="toggleOpen(i)"
+          (keydown.enter)="toggleOpen(i)"
+          (keydown.space)="$event.preventDefault(); toggleOpen(i)"
+          role="button" tabindex="0"
+          [attr.aria-expanded]="!!isOpen[i]"
+          [attr.aria-label]="'Toggle ' + itm"
+          class="nav-link tree-item"
           [ngClass]="{'text-bold': checkIfActive(data[i])}">
           @if (checkExpand(i)) {
             <span class="bi bi-plus-circle list-arrows"> </span>

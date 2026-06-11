@@ -11,7 +11,7 @@
  */
 
 /** Rough size class, used to match a model to detected hardware. */
-export type ModelTier = 'tiny' | 'small' | 'medium';
+export type ModelTier = 'tiny' | 'small' | 'medium' | 'large';
 
 export interface LocalModel {
   /** WebLLM `model_id` — must match the prebuilt config exactly. */
@@ -136,7 +136,46 @@ export const LOCAL_MODELS: LocalModel[] = [
     minMemoryGb: 8,
     downloadSize: '~2.3 GB',
     contextTokens: 4096,
-    note: 'Microsoft (MIT) · best-in-class reasoning and math for its size. Largest download.',
+    note: 'Microsoft (MIT) · best-in-class reasoning and math for its size.',
+    lowResource: false,
+  },
+
+  // ── High-end — SOTA models for discrete GPUs (manual pick only) ───────────
+  // minMemoryGb is set to 16 so recommendModel() never auto-loads these on a
+  // typical machine (navigator.deviceMemory caps at 8). assess() shows a
+  // non-blocking "works best with more memory" advisory; power users with a
+  // capable GPU select them explicitly from the picker.
+  {
+    id: 'Qwen3.5-4B-q4f16_1-MLC',
+    label: 'Qwen3.5 4B',
+    tier: 'large',
+    vramMb: 3868,
+    minMemoryGb: 16,
+    downloadSize: '~2.4 GB',
+    contextTokens: 4096,
+    note: 'Alibaba · high-end. Noticeably stronger reasoning and writing than the 2B; wants a capable discrete GPU.',
+    lowResource: false,
+  },
+  {
+    id: 'Llama-3.1-8B-Instruct-q4f16_1-MLC',
+    label: 'Llama 3.1 8B',
+    tier: 'large',
+    vramMb: 5001,
+    minMemoryGb: 16,
+    downloadSize: '~4.5 GB',
+    contextTokens: 4096,
+    note: 'Meta · high-end. The widely-benchmarked 8B — excellent all-round quality on a discrete GPU.',
+    lowResource: false,
+  },
+  {
+    id: 'Qwen3.5-9B-q4f16_1-MLC',
+    label: 'Qwen3.5 9B',
+    tier: 'large',
+    vramMb: 6433,
+    minMemoryGb: 16,
+    downloadSize: '~5 GB',
+    contextTokens: 4096,
+    note: 'Alibaba · most capable here. SOTA in-browser quality for high-VRAM GPUs; largest download.',
     lowResource: false,
   },
 ];

@@ -43,6 +43,10 @@ export function splitThinking(raw: string): SplitOutput {
     text = text.slice(0, open.index).trimEnd();
   }
 
+  // Strip any orphan <think>/</think> tag left behind (e.g. a stray closing tag
+  // with no opener) so raw tags never reach the UI.
+  text = text.replace(/<\/?think>/gi, '');
+
   const thinking = reasoning.filter(Boolean).join('\n\n').trim();
   return { text: text.trim(), thinking: thinking || undefined };
 }

@@ -17,6 +17,71 @@ export class UtilityService {
     this.isMobile = flag;
   }
 
+  /**
+   * Parses CSV/TSV text into rows of fields in a single pass that respects
+   * RFC-4180 quoting — delimiters, quotes, and newlines are all allowed inside
+   * double-quoted fields, and a doubled quote (`""`) becomes one literal quote.
+   *
+   * Unquoted fields are trimmed for convenience (`a, b, c`); quoted fields are
+   * preserved verbatim so significant leading/trailing spaces survive. Fully
+   * empty rows (blank lines) are dropped, matching the previous behaviour.
+   */
+  parseCsv(text: string, delimiter = ','): string[][] {
+    const rows: string[][] = [];
+    let row: string[] = [];
+    let field = '';
+    let inQuotes = false;
+    let quoted = false; // the current field contained a quoted section
+
+    const pushField = () => {
+      row.push(quoted ? field : field.trim());
+      field = '';
+      quoted = false;
+    };
+    const pushRow = () => {
+      pushField();
+      // Drop a fully empty row (a blank line), but keep `,,` (real empty fields).
+      if (!(row.length === 1 && row[0] === '')) {
+        rows.push(row);
+      }
+      row = [];
+    };
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+
+      if (inQuotes) {
+        if (char === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else { inQuotes = false; }
+        } else {
+          field += char;
+        }
+        continue;
+      }
+
+      if (char === '"') {
+        inQuotes = true;
+        quoted = true;
+      } else if (char === delimiter) {
+        pushField();
+      } else if (char === '\r') {
+        pushRow();
+        if (text[i + 1] === '\n') i++; // treat \r\n as a single break
+      } else if (char === '\n') {
+        pushRow();
+      } else {
+        field += char;
+      }
+    }
+
+    // Flush the final field/row when the text has no trailing newline.
+    if (field !== '' || quoted || row.length > 0) {
+      pushRow();
+    }
+    return rows;
+  }
+
   downloadFile(data: string, contentType: string, fileName: string): void {
     const file = new window.Blob([data], { type: contentType });
 

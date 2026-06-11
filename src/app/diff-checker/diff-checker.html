@@ -103,7 +103,11 @@
           @if (diffLines.length === 0) {
             <div class="empty-state">
               <i class="bi bi-file-diff"></i>
-              <p>Enter text in both fields to see the diff.</p>
+              @if (tooLarge) {
+                <p>Inputs are too large for a live diff — reduce the input size and try again.</p>
+              } @else {
+                <p>Enter text in both fields to see the diff.</p>
+              }
             </div>
           } @else if (viewMode === 'unified') {
             <div class="diff-output">

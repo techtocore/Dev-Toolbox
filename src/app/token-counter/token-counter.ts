@@ -25,22 +25,37 @@ export class TokenCounter {
   outputText: string = '';
 
   selectedProvider: string = 'anthropic';
-  selectedModel: string = 'claude-opus-4-7';
+  selectedModel: string = 'claude-opus-4-8';
 
   cachedInputPercent: number = 0;
   batchRequests: number = 1000;
 
-  // Pricing as of January 2026. Verify with each provider's official pricing
-  // page before relying on these numbers for procurement.
-  // Sources: anthropic.com/pricing, openai.com/api/pricing, ai.google.dev/pricing.
+  // Pricing verified June 2026 against each provider's official pricing page
+  // (anthropic.com/pricing, developers.openai.com/api/docs/pricing,
+  // ai.google.dev/gemini-api/docs/pricing). Re-verify before relying on these
+  // for procurement — model lineups and rates change frequently.
   models: ModelPricing[] = [
     // ---------- Anthropic Claude ----------
     {
+      provider: 'anthropic', model: 'claude-opus-4-8', displayName: 'Claude Opus 4.8',
+      inputPricePer1M: 5.00, outputPricePer1M: 25.00,
+      cacheWritePricePer1M: 6.25, cacheReadPricePer1M: 0.50,
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Most capable Opus-tier model. Adaptive thinking; 1M context at standard pricing.'
+    },
+    {
       provider: 'anthropic', model: 'claude-opus-4-7', displayName: 'Claude Opus 4.7',
-      inputPricePer1M: 15.00, outputPricePer1M: 75.00,
-      cacheWritePricePer1M: 18.75, cacheReadPricePer1M: 1.50,
-      contextWindow: 200000, outputLimit: 32000,
-      notes: 'Highest capability. Extended thinking supported.'
+      inputPricePer1M: 5.00, outputPricePer1M: 25.00,
+      cacheWritePricePer1M: 6.25, cacheReadPricePer1M: 0.50,
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Previous-generation Opus. Adaptive thinking; 1M context.'
+    },
+    {
+      provider: 'anthropic', model: 'claude-opus-4-6', displayName: 'Claude Opus 4.6',
+      inputPricePer1M: 5.00, outputPricePer1M: 25.00,
+      cacheWritePricePer1M: 6.25, cacheReadPricePer1M: 0.50,
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Adaptive thinking; 1M context.'
     },
     {
       provider: 'anthropic', model: 'claude-opus-4-5', displayName: 'Claude Opus 4.5',
@@ -53,8 +68,8 @@ export class TokenCounter {
       provider: 'anthropic', model: 'claude-sonnet-4-6', displayName: 'Claude Sonnet 4.6',
       inputPricePer1M: 3.00, outputPricePer1M: 15.00,
       cacheWritePricePer1M: 3.75, cacheReadPricePer1M: 0.30,
-      contextWindow: 200000, outputLimit: 64000,
-      notes: 'Default frontier balance of quality vs cost.'
+      contextWindow: 1000000, outputLimit: 64000,
+      notes: 'Best balance of speed and intelligence; 1M context.'
     },
     {
       provider: 'anthropic', model: 'claude-sonnet-4-5', displayName: 'Claude Sonnet 4.5',
@@ -66,110 +81,83 @@ export class TokenCounter {
       provider: 'anthropic', model: 'claude-haiku-4-5', displayName: 'Claude Haiku 4.5',
       inputPricePer1M: 1.00, outputPricePer1M: 5.00,
       cacheWritePricePer1M: 1.25, cacheReadPricePer1M: 0.10,
-      contextWindow: 200000, outputLimit: 16000,
+      contextWindow: 200000, outputLimit: 64000,
       notes: 'Fast/cheap tier; good for high-volume workloads.'
-    },
-    {
-      provider: 'anthropic', model: 'claude-haiku-3-5', displayName: 'Claude Haiku 3.5',
-      inputPricePer1M: 0.80, outputPricePer1M: 4.00,
-      cacheWritePricePer1M: 1.00, cacheReadPricePer1M: 0.08,
-      contextWindow: 200000
     },
 
     // ---------- OpenAI ----------
     {
-      provider: 'openai', model: 'gpt-5.1', displayName: 'GPT-5.1',
-      inputPricePer1M: 1.25, outputPricePer1M: 10.00,
-      cacheReadPricePer1M: 0.125,
-      contextWindow: 400000, outputLimit: 100000,
-      notes: 'Latest flagship; supports cached input discount (~90%).'
-    },
-    {
-      provider: 'openai', model: 'gpt-5', displayName: 'GPT-5',
-      inputPricePer1M: 1.25, outputPricePer1M: 10.00,
-      cacheReadPricePer1M: 0.125,
-      contextWindow: 400000, outputLimit: 100000
-    },
-    {
-      provider: 'openai', model: 'gpt-5-mini', displayName: 'GPT-5 mini',
-      inputPricePer1M: 0.25, outputPricePer1M: 2.00,
-      cacheReadPricePer1M: 0.025,
-      contextWindow: 400000, outputLimit: 100000
-    },
-    {
-      provider: 'openai', model: 'gpt-5-nano', displayName: 'GPT-5 nano',
-      inputPricePer1M: 0.05, outputPricePer1M: 0.40,
-      cacheReadPricePer1M: 0.005,
-      contextWindow: 400000, outputLimit: 100000
-    },
-    {
-      provider: 'openai', model: 'o3', displayName: 'o3 (reasoning)',
-      inputPricePer1M: 2.00, outputPricePer1M: 8.00,
+      provider: 'openai', model: 'gpt-5.5', displayName: 'GPT-5.5',
+      inputPricePer1M: 5.00, outputPricePer1M: 30.00,
       cacheReadPricePer1M: 0.50,
-      contextWindow: 200000, outputLimit: 100000,
-      notes: 'Reasoning model — billed output includes hidden reasoning tokens.'
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Latest flagship; cached input ~90% off.'
+    },
+    {
+      provider: 'openai', model: 'gpt-5.5-pro', displayName: 'GPT-5.5 pro',
+      inputPricePer1M: 30.00, outputPricePer1M: 180.00,
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Highest-capability tier; no published cached-input discount.'
+    },
+    {
+      provider: 'openai', model: 'gpt-5.4', displayName: 'GPT-5.4',
+      inputPricePer1M: 2.50, outputPricePer1M: 15.00,
+      cacheReadPricePer1M: 0.25,
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Recommended production workhorse.'
+    },
+    {
+      provider: 'openai', model: 'gpt-5.4-mini', displayName: 'GPT-5.4 mini',
+      inputPricePer1M: 0.75, outputPricePer1M: 4.50,
+      cacheReadPricePer1M: 0.075,
+      contextWindow: 1000000, outputLimit: 128000
+    },
+    {
+      provider: 'openai', model: 'gpt-5.4-nano', displayName: 'GPT-5.4 nano',
+      inputPricePer1M: 0.20, outputPricePer1M: 1.25,
+      cacheReadPricePer1M: 0.02,
+      contextWindow: 1000000, outputLimit: 128000,
+      notes: 'Budget tier.'
     },
     {
       provider: 'openai', model: 'o4-mini', displayName: 'o4-mini (reasoning)',
-      inputPricePer1M: 1.10, outputPricePer1M: 4.40,
-      cacheReadPricePer1M: 0.275,
-      contextWindow: 200000, outputLimit: 100000
-    },
-    {
-      provider: 'openai', model: 'gpt-4.1', displayName: 'GPT-4.1',
-      inputPricePer1M: 2.00, outputPricePer1M: 8.00,
-      cacheReadPricePer1M: 0.50,
-      contextWindow: 1000000, outputLimit: 32000
-    },
-    {
-      provider: 'openai', model: 'gpt-4.1-mini', displayName: 'GPT-4.1 mini',
-      inputPricePer1M: 0.40, outputPricePer1M: 1.60,
-      cacheReadPricePer1M: 0.10,
-      contextWindow: 1000000, outputLimit: 32000
-    },
-    {
-      provider: 'openai', model: 'gpt-4o', displayName: 'GPT-4o',
-      inputPricePer1M: 2.50, outputPricePer1M: 10.00,
-      cacheReadPricePer1M: 1.25,
-      contextWindow: 128000, outputLimit: 16000
-    },
-    {
-      provider: 'openai', model: 'gpt-4o-mini', displayName: 'GPT-4o mini',
-      inputPricePer1M: 0.15, outputPricePer1M: 0.60,
-      cacheReadPricePer1M: 0.075,
-      contextWindow: 128000, outputLimit: 16000
+      inputPricePer1M: 4.00, outputPricePer1M: 16.00,
+      cacheReadPricePer1M: 1.00,
+      contextWindow: 200000, outputLimit: 100000,
+      notes: 'Reasoning model — billed output includes hidden reasoning tokens.'
     },
 
     // ---------- Google Gemini ----------
     {
-      provider: 'google', model: 'gemini-3-pro', displayName: 'Gemini 3 Pro',
-      inputPricePer1M: 1.25, outputPricePer1M: 10.00,
-      cacheReadPricePer1M: 0.31,
-      contextWindow: 2000000, outputLimit: 64000,
-      notes: 'Tier pricing: >200k input tokens may bill at higher rate.'
+      provider: 'google', model: 'gemini-3.1-pro', displayName: 'Gemini 3.1 Pro',
+      inputPricePer1M: 2.00, outputPricePer1M: 12.00,
+      cacheReadPricePer1M: 0.20,
+      contextWindow: 1000000, outputLimit: 65536,
+      notes: 'Base (≤200K) rate; prompts over 200K tokens bill at $4 / $18 per 1M.'
     },
     {
-      provider: 'google', model: 'gemini-3-flash', displayName: 'Gemini 3 Flash',
-      inputPricePer1M: 0.30, outputPricePer1M: 2.50,
-      cacheReadPricePer1M: 0.075,
-      contextWindow: 1000000, outputLimit: 64000
+      provider: 'google', model: 'gemini-3.5-flash', displayName: 'Gemini 3.5 Flash',
+      inputPricePer1M: 1.50, outputPricePer1M: 9.00,
+      cacheReadPricePer1M: 0.15,
+      contextWindow: 1000000, outputLimit: 65536
     },
     {
-      provider: 'google', model: 'gemini-2.5-pro', displayName: 'Gemini 2.5 Pro',
-      inputPricePer1M: 1.25, outputPricePer1M: 10.00,
-      cacheReadPricePer1M: 0.31,
-      contextWindow: 2000000, outputLimit: 64000
+      provider: 'google', model: 'gemini-3.1-flash-lite', displayName: 'Gemini 3.1 Flash-Lite',
+      inputPricePer1M: 0.25, outputPricePer1M: 1.50,
+      cacheReadPricePer1M: 0.025,
+      contextWindow: 1000000, outputLimit: 65536
     },
     {
       provider: 'google', model: 'gemini-2.5-flash', displayName: 'Gemini 2.5 Flash',
       inputPricePer1M: 0.30, outputPricePer1M: 2.50,
-      cacheReadPricePer1M: 0.075,
-      contextWindow: 1000000, outputLimit: 64000
+      cacheReadPricePer1M: 0.03,
+      contextWindow: 1000000, outputLimit: 65536
     },
     {
-      provider: 'google', model: 'gemini-2.5-flash-lite', displayName: 'Gemini 2.5 Flash Lite',
+      provider: 'google', model: 'gemini-2.5-flash-lite', displayName: 'Gemini 2.5 Flash-Lite',
       inputPricePer1M: 0.10, outputPricePer1M: 0.40,
-      contextWindow: 1000000
+      cacheReadPricePer1M: 0.01,
+      contextWindow: 1000000, outputLimit: 65536
     },
 
     // ---------- Meta Llama (via inference providers) ----------
@@ -333,7 +321,7 @@ export class TokenCounter {
     if (Math.abs(amount) < 1) {
       return `$${amount.toFixed(4)}`;
     }
-    return `$${amount.toFixed(amount < 100 ? 4 : 2)}`;
+    return `$${amount.toFixed(2)}`;
   }
 
   formatNumber(num: number): string {
@@ -354,10 +342,11 @@ export class TokenCounter {
   }
 
   get batchTotalCost(): number {
-    return this.totalCost * this.batchRequests;
+    // Include the one-time cache-write fee (no-ops to 0 when caching is unused).
+    return this.totalCost * this.batchRequests + this.cacheWriteCost;
   }
 
   get batchCacheSavings(): number {
-    return this.cacheSavings * this.batchRequests;
+    return Math.max(0, this.cacheSavings * this.batchRequests - this.cacheWriteCost);
   }
 }

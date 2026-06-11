@@ -126,8 +126,8 @@
                         <input type="text" class="form-control form-control-sm" [(ngModel)]="join.on" placeholder="table1.id = table2.id">
                       </div>
                       <div class="col-md-1">
-                        <button class="btn btn-sm btn-outline-danger w-100" (click)="removeJoin(i)">
-                          <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm btn-outline-danger w-100" (click)="removeJoin(i)" aria-label="Remove join">
+                          <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
@@ -246,8 +246,8 @@
                           [disabled]="condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL'">
                       </div>
                       <div class="col-md-1">
-                        <button class="btn btn-sm btn-outline-danger w-100" (click)="removeCondition(i)">
-                          <i class="bi bi-trash"></i>
+                        <button class="btn btn-sm btn-outline-danger w-100" (click)="removeCondition(i)" aria-label="Remove condition">
+                          <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
@@ -270,11 +270,11 @@
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Generated SQL Query</h5>
           <div>
-            <button class="btn btn-sm btn-light me-2" (click)="copyQuery()" [disabled]="!generatedQuery">
-              <i class="bi bi-clipboard"></i>
+            <button class="btn btn-sm btn-light me-2" (click)="copyQuery()" [disabled]="!generatedQuery" aria-label="Copy query">
+              <i class="bi bi-clipboard" aria-hidden="true"></i>
             </button>
-            <button class="btn btn-sm btn-light" (click)="downloadQuery()" [disabled]="!generatedQuery">
-              <i class="bi bi-download"></i>
+            <button class="btn btn-sm btn-light" (click)="downloadQuery()" [disabled]="!generatedQuery" aria-label="Download query">
+              <i class="bi bi-download" aria-hidden="true"></i>
             </button>
           </div>
         </div>

@@ -121,8 +121,8 @@ export class CapabilitiesService {
     }
 
     const candidates = LOCAL_MODELS.filter((m) => {
-      if (report.mobile && m.tier === 'medium') {
-        return false; // keep mobile light
+      if (report.mobile && !m.lowResource) {
+        return false; // on mobile recommend only low-resource models (matches assess())
       }
       return mem >= m.minMemoryGb;
     });

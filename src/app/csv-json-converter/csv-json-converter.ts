@@ -89,14 +89,14 @@ export class CsvJsonConverter {
         this.previewRows = [];
       }
     } else {
-      const lines = this.outputText.split(/\r\n|\r|\n/).filter(l => l.trim() !== '');
-      if (lines.length === 0) return;
+      const rows = this.utilityService.parseCsv(this.outputText, this.delimiter);
+      if (rows.length === 0) return;
       const startIdx = this.hasHeader ? 1 : 0;
       this.previewHeaders = this.hasHeader
-        ? this.parseCsvLine(lines[0])
-        : this.parseCsvLine(lines[0]).map((_, i) => `col${i + 1}`);
-      this.previewRows = lines.slice(startIdx, startIdx + 10).map(l => this.parseCsvLine(l));
-      this.outputRowCount = this.hasHeader ? lines.length - 1 : lines.length;
+        ? rows[0]
+        : rows[0].map((_, i) => `col${i + 1}`);
+      this.previewRows = rows.slice(startIdx, startIdx + 10);
+      this.outputRowCount = this.hasHeader ? rows.length - 1 : rows.length;
     }
   }
 
@@ -147,40 +147,31 @@ export class CsvJsonConverter {
       throw new Error('Please enter CSV data');
     }
 
-    const lines = this.inputText.trim().split(/\r\n|\r|\n/);
-    if (lines.length === 0) {
+    // Single-pass, quote-aware parse (handles newlines inside quoted fields).
+    const rows = this.utilityService.parseCsv(this.inputText, this.delimiter);
+    if (rows.length === 0) {
       throw new Error('Empty CSV data');
     }
 
-    let headers: string[] = [];
-    let dataStartIndex = 0;
+    let headers: string[];
+    let dataRows: string[][];
 
     if (this.hasHeader) {
-      headers = this.parseCsvLine(lines[0]);
-      dataStartIndex = 1;
+      headers = rows[0];
+      dataRows = rows.slice(1);
     } else {
       // Generate default headers: col1, col2, etc.
-      const firstLine = this.parseCsvLine(lines[0]);
-      headers = firstLine.map((_, index) => `col${index + 1}`);
-      dataStartIndex = 0;
+      headers = rows[0].map((_, index) => `col${index + 1}`);
+      dataRows = rows;
     }
 
     const result: any[] = [];
 
-    for (let i = dataStartIndex; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const values = this.parseCsvLine(line);
-
-      if (values.length !== headers.length) {
-        console.warn(`Line ${i + 1} has ${values.length} columns, expected ${headers.length}`);
-      }
-
+    for (const values of dataRows) {
       if (this.jsonFormat === 'objects') {
         const obj: any = {};
         headers.forEach((header, index) => {
-          obj[header] = values[index] || '';
+          obj[header] = values[index] ?? '';
         });
         result.push(obj);
       } else {
@@ -218,8 +209,13 @@ export class CsvJsonConverter {
       throw new Error('Empty JSON array');
     }
 
-    // Extract headers from first object
-    const headers = Object.keys(data[0]);
+    // Union of keys across all rows (first-seen order) so objects with extra
+    // or differing keys are not silently dropped.
+    const headers: string[] = [];
+    const seen = new Set<string>();
+    data.forEach(obj => Object.keys(obj ?? {}).forEach(k => {
+      if (!seen.has(k)) { seen.add(k); headers.push(k); }
+    }));
     const rows: string[] = [];
 
     if (this.hasHeader) {
@@ -240,38 +236,17 @@ export class CsvJsonConverter {
     return rows.join('\n');
   }
 
-  parseCsvLine(line: string): string[] {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
-
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          current += '"';
-          i++; // Skip next quote
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === this.delimiter && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    result.push(current.trim());
-    return result;
-  }
-
   createCsvLine(values: string[]): string {
     return values.map(value => {
-      // Escape if contains delimiter, quotes, or newlines
-      if (value.includes(this.delimiter) || value.includes('"') || value.includes('\n')) {
+      // Quote if the value contains the delimiter, a quote, a line break, or
+      // significant leading/trailing whitespace (so it round-trips intact).
+      if (
+        value.includes(this.delimiter) ||
+        value.includes('"') ||
+        value.includes('\n') ||
+        value.includes('\r') ||
+        /^\s|\s$/.test(value)
+      ) {
         return `"${value.replace(/"/g, '""')}"`;
       }
       return value;
