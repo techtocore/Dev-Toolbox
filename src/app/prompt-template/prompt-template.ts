@@ -226,13 +226,15 @@ Translate the text from {{source_lang}} to {{target_lang}}, preserving {{preserv
   }
 
   generateOutput(): void {
-    this.output = this.template;
-
-    // Replace all variables in the template
-    this.variables.forEach(variable => {
-      const regex = new RegExp(`\\{\\{\\s*${variable.name}\\s*\\}\\}`, 'g');
-      this.output = this.output.replace(regex, variable.value);
-    });
+    // Single pass over the original template: each placeholder is substituted
+    // exactly once (order-independent), substituted values are never re-scanned,
+    // and the callback form inserts values literally so '$' sequences in a value
+    // (e.g. '$1', '$&') are not interpreted as replacement patterns.
+    const values = new Map(this.variables.map(v => [v.name, v.value]));
+    const regex = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
+    this.output = this.template.replace(regex, (match, name) =>
+      values.has(name) ? values.get(name)! : match
+    );
   }
 
   detectVariables(): void {

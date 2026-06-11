@@ -35,6 +35,9 @@ export class DiffChecker implements OnInit {
   ignoreWhitespace = false;
   ignoreCase = false;
 
+  /** Set when inputs exceed the live-diff size cap (avoids freezing the tab). */
+  tooLarge = false;
+
   isMobile = false;
 
   constructor(public utilityService: UtilityService) { }
@@ -50,12 +53,23 @@ export class DiffChecker implements OnInit {
   compareTexts(): void {
     if (!this.text1 && !this.text2) {
       this.diffLines = [];
+      this.tooLarge = false;
       this.resetCounts();
       return;
     }
 
     const lines1 = this.text1.split('\n');
     const lines2 = this.text2.split('\n');
+
+    // The LCS table is O(m*n) in both time and memory; on every keystroke a
+    // very large pair would freeze the tab. Cap the line-count product.
+    if (lines1.length * lines2.length > 4_000_000) {
+      this.diffLines = [];
+      this.resetCounts();
+      this.tooLarge = true;
+      return;
+    }
+    this.tooLarge = false;
 
     this.diffLines = this.generateDiff(lines1, lines2);
     this.attachWordSegments();

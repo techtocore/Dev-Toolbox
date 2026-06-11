@@ -18,14 +18,15 @@
 
       <div class="search-box">
         <div class="search-input-wrapper">
-          <i class="bi bi-search search-icon"></i>
+          <i class="bi bi-search search-icon" aria-hidden="true"></i>
           <input type="text" class="form-control search-input" [(ngModel)]="searchQuery"
             (input)="onSearchChange()" (focus)="onSearchFocus()" (blur)="onSearchBlur()"
+            aria-label="Search for tools"
             placeholder="Search for tools... (e.g., 'json', 'hash', 'color')" />
             @if (searchQuery) {
               <button class="btn btn-sm clear-btn" (click)="clearSearch()"
-                title="Clear search">
-                <i class="bi bi-x-lg"></i>
+                title="Clear search" aria-label="Clear search">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
               </button>
             }
           </div>
@@ -150,11 +151,11 @@
             <p class="cta-description">We're always adding new tools. Create an issue on GitHub or contribute code
             yourself!</p>
             <div class="cta-buttons">
-              <a href="https://github.com/techtocore/Dev-Toolbox/issues" target="_blank"
-                class="btn btn-primary-custom white-text">
+              <a href="https://github.com/techtocore/Dev-Toolbox/issues" target="_blank" rel="noopener"
+                class="btn btn-primary-custom">
                 <i class="bi bi-github"></i> Request a Tool
               </a>
-              <a href="https://github.com/techtocore/Dev-Toolbox" target="_blank"
+              <a href="https://github.com/techtocore/Dev-Toolbox" target="_blank" rel="noopener"
                 class="btn btn-secondary-custom white-text">
                 <i class="bi bi-star"></i> Star on GitHub
               </a>

@@ -134,9 +134,12 @@
         </div>
         <div class="card-body">
           <div class="file-dropzone mb-3"
+               role="button" tabindex="0" aria-label="Upload a CSV, TSV, or JSON file"
                (dragover)="onDragOver($event)"
                (drop)="onFileDropped($event)"
-               (click)="fileInput.click()">
+               (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
             <input #fileInput type="file" hidden accept=".csv,.json,.tsv,.txt" (change)="onFileSelected($event)">
             <i class="bi bi-cloud-arrow-up me-2"></i>
             <strong>Drop a .csv / .tsv / .json file</strong> or click to browse.

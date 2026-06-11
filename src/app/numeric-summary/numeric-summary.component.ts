@@ -118,17 +118,11 @@ export class NumericSummaryComponent implements OnInit {
         throw new Error('Please enter numeric data');
       }
 
-      let arr: number[] = [];
+      // Parse input — treat any run of commas and/or whitespace (spaces, tabs,
+      // newlines) as a single delimiter, so mixed separators across lines work.
+      let arr: number[] = this.inputTxt.trim().split(/[\s,]+/).map(Number);
 
-      // Parse input - support comma or space separated
-      if (this.inputTxt.includes(",")) {
-        let str = this.inputTxt.replace(/\s/g, '');
-        arr = str.split(",").map(Number);
-      } else {
-        arr = this.inputTxt.trim().split(/\s+/).map(Number);
-      }
-
-      // Remove NaN values
+      // Remove NaN values (also drops any stray empty token).
       arr = arr.filter(n => !isNaN(n));
 
       if (arr.length === 0) {
@@ -174,13 +168,15 @@ export class NumericSummaryComponent implements OnInit {
         ? 0
         : (this.stdDev / Math.abs(this.mean)) * 100;
 
-      // Skewness and Kurtosis (only if enough data)
-      if (this.count >= 3) {
-        this.skewness = this.calculateSkewness(arr, this.mean, this.stdDev);
-      }
-      if (this.count >= 4) {
-        this.kurtosis = this.calculateKurtosis(arr, this.mean, this.stdDev);
-      }
+      // Skewness and Kurtosis are undefined without variation — guard the
+      // zero-stdDev case so constant data yields N/A rather than NaN, and reset
+      // explicitly so a prior run's value never lingers (these are instance state).
+      this.skewness = (this.count >= 3 && this.stdDev > 0)
+        ? this.calculateSkewness(arr, this.mean, this.stdDev)
+        : NaN;
+      this.kurtosis = (this.count >= 4 && this.stdDev > 0)
+        ? this.calculateKurtosis(arr, this.mean, this.stdDev)
+        : NaN;
 
       // Outliers
       this.outliers = this.findOutliers(arr, this.q1, this.q3, this.iqr);

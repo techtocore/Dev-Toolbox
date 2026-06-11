@@ -45,12 +45,20 @@
         <div class="card-body">
           <!-- HEX -->
           <label class="form-label small mb-1">HEX</label>
-          <div class="input-group mb-3">
-            <input type="text" class="form-control font-monospace" [(ngModel)]="hexInput" (ngModelChange)="onHexChange()">
-            <button class="btn btn-outline-secondary" (click)="copy(hexInput, 'HEX')" title="Copy">
-              <i class="bi bi-clipboard"></i>
+          <div class="input-group mb-1">
+            <input type="text" class="form-control font-monospace" [(ngModel)]="hexInput" (ngModelChange)="onHexChange()"
+              aria-label="HEX color" [class.is-invalid]="!hexInputValid">
+            <button class="btn btn-outline-secondary" (click)="copy(hexInput, 'HEX')" title="Copy" aria-label="Copy HEX">
+              <i class="bi bi-clipboard" aria-hidden="true"></i>
             </button>
           </div>
+          @if (!hexInputValid) {
+            <small class="text-danger d-block mb-3">
+              <i class="bi bi-exclamation-circle me-1"></i>Enter a 3- or 6-digit hex like #fff or #abc123
+            </small>
+          } @else {
+            <div class="mb-3"></div>
+          }
 
           <!-- RGB -->
           <label class="form-label small mb-1">RGB</label>
@@ -115,8 +123,10 @@
             <div class="col-md-4">
               <label class="form-label small mb-1">Compare against</label>
               <div class="input-group">
-                <input type="color" class="form-control form-control-color" [(ngModel)]="contrastAgainst">
+                <input type="color" class="form-control form-control-color" [(ngModel)]="contrastAgainst"
+                  aria-label="Compare-against color (picker)">
                 <input type="text" class="form-control font-monospace" [(ngModel)]="contrastAgainst"
+                  aria-label="Compare-against color (hex)"
                   [class.is-invalid]="!contrastInputValid">
               </div>
               @if (!contrastInputValid) {

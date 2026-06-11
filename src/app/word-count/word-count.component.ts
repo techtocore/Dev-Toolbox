@@ -38,11 +38,13 @@ export class WordCountComponent implements OnInit {
     const txt = this.inputTxt || '';
     const trimmed = txt.trim();
 
-    this.charCount = txt.length;
-    this.charCountWithoutWS = txt.replace(/\s/g, '').length;
+    // Count by Unicode code point (spread iterates code points), so emoji and
+    // other astral characters count as one, not two UTF-16 code units.
+    this.charCount = [...txt].length;
+    this.charCountWithoutWS = [...txt.replace(/\s/g, '')].length;
     this.lineCount = txt === '' ? 0 : txt.split(/\r\n|\r|\n/).length;
     this.paragraphCount = trimmed === '' ? 0 : trimmed.split(/\n\s*\n+/).filter(p => p.trim().length > 0).length;
-    this.sentenceCount = trimmed === '' ? 0 : (trimmed.match(/[^.!?]+[.!?]+(?:["')\]]+)?/g) || []).length;
+    this.sentenceCount = trimmed === '' ? 0 : this.countSentences(trimmed);
 
     const wordTokens: string[] = trimmed === ''
       ? []
@@ -60,6 +62,23 @@ export class WordCountComponent implements OnInit {
     // 238 wpm ≈ average silent reading speed; 150 wpm ≈ public speaking pace.
     this.readingTimeSec = Math.round((this.wordCount / 238) * 60);
     this.speakingTimeSec = Math.round((this.wordCount / 150) * 60);
+  }
+
+  /**
+   * Counts sentences as runs ending in .!? (with optional closing quote/bracket),
+   * plus one final sentence if trailing text carries word characters but no
+   * terminating punctuation (e.g. "hello world" → 1).
+   */
+  private countSentences(trimmed: string): number {
+    const re = /[^.!?]+[.!?]+(?:["')\]]+)?/g;
+    let count = 0;
+    let lastEnd = 0;
+    while (re.exec(trimmed) !== null) {
+      count++;
+      lastEnd = re.lastIndex;
+    }
+    if (/[\p{L}\p{N}]/u.test(trimmed.slice(lastEnd))) count++;
+    return count;
   }
 
   loadSample(): void {

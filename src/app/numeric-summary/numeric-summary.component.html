@@ -17,9 +17,12 @@
         </div>
         <div class="card-body">
           <div class="file-dropzone mb-3"
+               role="button" tabindex="0" aria-label="Upload a file with numbers"
                (dragover)="onDragOver($event)"
                (drop)="onFileDropped($event)"
-               (click)="nsFileInput.click()">
+               (click)="nsFileInput.click()"
+               (keydown.enter)="nsFileInput.click()"
+               (keydown.space)="$event.preventDefault(); nsFileInput.click()">
             <input #nsFileInput type="file" hidden accept=".csv,.txt,.tsv" (change)="onFileSelected($event)">
             <i class="bi bi-cloud-arrow-up me-2"></i>
             <strong>Drop a file</strong> with whitespace- or comma-separated numbers.

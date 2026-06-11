@@ -73,9 +73,12 @@
             </div>
           } @else {
             <div class="file-dropzone"
+                 role="button" tabindex="0" aria-label="Upload a file to hash"
                  (dragover)="onDragOver($event)"
                  (drop)="onFileDropped($event)"
-                 (click)="fileInput.click()">
+                 (click)="fileInput.click()"
+                 (keydown.enter)="fileInput.click()"
+                 (keydown.space)="$event.preventDefault(); fileInput.click()">
               <input #fileInput type="file" hidden (change)="onFileSelected($event)">
               <i class="bi bi-cloud-arrow-up file-icon"></i>
               <p class="mb-1"><strong>Drop a file here</strong> or click to browse.</p>

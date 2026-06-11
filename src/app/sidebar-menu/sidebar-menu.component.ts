@@ -1,5 +1,5 @@
 import {
-  Component, ElementRef, HostListener, OnInit, ViewChild
+  Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Collapse } from 'bootstrap';
@@ -17,7 +17,7 @@ const VERTICAL_NOISE_LIMIT_PX = 40;   // ignore mostly-vertical gestures
   styleUrls: ['./sidebar-menu.component.scss'],
   standalone: false
 })
-export class SidebarMenuComponent implements OnInit {
+export class SidebarMenuComponent implements OnInit, OnDestroy {
   @ViewChild('jsonTreeComponent') jsonTree: JsonTreeComponent;
   menuData: any[] = [];
 
@@ -25,6 +25,20 @@ export class SidebarMenuComponent implements OnInit {
   private touchStartY: number | null = null;
   private touchOriginatedAtEdge = false;
   private justOpenedAt = 0;
+
+  // Bound once so it can be removed on destroy (symmetric add/remove).
+  private readonly onExpandCategory = (e: Event): void => {
+    const ev = e as CustomEvent<{ category: string }>;
+    // If we're on mobile and the drawer is closed, open it first so the
+    // expanded category is actually visible. Defer the tree expansion until
+    // after Bootstrap's collapse transition finishes.
+    if (this.isMobile() && !this.isOpen()) {
+      this.openDrawer();
+      setTimeout(() => this.expandCategory(ev.detail.category), 360);
+    } else {
+      this.expandCategory(ev.detail.category);
+    }
+  };
 
   constructor(
     private router: Router,
@@ -34,18 +48,11 @@ export class SidebarMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.menuData = this.toolsService.getMenuData();
+    window.addEventListener('expandCategory', this.onExpandCategory);
+  }
 
-    window.addEventListener('expandCategory', (event: CustomEvent) => {
-      // If we're on mobile and the drawer is closed, open it first so the
-      // expanded category is actually visible. Defer the tree expansion until
-      // after Bootstrap's collapse transition finishes.
-      if (this.isMobile() && !this.isOpen()) {
-        this.openDrawer();
-        setTimeout(() => this.expandCategory(event.detail.category), 360);
-      } else {
-        this.expandCategory(event.detail.category);
-      }
-    });
+  ngOnDestroy(): void {
+    window.removeEventListener('expandCategory', this.onExpandCategory);
   }
 
   onCustomTreeSelection(value: string) {

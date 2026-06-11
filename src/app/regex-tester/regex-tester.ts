@@ -195,14 +195,18 @@ export class RegexTester implements OnInit {
       return;
     }
 
-    // ReDoS guard: nested unbounded quantifiers on a multi-KB input can hang
-    // the tab for minutes. Block the combination and let the user opt back in
-    // by trimming either the pattern or the test string.
+    // ReDoS guard: a nested-quantifier pattern (e.g. (a+)+, (a*)*, (.*)+) can
+    // trigger catastrophic backtracking that hangs the tab — and it does so even
+    // on a handful of characters, so this is checked on ALL inputs, not just
+    // large ones. JS regex matching cannot be interrupted once started, so the
+    // only safe option is to refuse the pattern before running it. (A Web Worker
+    // with a terminate-on-timeout would let such patterns run safely; that's the
+    // robust follow-up.)
     const SUSPECT = /(\([^)]*[+*][^)]*\)[+*]|\.[+*]\?[*+])/;
-    if (this.testString.length > 50000 && SUSPECT.test(this.regexPattern)) {
+    if (SUSPECT.test(this.regexPattern)) {
       this.isValid = false;
       this.errorMessage =
-        'Pattern contains nested quantifiers on a long test string — refused to run to avoid hanging the browser. Trim the input or simplify the pattern.';
+        'Pattern contains nested quantifiers (e.g. (x+)+) that can cause catastrophic backtracking — refused to run to avoid freezing the browser. Simplify the pattern.';
       this.clearResults();
       return;
     }

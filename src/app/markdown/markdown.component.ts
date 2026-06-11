@@ -88,8 +88,9 @@ function hello(name: string) {
       .replace(/\s+on[a-z]+\s*=\s*"[^"]*"/gi, '')
       .replace(/\s+on[a-z]+\s*=\s*'[^']*'/gi, '')
       .replace(/\s+on[a-z]+\s*=\s*[^\s"'>]+/gi, '')
-      // javascript: / vbscript: / data: URLs in href/src.
-      .replace(/(href|src|xlink:href)\s*=\s*("|')\s*(?:javascript|vbscript|data)\s*:[^"']*\2/gi,
+      // Neutralize javascript:/vbscript: always, and data: URLs except inline
+      // images (data:image/...), which are legitimate and safe to render.
+      .replace(/(href|src|xlink:href)\s*=\s*("|')\s*(?:(?:javascript|vbscript)\s*:|data\s*:(?!\s*image\/))[^"']*\2/gi,
         '$1=$2#$2');
   }
 
@@ -98,7 +99,7 @@ function hello(name: string) {
     const entries: { level: number; text: string; id: string }[] = [];
     let inCode = false;
     for (const line of lines) {
-      if (/^```/.test(line)) inCode = !inCode;
+      if (/^(```|~~~)/.test(line)) inCode = !inCode;
       if (inCode) continue;
       const m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
       if (m) {

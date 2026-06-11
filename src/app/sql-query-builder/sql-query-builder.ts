@@ -249,8 +249,11 @@ export class SqlQueryBuilder {
         conditionStr += `${condition.field} IN (${condition.value})`;
       } else {
         // Numeric values pass through unquoted; strings get single-quoted with
-        // embedded single quotes doubled per the SQL standard.
-        const isNumeric = condition.value !== '' && !isNaN(Number(condition.value));
+        // embedded single quotes doubled per the SQL standard. Use a strict
+        // integer/decimal test so things like Infinity, 0x1F, 1e3, or '1.'
+        // fall through to the safe quoted-string path instead of emitting
+        // invalid SQL.
+        const isNumeric = /^-?\d+(\.\d+)?$/.test(condition.value);
         const quotedValue = isNumeric
           ? condition.value
           : `'${this.escapeSqlString(condition.value)}'`;

@@ -16,7 +16,6 @@ export class JsonTreeComponent implements OnInit {
   @Output() leafSelected = new EventEmitter<string>();
   processedData = []
   isOpen = {}
-  selectedItems = {}
 
   ngOnInit(): void {
     this.drawTree(this.data);
@@ -37,11 +36,6 @@ export class JsonTreeComponent implements OnInit {
       if (this.data[ind]['link']) {
         this.leafSelected.emit(this.data[ind]['link']);
       }
-      if (!this.selectedItems[ind]) {
-        this.selectedItems[ind] = true;
-      } else {
-        this.selectedItems[ind] = false;
-      }
     }
   }
 
@@ -59,15 +53,7 @@ export class JsonTreeComponent implements OnInit {
   }
 
   toggleOpen(i) {
-    if (!this.isOpen[i]) {
-      this.isOpen[i] = true;
-      return;
-    }
-    if (this.isOpen[i]) {
-      this.isOpen[i] = false;
-    } else {
-      this.isOpen[i] = true;
-    }
+    this.isOpen[i] = !this.isOpen[i];
   }
 
   checkExpand(ind) {

@@ -13,7 +13,6 @@ import { UtilityService } from './services/utility.service'
 import { Base64Component } from './base64/base64.component';
 import { UrlEncodeComponent } from './url-encode/url-encode.component';
 import { JsonFormatterComponent } from './json-formatter/json-formatter.component';
-import { TwoWayIoComponent } from './two-way-io/two-way-io.component';
 import { CertInfoComponent } from './cert-info/cert-info.component';
 import { MarkdownComponent } from './markdown/markdown.component';
 import { WordCountComponent } from './word-count/word-count.component';
@@ -46,7 +45,6 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     Base64Component,
     UrlEncodeComponent,
     JsonFormatterComponent,
-    TwoWayIoComponent,
     CertInfoComponent,
     MarkdownComponent,
     WordCountComponent,

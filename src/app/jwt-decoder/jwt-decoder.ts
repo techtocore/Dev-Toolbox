@@ -84,12 +84,24 @@ export class JwtDecoder implements OnInit {
       this.clearOutputs(true);
       return;
     }
+    if (!this.isPlainObject(this.headerObj)) {
+      this.errorMessage = 'JWT header is not a JSON object.';
+      this.isValid = false;
+      this.clearOutputs(true);
+      return;
+    }
 
     try {
       this.payloadObj = JSON.parse(this.base64UrlDecode(parts[1]));
       this.payloadJson = JSON.stringify(this.payloadObj, null, 2);
     } catch {
       this.errorMessage = 'Failed to decode JWT payload — invalid base64url or JSON.';
+      this.isValid = false;
+      this.clearOutputs(true);
+      return;
+    }
+    if (!this.isPlainObject(this.payloadObj)) {
+      this.errorMessage = 'JWT payload is not a JSON object.';
       this.isValid = false;
       this.clearOutputs(true);
       return;
@@ -103,10 +115,32 @@ export class JwtDecoder implements OnInit {
     this.buildClaimRows();
   }
 
+  /** True only for a non-null, non-array plain object (a valid JWT segment). */
+  private isPlainObject(value: unknown): boolean {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  /**
+   * Coerces a NumericDate-style claim (number or numeric string) to epoch
+   * seconds, returning undefined for anything non-finite. Values beyond
+   * ~year 5138 in seconds are almost certainly milliseconds, so they are
+   * normalized down — avoids a stray ms `exp` reading as a 56,000-year token.
+   */
+  private toEpochSeconds(value: unknown): number | undefined {
+    const n =
+      typeof value === 'number'
+        ? value
+        : typeof value === 'string' && value.trim() !== ''
+          ? Number(value)
+          : NaN;
+    if (!Number.isFinite(n)) return undefined;
+    return n > 1e11 ? Math.floor(n / 1000) : n;
+  }
+
   private computeExpiry(): void {
     const nowSec = Math.floor(Date.now() / 1000);
-    const exp: number | undefined = this.payloadObj.exp;
-    const nbf: number | undefined = this.payloadObj.nbf;
+    const exp = this.toEpochSeconds(this.payloadObj.exp);
+    const nbf = this.toEpochSeconds(this.payloadObj.nbf);
 
     if (nbf != null && nowSec < nbf) {
       this.expiryStatus = 'not-yet-valid';
@@ -141,8 +175,9 @@ export class JwtDecoder implements OnInit {
       let display: string;
       let tone: ClaimRow['tone'] = 'normal';
 
-      if (timeClaims.has(key) && typeof value === 'number') {
-        display = `${value}  →  ${this.formatTime(value)}`;
+      const epochSec = timeClaims.has(key) ? this.toEpochSeconds(value) : undefined;
+      if (epochSec !== undefined) {
+        display = `${value}  →  ${this.formatTime(epochSec)}`;
         if (key === 'exp') {
           tone = this.expiryStatus === 'expired' ? 'danger'
             : this.expiryStatus === 'not-yet-valid' ? 'warning'

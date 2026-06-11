@@ -65,6 +65,11 @@ export class CommandPaletteComponent implements OnInit, OnDestroy, AfterViewInit
     } else if (event.key === 'Enter') {
       event.preventDefault();
       this.activate(this.results[this.selectedIndex]);
+    } else if (event.key === 'Tab') {
+      // The search input is the only focusable control, so keep focus trapped
+      // inside the dialog rather than letting it escape to the page behind.
+      event.preventDefault();
+      this.searchInput?.nativeElement.focus();
     }
   }
 

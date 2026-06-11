@@ -1,4 +1,6 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 
 import { UrlEncodeComponent } from './url-encode.component';
 
@@ -8,7 +10,9 @@ describe('UrlEncodeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ UrlEncodeComponent ]
+      imports: [ FormsModule ],
+      declarations: [ UrlEncodeComponent ],
+      schemas: [ NO_ERRORS_SCHEMA ]
     })
     .compileComponents();
   });

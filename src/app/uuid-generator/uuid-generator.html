@@ -76,7 +76,7 @@
             </div>
           } @else {
             <div class="uuid-list">
-              @for (uuid of uuids; track uuid) {
+              @for (uuid of uuids; track $index) {
                 <div class="uuid-item">
                   <input type="text" readonly [value]="uuid" class="form-control font-monospace" />
                   <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard(uuid)" title="Copy">

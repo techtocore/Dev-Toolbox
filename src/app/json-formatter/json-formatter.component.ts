@@ -16,7 +16,7 @@ export class JsonFormatterComponent implements OnInit {
   errorMessage: string = '';
   isMobile = false;
 
-  indentSize: number = 2;
+  indentSize: number | 'tab' = 2;
   mode: Mode = 'format';
 
   // Stats
@@ -50,7 +50,7 @@ export class JsonFormatterComponent implements OnInit {
       return;
     }
 
-    const indent = this.mode === 'minify' ? 0 : this.indentSize;
+    const indent = this.mode === 'minify' ? 0 : (this.indentSize === 'tab' ? '\t' : this.indentSize);
     const data = this.mode === 'sort' ? this.sortKeysDeep(parsed) : parsed;
     this.output = JSON.stringify(data, null, indent);
     this.outputBytes = new Blob([this.output]).size;

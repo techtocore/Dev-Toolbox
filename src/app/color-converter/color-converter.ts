@@ -214,6 +214,11 @@ export class ColorConverter implements OnInit {
     return !!this.hexToRgb(this.contrastAgainst);
   }
 
+  /** Validity of the main HEX field (getter avoids stale-flag risk). */
+  get hexInputValid(): boolean {
+    return !!this.hexToRgb(this.hexInput);
+  }
+
   get contrast(): ContrastResult {
     const fg = this.hexToRgb(this.hexInput);
     const bg = this.hexToRgb(this.contrastAgainst);

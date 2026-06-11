@@ -1,8 +1,10 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { UtilityService } from './services/utility.service';
 import { CommandPaletteService } from './services/command-palette.service';
 
-const MOBILE_BREAKPOINT = 658;
+// Matches Bootstrap's md breakpoint (where the layout stacks to col-sm-12),
+// keeping UtilityService.isMobile in sync with the sidebar/home thresholds.
+const MOBILE_BREAKPOINT = 768;
 
 @Component({
   selector: 'app-root',
@@ -10,7 +12,7 @@ const MOBILE_BREAKPOINT = 658;
   styleUrls: ['./app.component.scss'],
   standalone: false
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'dev-toolbox';
   isMobile = false;
 
@@ -22,8 +24,6 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.checkMobileView();
   }
-
-  ngOnDestroy(): void {}
 
   @HostListener('window:resize', ['$event'])
   onResize(event?: Event): void {

@@ -182,66 +182,32 @@ export class DataProfiler {
   }
 
   parseCsv(): any[] {
-    const lines = this.inputData.trim().split(/\r\n|\r|\n/);
-    if (lines.length === 0) return [];
+    // Single-pass, quote-aware parse (handles newlines inside quoted fields).
+    const rows = this.utilityService.parseCsv(this.inputData, this.delimiter);
+    if (rows.length === 0) return [];
 
-    let headers: string[] = [];
-    let dataStartIndex = 0;
+    let headers: string[];
+    let dataRows: string[][];
 
     if (this.hasHeader) {
-      headers = this.parseCsvLine(lines[0]);
-      dataStartIndex = 1;
+      headers = rows[0];
+      dataRows = rows.slice(1);
     } else {
-      const firstLine = this.parseCsvLine(lines[0]);
-      headers = firstLine.map((_, index) => `col${index + 1}`);
-      dataStartIndex = 0;
+      headers = rows[0].map((_, index) => `col${index + 1}`);
+      dataRows = rows;
     }
 
     const data: any[] = [];
 
-    for (let i = dataStartIndex; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const values = this.parseCsvLine(line);
+    for (const values of dataRows) {
       const row: any = {};
-
       headers.forEach((header, index) => {
         row[header] = values[index] || null;
       });
-
       data.push(row);
     }
 
     return data;
-  }
-
-  parseCsvLine(line: string): string[] {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
-
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === this.delimiter && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    result.push(current.trim());
-    return result;
   }
 
   parseJson(): any[] {
@@ -298,14 +264,22 @@ export class DataProfiler {
     // Calculate statistics based on type
     if (profile.type === 'number') {
       const numbers = nonNullValues.map(v => Number(v));
-      profile.min = Math.min(...numbers);
-      profile.max = Math.max(...numbers);
+      // Single O(n) pass — Math.min/max(...spread) throws RangeError (call-stack
+      // argument limit) on large columns. `numbers` is non-empty here.
+      let min = numbers[0];
+      let max = numbers[0];
+      for (const n of numbers) {
+        if (n < min) min = n;
+        if (n > max) max = n;
+      }
+      profile.min = min;
+      profile.max = max;
       profile.mean = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
       profile.median = this.calculateMedian(numbers);
       profile.mode = this.calculateMode(numbers);
     } else {
-      profile.min = nonNullValues[0];
-      profile.max = nonNullValues[nonNullValues.length - 1];
+      // For non-numeric columns the unsorted first/last values aren't a
+      // meaningful min/max, so leave them undefined (exports coalesce to blank).
       profile.mode = this.calculateMode(nonNullValues);
     }
 
