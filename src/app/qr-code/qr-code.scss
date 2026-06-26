@@ -1,0 +1,59 @@
+.qr-frame {
+  position: relative;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  background:
+    linear-gradient(45deg, #e9ecef 25%, transparent 25%),
+    linear-gradient(-45deg, #e9ecef 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e9ecef 75%),
+    linear-gradient(-45deg, transparent 75%, #e9ecef 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-color: #f8f9fa;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  overflow: hidden;
+}
+
+.qr-canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  // White matte behind the code so transparent margins read cleanly on the
+  // checkerboard backdrop.
+  box-shadow: 0 0 0 8px #ffffff;
+  background: #ffffff;
+}
+
+.empty-state {
+  color: #6c757d;
+}
+
+.render-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 249, 250, 0.6);
+  border-radius: 10px;
+}
+
+.payload-out {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  color: #212529;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.form-control-color {
+  width: 100%;
+  min-width: 48px;
+}

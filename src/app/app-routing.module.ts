@@ -26,6 +26,15 @@ import { IpInfo } from './ip-info/ip-info';
 import { BubbleLevel } from './bubble-level/bubble-level';
 import { Compass } from './compass/compass';
 import { SoundMeter } from './sound-meter/sound-meter';
+import { PdfMerge } from './pdf-merge/pdf-merge';
+import { PdfSplit } from './pdf-split/pdf-split';
+import { PdfOrganize } from './pdf-organize/pdf-organize';
+import { ImagesToPdf } from './images-to-pdf/images-to-pdf';
+import { ImageResizer } from './image-resizer/image-resizer';
+import { ImageMetadata } from './image-metadata/image-metadata';
+import { ImageBase64 } from './image-base64/image-base64';
+import { QrCode } from './qr-code/qr-code';
+import { PasswordGenerator } from './password-generator/password-generator';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -54,6 +63,15 @@ const routes: Routes = [
   { path: 'bubbleLevel', component: BubbleLevel },
   { path: 'compass', component: Compass },
   { path: 'soundMeter', component: SoundMeter },
+  { path: 'pdfMerge', component: PdfMerge },
+  { path: 'pdfSplit', component: PdfSplit },
+  { path: 'pdfOrganize', component: PdfOrganize },
+  { path: 'imagesToPdf', component: ImagesToPdf },
+  { path: 'imageResizer', component: ImageResizer },
+  { path: 'imageMetadata', component: ImageMetadata },
+  { path: 'imageBase64', component: ImageBase64 },
+  { path: 'qrCode', component: QrCode },
+  { path: 'passwordGenerator', component: PasswordGenerator },
   {
     path: 'localAi',
     loadComponent: () => import('./local-ai/local-ai').then((m) => m.LocalAi),

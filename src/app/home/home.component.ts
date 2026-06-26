@@ -86,7 +86,9 @@ export class HomeComponent implements OnInit {
       'Data Analysis': 'bi-bar-chart-line',
       'Text Processing': 'bi-file-text',
       'Development Tools': 'bi-wrench',
-      'Device & Sensors': 'bi-phone-vibrate'
+      'Device & Sensors': 'bi-phone-vibrate',
+      'PDF Tools': 'bi-file-earmark-pdf',
+      'Image & Media': 'bi-image'
     };
     return icons[category] || 'bi-tools';
   }

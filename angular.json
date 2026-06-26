@@ -31,6 +31,13 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "crypto-js",
+              "node-forge",
+              "qrcode",
+              "pako",
+              "dijkstrajs"
+            ],
             "assets": [
               {
                 "glob": "**/*",

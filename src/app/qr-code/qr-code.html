@@ -1,0 +1,282 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">QR Code Generator</h2>
+      <p class="text-muted mb-4">
+        Create QR codes for text, links, or Wi-Fi networks and download them as PNG or SVG.
+        Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left column: content + options -->
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-pencil-square me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Content</h5>
+        </div>
+        <div class="card-body">
+          <!-- Content-type selector -->
+          <div class="btn-group mb-3" role="group" aria-label="Content type">
+            <button
+              type="button"
+              class="btn"
+              [class.btn-primary]="contentType === 'text'"
+              [class.btn-outline-secondary]="contentType !== 'text'"
+              (click)="setContentType('text')"
+            >
+              <i class="bi bi-fonts me-1" aria-hidden="true"></i>Text
+            </button>
+            <button
+              type="button"
+              class="btn"
+              [class.btn-primary]="contentType === 'url'"
+              [class.btn-outline-secondary]="contentType !== 'url'"
+              (click)="setContentType('url')"
+            >
+              <i class="bi bi-link-45deg me-1" aria-hidden="true"></i>URL
+            </button>
+            <button
+              type="button"
+              class="btn"
+              [class.btn-primary]="contentType === 'wifi'"
+              [class.btn-outline-secondary]="contentType !== 'wifi'"
+              (click)="setContentType('wifi')"
+            >
+              <i class="bi bi-wifi me-1" aria-hidden="true"></i>Wi-Fi
+            </button>
+          </div>
+
+          <!-- Text -->
+          @if (contentType === 'text') {
+            <div class="mb-2">
+              <label class="form-label" for="qr-text">Text</label>
+              <textarea
+                id="qr-text"
+                class="form-control"
+                rows="4"
+                placeholder="Enter any text to encode…"
+                [(ngModel)]="text"
+                (ngModelChange)="onInputChange()"
+              ></textarea>
+            </div>
+          }
+
+          <!-- URL -->
+          @if (contentType === 'url') {
+            <div class="mb-2">
+              <label class="form-label" for="qr-url">URL</label>
+              <input
+                id="qr-url"
+                type="url"
+                class="form-control"
+                placeholder="https://example.com"
+                [(ngModel)]="url"
+                (ngModelChange)="onInputChange()"
+              />
+            </div>
+          }
+
+          <!-- Wi-Fi -->
+          @if (contentType === 'wifi') {
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="wifi-ssid">Network name (SSID)</label>
+                <input
+                  id="wifi-ssid"
+                  type="text"
+                  class="form-control"
+                  placeholder="MyNetwork"
+                  [(ngModel)]="wifiSsid"
+                  (ngModelChange)="onInputChange()"
+                />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="wifi-enc">Encryption</label>
+                <select
+                  id="wifi-enc"
+                  class="form-select"
+                  [(ngModel)]="wifiEncryption"
+                  (ngModelChange)="onInputChange()"
+                >
+                  <option value="WPA">WPA / WPA2 / WPA3</option>
+                  <option value="WEP">WEP</option>
+                  <option value="nopass">None (open)</option>
+                </select>
+              </div>
+              @if (wifiEncryption !== 'nopass') {
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="wifi-pass">Password</label>
+                  <input
+                    id="wifi-pass"
+                    type="text"
+                    class="form-control"
+                    placeholder="Network password"
+                    [(ngModel)]="wifiPassword"
+                    (ngModelChange)="onInputChange()"
+                  />
+                </div>
+              }
+              <div class="col-12 col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                  <input
+                    id="wifi-hidden"
+                    class="form-check-input"
+                    type="checkbox"
+                    [(ngModel)]="wifiHidden"
+                    (ngModelChange)="onInputChange()"
+                  />
+                  <label class="form-check-label" for="wifi-hidden">Hidden network</label>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="card shadow-sm mt-3">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-sliders me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Options</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-6 col-md-3">
+              <label class="form-label" for="qr-size">Size (px)</label>
+              <input
+                id="qr-size"
+                type="number"
+                class="form-control"
+                min="64"
+                max="1024"
+                step="8"
+                [(ngModel)]="size"
+                (ngModelChange)="onSizeChange()"
+              />
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label" for="qr-ecl">Error correction</label>
+              <select
+                id="qr-ecl"
+                class="form-select"
+                [(ngModel)]="errorCorrectionLevel"
+                (ngModelChange)="onInputChange()"
+              >
+                <option value="L">L — Low (7%)</option>
+                <option value="M">M — Medium (15%)</option>
+                <option value="Q">Q — Quartile (25%)</option>
+                <option value="H">H — High (30%)</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label" for="qr-margin">Margin</label>
+              <input
+                id="qr-margin"
+                type="number"
+                class="form-control"
+                min="0"
+                max="20"
+                step="1"
+                [(ngModel)]="margin"
+                (ngModelChange)="onMarginChange()"
+              />
+            </div>
+            <div class="col-6 col-md-3 d-flex gap-3">
+              <div>
+                <label class="form-label d-block" for="qr-fg">Foreground</label>
+                <input
+                  id="qr-fg"
+                  type="color"
+                  class="form-control form-control-color"
+                  [(ngModel)]="foreground"
+                  (ngModelChange)="onInputChange()"
+                  aria-label="Foreground color"
+                />
+              </div>
+              <div>
+                <label class="form-label d-block" for="qr-bg">Background</label>
+                <input
+                  id="qr-bg"
+                  type="color"
+                  class="form-control form-control-color"
+                  [(ngModel)]="background"
+                  (ngModelChange)="onInputChange()"
+                  aria-label="Background color"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: preview + downloads -->
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-qr-code me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Preview</h5>
+        </div>
+        <div class="card-body">
+          @if (errorMessage) {
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          <div class="qr-frame mb-3" [class.is-empty]="!hasRendered">
+            <canvas #qrCanvas class="qr-canvas" [class.d-none]="!hasRendered"></canvas>
+            @if (!hasRendered) {
+              <div class="empty-state text-center text-muted p-4">
+                <i class="bi bi-qr-code display-5 d-block mb-2" aria-hidden="true"></i>
+                <span>Enter content to generate a QR code.</span>
+              </div>
+            }
+            @if (isRendering) {
+              <div class="render-overlay">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              </div>
+            }
+          </div>
+
+          <div class="d-grid gap-2 d-sm-flex">
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="!hasRendered || isRendering"
+              (click)="downloadPng()"
+            >
+              <i class="bi bi-download me-1" aria-hidden="true"></i>PNG
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [disabled]="!hasRendered || isRendering"
+              (click)="downloadSvg()"
+            >
+              <i class="bi bi-filetype-svg me-1" aria-hidden="true"></i>SVG
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [disabled]="!hasPayload"
+              (click)="copyPayload()"
+            >
+              <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy payload
+            </button>
+          </div>
+
+          @if (hasPayload) {
+            <div class="mt-3">
+              <label class="form-label small text-muted mb-1" for="qr-payload-out">Encoded payload</label>
+              <code id="qr-payload-out" class="payload-out d-block">{{ payload }}</code>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,150 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Image Resizer &amp; Compressor</h2>
+      <p class="text-muted mb-4">
+        Resize, convert, and compress images to PNG, JPEG, or WebP. Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left: upload + source preview -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-image me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Source Image</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload an image"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden accept="image/*" [multiple]="false" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop an image</strong> or click to browse.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (previewUrl) {
+            <div class="preview-frame mb-3">
+              <img [src]="previewUrl" alt="Source preview" class="preview-img">
+            </div>
+
+            <dl class="row mb-0 small">
+              <dt class="col-5 text-muted">File name</dt>
+              <dd class="col-7 text-truncate" [title]="fileName">{{ fileName }}</dd>
+
+              <dt class="col-5 text-muted">Dimensions</dt>
+              <dd class="col-7">{{ originalWidth }} × {{ originalHeight }} px</dd>
+
+              <dt class="col-5 text-muted">File size</dt>
+              <dd class="col-7">{{ formatBytes(originalBytes) }}</dd>
+            </dl>
+
+            <button type="button" class="btn btn-outline-secondary btn-sm mt-3" (click)="clearAll()">
+              <i class="bi bi-trash me-1" aria-hidden="true"></i>Clear
+            </button>
+          } @else {
+            <p class="text-muted small mb-0">No image loaded yet. Drop one above to get started.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: controls + result -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-sliders me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Output Settings</h5>
+        </div>
+        <div class="card-body">
+          <fieldset [disabled]="!previewUrl">
+            <div class="row g-2 align-items-end mb-2">
+              <div class="col-6">
+                <label for="resizeWidth" class="form-label small mb-1">Width (px)</label>
+                <input id="resizeWidth" type="number" min="1" class="form-control"
+                       [(ngModel)]="targetWidth" (ngModelChange)="onWidthChange()">
+              </div>
+              <div class="col-6">
+                <label for="resizeHeight" class="form-label small mb-1">Height (px)</label>
+                <input id="resizeHeight" type="number" min="1" class="form-control"
+                       [(ngModel)]="targetHeight" (ngModelChange)="onHeightChange()">
+              </div>
+            </div>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="lockAspect"
+                     [(ngModel)]="lockAspect" (ngModelChange)="onLockToggle()">
+              <label class="form-check-label small" for="lockAspect">
+                <i class="bi bi-lock me-1" aria-hidden="true"></i>Lock aspect ratio
+              </label>
+            </div>
+
+            <div class="mb-3">
+              <label for="outputFormat" class="form-label small mb-1">Output format</label>
+              <select id="outputFormat" class="form-select" [(ngModel)]="format">
+                <option value="png">PNG (lossless)</option>
+                <option value="jpeg">JPEG</option>
+                <option value="webp">WebP</option>
+              </select>
+            </div>
+
+            @if (isLossy) {
+              <div class="mb-3">
+                <label for="quality" class="form-label small mb-1 d-flex justify-content-between">
+                  <span>Quality</span>
+                  <span class="badge text-bg-light">{{ quality.toFixed(2) }}</span>
+                </label>
+                <input id="quality" type="range" class="form-range"
+                       min="0.1" max="1" step="0.05" [(ngModel)]="quality">
+              </div>
+            }
+
+            <button type="button" class="btn btn-primary w-100"
+                    [disabled]="!previewUrl || isProcessing" (click)="process()">
+              @if (isProcessing) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Processing…
+              } @else {
+                <i class="bi bi-download me-2" aria-hidden="true"></i>Process &amp; download
+              }
+            </button>
+          </fieldset>
+
+          @if (hasResult) {
+            <hr>
+            <h6 class="mb-2"><i class="bi bi-check2-circle me-1 text-success" aria-hidden="true"></i>Result</h6>
+            @if (resultUrl) {
+              <div class="preview-frame mb-3">
+                <img [src]="resultUrl" alt="Processed result preview" class="preview-img">
+              </div>
+            }
+            <dl class="row mb-0 small">
+              <dt class="col-5 text-muted">Dimensions</dt>
+              <dd class="col-7">{{ outputWidth }} × {{ outputHeight }} px</dd>
+
+              <dt class="col-5 text-muted">New size</dt>
+              <dd class="col-7">{{ formatBytes(outputBytes) }}</dd>
+
+              <dt class="col-5 text-muted">Change</dt>
+              <dd class="col-7">
+                <span class="badge" [class.text-bg-success]="!sizeIncreased" [class.text-bg-warning]="sizeIncreased">
+                  {{ sizeChangeLabel }}
+                </span>
+                <span class="text-muted ms-1">vs original</span>
+              </dd>
+            </dl>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

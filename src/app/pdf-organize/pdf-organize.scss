@@ -1,0 +1,35 @@
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .18s ease;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: .9rem;
+}
+
+.file-dropzone:hover {
+  border-color: #017cad;
+  background: #f1f7fb;
+  color: #017cad;
+}
+
+.page-label {
+  min-width: 5rem;
+  color: #212529;
+}
+
+.list-group-item {
+  color: #212529;
+}
+
+.page-deleted {
+  background: #fff5f5;
+
+  .page-label {
+    text-decoration: line-through;
+    color: #adb5bd;
+  }
+}

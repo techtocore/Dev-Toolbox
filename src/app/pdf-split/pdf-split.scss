@@ -1,0 +1,43 @@
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: 0.9rem;
+
+  &:hover {
+    border-color: #017cad;
+    background: #f1f7fb;
+    color: #017cad;
+  }
+
+  i {
+    font-size: 1.2rem;
+    vertical-align: middle;
+  }
+}
+
+code {
+  color: #017cad;
+  background: #f1f7fb;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.btn-group .btn {
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 576px) {
+  .btn-group {
+    width: 100%;
+
+    .btn {
+      flex: 1 1 auto;
+    }
+  }
+}

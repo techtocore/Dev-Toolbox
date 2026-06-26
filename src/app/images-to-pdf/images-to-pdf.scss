@@ -1,0 +1,65 @@
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .18s ease;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: .9rem;
+}
+
+.file-dropzone:hover {
+  border-color: #017cad;
+  background: #f1f7fb;
+  color: #017cad;
+}
+
+.image-list {
+  max-height: 460px;
+  overflow-y: auto;
+
+  .order-badge {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #017cad;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+  }
+
+  .thumb {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+  }
+
+  .filename {
+    min-width: 0;
+    font-size: .9rem;
+    color: #212529;
+  }
+}
+
+@media (max-width: 576px) {
+  .image-list {
+    .thumb {
+      width: 40px;
+      height: 40px;
+    }
+
+    .filename {
+      font-size: .8rem;
+    }
+  }
+}

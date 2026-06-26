@@ -83,15 +83,23 @@ export class UtilityService {
   }
 
   downloadFile(data: string, contentType: string, fileName: string): void {
-    const file = new window.Blob([data], { type: contentType });
+    this.downloadBlob(new window.Blob([data], { type: contentType }), fileName);
+  }
 
+  /**
+   * Download an arbitrary Blob (binary-safe — used by the PDF / image tools for
+   * Uint8Array / canvas output that the string-based downloadFile can't carry).
+   */
+  downloadBlob(blob: Blob, fileName: string): void {
     const downloadAnchor = document.createElement("a");
     downloadAnchor.style.display = "none";
 
-    const fileURL = URL.createObjectURL(file);
+    const fileURL = URL.createObjectURL(blob);
     downloadAnchor.href = fileURL;
     downloadAnchor.download = fileName;
+    document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
+    downloadAnchor.remove();
 
     // Revoke the object URL after a short delay to prevent memory leaks
     setTimeout(() => {

@@ -1,0 +1,164 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Image Metadata (EXIF) Viewer &amp; Stripper</h2>
+      <p class="text-muted mb-4">
+        Inspect the EXIF/GPS tags embedded in a photo, then download a clean copy with all metadata
+        removed. Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Upload + preview -->
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-image me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Image</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload an image"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden
+                   accept="image/jpeg,image/png,image/webp"
+                   [multiple]="false" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop an image</strong> or click to browse.
+            <div class="text-muted small mt-1">JPEG, PNG, or WebP — up to 30 MB.</div>
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger d-flex align-items-start" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2 mt-1" aria-hidden="true"></i>
+              <div>{{ errorMessage }}</div>
+            </div>
+          }
+
+          @if (previewUrl) {
+            <div class="preview-wrap mb-3">
+              <img [src]="previewUrl" class="preview-img" alt="Selected image preview">
+            </div>
+            <div class="d-flex justify-content-between align-items-center small text-muted mb-3">
+              <span class="text-truncate me-2" [title]="fileName">
+                <i class="bi bi-file-earmark-image me-1" aria-hidden="true"></i>{{ fileName }}
+              </span>
+              <span class="flex-shrink-0">{{ fileSizeLabel }}</span>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clear()">
+              <i class="bi bi-x-lg me-1" aria-hidden="true"></i>Clear
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Download stripped copy -->
+      @if (previewUrl) {
+        <div class="card shadow-sm mt-3">
+          <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-shield-lock me-2" aria-hidden="true"></i>
+            <h5 class="mb-0">Download stripped copy</h5>
+          </div>
+          <div class="card-body">
+            <p class="small text-muted mb-3">
+              Saves a re-encoded copy with <strong>all</strong> metadata removed (EXIF, GPS, XMP).
+              Note: re-encoding may slightly change pixels and file size.
+            </p>
+            <label class="form-label small fw-semibold" for="exportFormat">Output format</label>
+            <select id="exportFormat" class="form-select form-select-sm mb-3"
+                    [(ngModel)]="exportFormat">
+              <option value="jpeg">JPEG (quality 0.92)</option>
+              <option value="png">PNG (lossless)</option>
+            </select>
+            <button type="button" class="btn btn-primary w-100"
+                    [disabled]="stripping" (click)="downloadStripped()">
+              @if (stripping) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Working…
+              } @else {
+                <i class="bi bi-download me-2" aria-hidden="true"></i>Download stripped copy
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Results -->
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Metadata</h5>
+          @if (groups.length > 0 || hasGps) {
+            <button type="button" class="btn btn-sm btn-outline-light ms-auto"
+                    aria-label="Copy all metadata" (click)="copyAll()">
+              <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy all
+            </button>
+          }
+        </div>
+        <div class="card-body">
+          @if (loading) {
+            <div class="text-center text-muted py-4">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Reading metadata…
+            </div>
+          } @else if (!previewUrl) {
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-image fs-1 d-block mb-2" aria-hidden="true"></i>
+              Upload an image to inspect its embedded metadata.
+            </div>
+          } @else {
+            <!-- GPS privacy warning -->
+            @if (hasGps) {
+              <div class="alert alert-danger" role="alert">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-geo-alt-fill me-2 fs-5" aria-hidden="true"></i>
+                  <strong>Privacy warning — this photo contains GPS location data.</strong>
+                </div>
+                <div class="small mb-2">
+                  The exact place this image was captured is embedded in the file. Strip the metadata
+                  before sharing it publicly.
+                </div>
+                <div class="mb-2"><code>{{ gpsLabel }}</code></div>
+                <a class="btn btn-sm btn-outline-danger" [href]="mapUrl"
+                   target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-map me-1" aria-hidden="true"></i>View on OpenStreetMap
+                </a>
+              </div>
+            }
+
+            @if (noMetadata) {
+              <div class="alert alert-info mb-0" role="alert">
+                <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+                No embedded metadata found (already clean, or this format carries none).
+              </div>
+            }
+
+            @for (group of groups; track group.title) {
+              <div class="mb-3">
+                <h6 class="text-uppercase text-muted small fw-bold d-flex align-items-center mb-2">
+                  <i class="bi {{ group.icon }} me-2" aria-hidden="true"></i>{{ group.title }}
+                </h6>
+                <div class="table-responsive">
+                  <table class="table table-sm table-borderless mb-0 meta-table">
+                    <tbody>
+                      @for (row of group.rows; track row.label) {
+                        <tr>
+                          <td class="meta-key">{{ row.label }}</td>
+                          <td class="meta-val">{{ row.value }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

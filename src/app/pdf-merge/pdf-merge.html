@@ -1,0 +1,111 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Merge PDF</h2>
+      <p class="text-muted mb-4">
+        Combine several PDF files into a single document. Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-files me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Add PDFs</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload PDF files"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden accept=".pdf" [multiple]="true" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop PDF files</strong> or click to browse. Add two or more to merge.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger d-flex align-items-start" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2 mt-1" aria-hidden="true"></i>
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+
+          @if (files.length > 0) {
+            <ul class="list-group mb-3">
+              @for (entry of files; track entry; let idx = $index) {
+                <li class="list-group-item d-flex align-items-center gap-2">
+                  <span class="badge bg-secondary order-badge">{{ idx + 1 }}</span>
+                  <i class="bi bi-file-earmark-pdf text-danger" aria-hidden="true"></i>
+                  <div class="flex-grow-1 min-w-0">
+                    <div class="fw-semibold text-truncate" [title]="entry.name">{{ entry.name }}</div>
+                    <small class="text-muted">{{ entry.pages }} page{{ entry.pages === 1 ? '' : 's' }} · {{ entry.sizeLabel }}</small>
+                  </div>
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Reorder and remove">
+                    <button type="button" class="btn btn-outline-secondary"
+                            [disabled]="idx === 0 || isLoading"
+                            (click)="moveUp(idx)" aria-label="Move up">
+                      <i class="bi bi-arrow-up" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            [disabled]="idx === files.length - 1 || isLoading"
+                            (click)="moveDown(idx)" aria-label="Move down">
+                      <i class="bi bi-arrow-down" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger"
+                            [disabled]="isLoading"
+                            (click)="remove(idx)" aria-label="Remove file">
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="text-muted mb-0">No files added yet.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-collection me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Summary</h5>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-3">
+            <dt class="col-7">Files</dt>
+            <dd class="col-5 text-end mb-2">{{ files.length }}</dd>
+            <dt class="col-7">Total pages</dt>
+            <dd class="col-5 text-end mb-0">{{ totalPages }}</dd>
+          </dl>
+
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-primary"
+                    [disabled]="!canMerge" (click)="merge()">
+              @if (isLoading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Working…
+              } @else {
+                <i class="bi bi-download me-2" aria-hidden="true"></i>
+                Merge &amp; download
+              }
+            </button>
+            <button type="button" class="btn btn-outline-secondary"
+                    [disabled]="files.length === 0 || isLoading" (click)="clearAll()">
+              <i class="bi bi-x-circle me-2" aria-hidden="true"></i>
+              Clear all
+            </button>
+          </div>
+
+          @if (files.length < 2) {
+            <p class="text-muted small mt-3 mb-0">Add at least two PDFs to enable merging.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

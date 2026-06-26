@@ -1,0 +1,131 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Image &lt;-&gt; Base64 Data URI</h2>
+      <p class="text-muted mb-4">
+        Convert an image into a Base64 data URI you can inline in CSS or HTML, or paste a data URI back into a downloadable image. Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- (A) ENCODE: image -> data URI -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-file-earmark-image me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Encode — image to data URI</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload an image to encode"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden accept="image/*" [multiple]="false" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop an image</strong> or click to browse.
+          </div>
+
+          @if (encodeError) {
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ encodeError }}
+            </div>
+          }
+
+          @if (encodeUri) {
+            <dl class="row mb-3 small">
+              <dt class="col-4 text-muted">File name</dt>
+              <dd class="col-8 text-truncate" [title]="fileName">{{ fileName }}</dd>
+
+              <dt class="col-4 text-muted">MIME type</dt>
+              <dd class="col-8">{{ fileMime || 'unknown' }}</dd>
+
+              <dt class="col-4 text-muted">URI size</dt>
+              <dd class="col-8">{{ formatBytes(encodeBytes) }}</dd>
+            </dl>
+
+            @if (encodeTooLarge) {
+              <div class="alert alert-warning py-2 small" role="alert">
+                <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>
+                This data URI is over 1 MB. Base64 inflates the raw image by about 33%, so inlining it can bloat your HTML/CSS and slow page parsing — consider linking the file instead.
+              </div>
+            }
+
+            <label for="encodeOutput" class="form-label small mb-1">Data URI</label>
+            <textarea id="encodeOutput" class="form-control font-monospace mb-2 uri-area" rows="6"
+                      readonly [value]="encodeUri" aria-label="Encoded data URI"></textarea>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn btn-primary btn-sm" (click)="copyUri()">
+                <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy URI
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="copyCss()">
+                <i class="bi bi-filetype-css me-1" aria-hidden="true"></i>Copy CSS
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="copyHtml()">
+                <i class="bi bi-filetype-html me-1" aria-hidden="true"></i>Copy HTML
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearEncode()">
+                <i class="bi bi-trash me-1" aria-hidden="true"></i>Clear
+              </button>
+            </div>
+
+            <label class="form-label small mb-1">CSS snippet</label>
+            <pre class="snippet mb-3"><code>{{ cssSnippet }}</code></pre>
+
+            <label class="form-label small mb-1">HTML snippet</label>
+            <pre class="snippet mb-0"><code>{{ htmlSnippet }}</code></pre>
+          } @else {
+            <p class="text-muted small mb-0">No image loaded yet. Drop one above to generate its data URI.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- (B) DECODE: data URI -> image -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-image me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Decode — data URI to image</h5>
+        </div>
+        <div class="card-body">
+          <label for="decodeInput" class="form-label small mb-1">Paste a data URI</label>
+          <textarea id="decodeInput" class="form-control font-monospace mb-2 uri-area" rows="6"
+                    placeholder="data:image/png;base64,iVBORw0KGgo…"
+                    [(ngModel)]="decodeInput" (ngModelChange)="onDecodeInput()"
+                    aria-label="Data URI to decode"></textarea>
+
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="btn btn-primary btn-sm"
+                    [disabled]="!decodePreview" (click)="downloadDecoded()">
+              <i class="bi bi-download me-1" aria-hidden="true"></i>Download image
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    [disabled]="!decodeInput" (click)="clearDecode()">
+              <i class="bi bi-trash me-1" aria-hidden="true"></i>Clear
+            </button>
+          </div>
+
+          @if (decodeError) {
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ decodeError }}
+            </div>
+          }
+
+          @if (decodePreview) {
+            <dl class="row mb-2 small">
+              <dt class="col-4 text-muted">MIME type</dt>
+              <dd class="col-8">{{ decodeMime }}</dd>
+            </dl>
+            <div class="preview-frame">
+              <img [src]="decodePreview" alt="Decoded image preview" class="preview-img" (error)="onPreviewError()">
+            </div>
+          } @else if (!decodeError) {
+            <p class="text-muted small mb-0">Paste an image data URI above to preview and download it.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

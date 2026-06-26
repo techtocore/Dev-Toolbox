@@ -1,0 +1,128 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Split / Extract PDF Pages</h2>
+      <p class="text-muted mb-4">
+        Pull specific pages out of a PDF into a new file. Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-filetype-pdf me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Upload PDF</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload a PDF file"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()" (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden accept=".pdf" [multiple]="false" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop a PDF</strong> or click to browse.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger mb-3" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (pageCount > 0) {
+            <div class="alert alert-success d-flex align-items-center mb-0" role="status">
+              <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>
+              <span>
+                Loaded <strong>{{ fileName }}</strong> &mdash;
+                <strong>{{ pageCount }}</strong> page{{ pageCount === 1 ? '' : 's' }}.
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (pageCount > 0) {
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-scissors me-2" aria-hidden="true"></i>
+            <h5 class="mb-0">Select Pages</h5>
+          </div>
+          <div class="card-body">
+            <label class="form-label" for="pageSelection">
+              Pages to extract (1-based, e.g. <code>1-3, 5, 8-10</code>)
+            </label>
+            <input
+              id="pageSelection"
+              type="text"
+              class="form-control mb-3"
+              placeholder="1-3, 5, 8-10"
+              [(ngModel)]="selection"
+              (ngModelChange)="onSelectionChange()"
+              [disabled]="isLoading"
+              aria-describedby="selectionHelp">
+
+            <div class="mb-3">
+              <span id="selectionHelp" class="text-muted small me-2">Quick select:</span>
+              <div class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Quick page selection">
+                <button type="button" class="btn btn-outline-secondary" (click)="selectAll()" [disabled]="isLoading">
+                  <i class="bi bi-files me-1" aria-hidden="true"></i>All
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="selectFirstHalf()" [disabled]="isLoading">
+                  <i class="bi bi-align-top me-1" aria-hidden="true"></i>First half
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="selectSecondHalf()" [disabled]="isLoading">
+                  <i class="bi bi-align-bottom me-1" aria-hidden="true"></i>Second half
+                </button>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="extract()"
+                [disabled]="isLoading || pageCount === 0">
+                @if (isLoading) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Working…
+                } @else {
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>
+                  Extract &amp; download
+                  @if (selectedCount > 0) {
+                    <span class="badge text-bg-light ms-1">{{ selectedCount }}</span>
+                  }
+                }
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="clear()" [disabled]="isLoading">
+                <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Clear
+              </button>
+            </div>
+
+            <p class="text-muted small mb-0 mt-3">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              Pages are extracted in the order you list them. You can change the selection and re-run for another range.
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-lightbulb me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Tips</h5>
+        </div>
+        <div class="card-body">
+          <ul class="mb-0 ps-3">
+            <li class="mb-2">Use a dash for ranges: <code>2-6</code>.</li>
+            <li class="mb-2">Combine ranges and single pages with commas: <code>1, 4, 9-12</code>.</li>
+            <li class="mb-2">Pages keep the order you type — <code>3, 1</code> outputs page 3 then page 1.</li>
+            <li class="mb-0">Everything is processed locally; nothing is uploaded.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -148,6 +148,14 @@ export class ToolsService {
       icon: 'bi-award',
       keywords: ['certificate', 'cert', 'x509', 'ssl', 'tls', 'pem']
     },
+    {
+      name: 'Password & Passphrase Generator',
+      description: 'Generate strong passwords and memorable passphrases locally with the Web Crypto CSPRNG — never transmitted',
+      route: '/passwordGenerator',
+      category: 'Encoding & Security',
+      icon: 'bi-key',
+      keywords: ['password', 'passphrase', 'generator', 'random', 'secret', 'secure', 'entropy', 'diceware', 'strong', 'crypto']
+    },
 
     // ── Data Analysis ───────────────────────────────────────────────────────
     {
@@ -245,6 +253,14 @@ export class ToolsService {
       icon: 'bi-globe',
       keywords: ['ip', 'address', 'isp', 'hostname', 'location', 'timezone', 'browser', 'user agent', 'geolocation', 'network']
     },
+    {
+      name: 'QR Code Generator',
+      description: 'Create QR codes from text, URLs, or Wi-Fi credentials — rendered locally, download as PNG or SVG',
+      route: '/qrCode',
+      category: 'Development Tools',
+      icon: 'bi-qr-code',
+      keywords: ['qr', 'qrcode', 'barcode', 'generate', 'wifi', 'url', 'vcard', 'png', 'svg', 'scan']
+    },
 
     // ── Device & Sensors ────────────────────────────────────────────────────
     // On-device hardware sensors with graceful fallbacks when a form factor
@@ -273,6 +289,70 @@ export class ToolsService {
       category: 'Device & Sensors',
       icon: 'bi-soundwave',
       keywords: ['sound', 'noise', 'decibel', 'db', 'spl', 'loudness', 'microphone', 'mic', 'meter', 'audio', 'volume', 'sensor']
+    },
+
+    // ── PDF Tools ───────────────────────────────────────────────────────────
+    // 100% in-browser PDF editing via pdf-lib — files never leave the device.
+    {
+      name: 'Merge PDF',
+      description: 'Combine multiple PDF files into one document, fully in your browser',
+      route: '/pdfMerge',
+      category: 'PDF Tools',
+      icon: 'bi-file-earmark-pdf',
+      keywords: ['pdf', 'merge', 'combine', 'join', 'concatenate', 'documents', 'append'],
+      featured: true
+    },
+    {
+      name: 'Split / Extract PDF',
+      description: 'Pull a page range out of a PDF into a new file — no upload, no server',
+      route: '/pdfSplit',
+      category: 'PDF Tools',
+      icon: 'bi-scissors',
+      keywords: ['pdf', 'split', 'extract', 'pages', 'range', 'separate', 'divide']
+    },
+    {
+      name: 'Organize PDF',
+      description: 'Reorder, rotate, and delete pages, then download the rebuilt PDF',
+      route: '/pdfOrganize',
+      category: 'PDF Tools',
+      icon: 'bi-files',
+      keywords: ['pdf', 'organize', 'reorder', 'rotate', 'delete', 'pages', 'rearrange', 'remove']
+    },
+    {
+      name: 'Images to PDF',
+      description: 'Combine JPG/PNG images into a single PDF with A4, Letter, or fit-to-image pages',
+      route: '/imagesToPdf',
+      category: 'PDF Tools',
+      icon: 'bi-images',
+      keywords: ['pdf', 'image', 'jpg', 'jpeg', 'png', 'convert', 'combine', 'photo', 'scan']
+    },
+
+    // ── Image & Media ───────────────────────────────────────────────────────
+    // Canvas / EXIF tooling that never uploads your images.
+    {
+      name: 'Image Resizer & Compressor',
+      description: 'Resize, compress, and convert images (PNG/JPEG/WebP) locally with a before/after size view',
+      route: '/imageResizer',
+      category: 'Image & Media',
+      icon: 'bi-aspect-ratio',
+      keywords: ['image', 'resize', 'compress', 'convert', 'png', 'jpeg', 'webp', 'optimize', 'shrink', 'photo'],
+      featured: true
+    },
+    {
+      name: 'Image Metadata Viewer & Stripper',
+      description: 'Inspect EXIF/GPS metadata in a photo and download a stripped, share-safe copy',
+      route: '/imageMetadata',
+      category: 'Image & Media',
+      icon: 'bi-geo-alt',
+      keywords: ['exif', 'metadata', 'gps', 'strip', 'privacy', 'image', 'photo', 'location', 'camera', 'remove']
+    },
+    {
+      name: 'Image to Base64 Data URI',
+      description: 'Convert an image to a Base64 data URI (with CSS/HTML snippets) and back, in-browser',
+      route: '/imageBase64',
+      category: 'Image & Media',
+      icon: 'bi-filetype-raw',
+      keywords: ['image', 'base64', 'data uri', 'datauri', 'inline', 'css', 'encode', 'decode', 'embed']
     }
   ];
 

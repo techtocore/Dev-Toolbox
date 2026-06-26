@@ -35,6 +35,15 @@ import { IpInfo } from './ip-info/ip-info';
 import { BubbleLevel } from './bubble-level/bubble-level';
 import { Compass } from './compass/compass';
 import { SoundMeter } from './sound-meter/sound-meter';
+import { PdfMerge } from './pdf-merge/pdf-merge';
+import { PdfSplit } from './pdf-split/pdf-split';
+import { PdfOrganize } from './pdf-organize/pdf-organize';
+import { ImagesToPdf } from './images-to-pdf/images-to-pdf';
+import { ImageResizer } from './image-resizer/image-resizer';
+import { ImageMetadata } from './image-metadata/image-metadata';
+import { ImageBase64 } from './image-base64/image-base64';
+import { QrCode } from './qr-code/qr-code';
+import { PasswordGenerator } from './password-generator/password-generator';
 import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
 import { CommandPaletteComponent } from './command-palette/command-palette.component';
 import { AiAssist } from './ai/ai-assist/ai-assist';
@@ -70,6 +79,15 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     BubbleLevel,
     Compass,
     SoundMeter,
+    PdfMerge,
+    PdfSplit,
+    PdfOrganize,
+    ImagesToPdf,
+    ImageResizer,
+    ImageMetadata,
+    ImageBase64,
+    QrCode,
+    PasswordGenerator,
     ToastOutletComponent,
     CommandPaletteComponent
   ],

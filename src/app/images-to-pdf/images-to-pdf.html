@@ -1,0 +1,123 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Images to PDF</h2>
+      <p class="text-muted mb-4">
+        Combine images into a single PDF, in the order you choose. Everything runs in your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left: upload + image list -->
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-images me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Images</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload images"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden accept="image/*" [multiple]="true" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop images</strong> or click to browse. JPEG, PNG, WebP, GIF, BMP.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+          }
+
+          @if (images.length === 0) {
+            <p class="text-muted mb-0">No images added yet.</p>
+          } @else {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small">{{ images.length }} image(s) — top of list is the first page.</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearAll()">
+                <i class="bi bi-trash me-1" aria-hidden="true"></i>Clear all
+              </button>
+            </div>
+
+            <ul class="list-group image-list">
+              @for (img of images; track img.url; let i = $index) {
+                <li class="list-group-item d-flex align-items-center gap-3">
+                  <span class="order-badge">{{ i + 1 }}</span>
+                  <img class="thumb" [src]="img.url" [alt]="img.name">
+                  <span class="filename flex-grow-1 text-truncate" [title]="img.name">{{ img.name }}</span>
+                  <div class="btn-group" role="group" aria-label="Reorder and remove">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            [disabled]="i === 0" (click)="moveUp(i)" aria-label="Move up">
+                      <i class="bi bi-arrow-up" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            [disabled]="i === images.length - 1" (click)="moveDown(i)" aria-label="Move down">
+                      <i class="bi bi-arrow-down" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            (click)="removeImage(i)" aria-label="Remove image">
+                      <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: options -->
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-sliders me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Options</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label" for="pageSize">Page size</label>
+            <select id="pageSize" class="form-select" [(ngModel)]="pageSize">
+              <option value="fit">Fit to image</option>
+              <option value="a4">A4</option>
+              <option value="letter">Letter</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="orientation">Orientation</label>
+            <select id="orientation" class="form-select" [(ngModel)]="orientation"
+                    [disabled]="pageSize === 'fit'">
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+            @if (pageSize === 'fit') {
+              <div class="form-text">Orientation is ignored when fitting the page to each image.</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="margin">Margin (pt)</label>
+            <input id="margin" type="number" class="form-control" min="0" step="1"
+                   [(ngModel)]="margin" [disabled]="pageSize === 'fit'">
+            @if (pageSize === 'fit') {
+              <div class="form-text">Margins apply only to A4 / Letter pages.</div>
+            }
+          </div>
+
+          <button type="button" class="btn btn-primary w-100"
+                  [disabled]="images.length === 0 || isBuilding" (click)="buildPdf()">
+            @if (isBuilding) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Building…
+            } @else {
+              <i class="bi bi-file-earmark-pdf me-2" aria-hidden="true"></i>
+              Build PDF
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

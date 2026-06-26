@@ -1,0 +1,60 @@
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .18s ease;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: .9rem;
+}
+
+.file-dropzone:hover {
+  border-color: #017cad;
+  background: #f1f7fb;
+  color: #017cad;
+}
+
+.preview-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f3f5;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 8px;
+  max-height: 320px;
+  overflow: hidden;
+}
+
+.preview-img {
+  max-width: 100%;
+  max-height: 304px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.meta-table {
+  td {
+    padding: .3rem .5rem;
+    vertical-align: top;
+    color: #212529;
+  }
+
+  .meta-key {
+    width: 38%;
+    color: #6c757d;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .meta-val {
+    word-break: break-word;
+  }
+
+  tr:nth-child(odd) {
+    background: #f8f9fa;
+  }
+}

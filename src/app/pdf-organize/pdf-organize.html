@@ -1,0 +1,129 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Organize PDF</h2>
+      <p class="text-muted mb-4">
+        Reorder, rotate, and delete pages, then download the result. Everything runs in
+        your browser — your files never leave your device.
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-file-earmark-pdf me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">PDF pages</h5>
+        </div>
+        <div class="card-body">
+
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload a PDF file"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
+               (keydown.enter)="fileInput.click()"
+               (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <input #fileInput type="file" hidden accept=".pdf" [multiple]="false" (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop a PDF</strong> or click to browse.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (loading) {
+            <div class="d-flex align-items-center text-muted mb-3" aria-live="polite">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Working…
+            </div>
+          }
+
+          @if (hasDocument) {
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <div class="text-muted small text-break">
+                <i class="bi bi-paperclip me-1" aria-hidden="true"></i>
+                <strong>{{ fileName }}</strong>
+                &middot; {{ remainingCount }} of {{ pages.length }} page(s) kept
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary"
+                        [disabled]="!canDownload" (click)="applyAndDownload()">
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Apply &amp; download
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        [disabled]="loading" (click)="clear()">
+                  <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Clear
+                </button>
+              </div>
+            </div>
+
+            <ul class="list-group">
+              @for (page of pages; track trackByEntry($index, page); let i = $index) {
+                <li class="list-group-item d-flex flex-wrap align-items-center gap-2"
+                    [class.page-deleted]="page.deleted">
+                  <span class="page-label fw-semibold">
+                    Page {{ page.srcIndex + 1 }}
+                  </span>
+
+                  <span class="badge text-bg-light border" aria-label="Rotation">
+                    <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>{{ page.rotation }}&deg;
+                  </span>
+
+                  @if (page.deleted) {
+                    <span class="badge text-bg-danger">Deleted</span>
+                  }
+
+                  <div class="btn-group btn-group-sm ms-auto" role="group" aria-label="Page actions">
+                    <button type="button" class="btn btn-outline-secondary"
+                            [disabled]="page.deleted" aria-label="Rotate left"
+                            (click)="rotateLeft(page)">
+                      <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            [disabled]="page.deleted" aria-label="Rotate right"
+                            (click)="rotateRight(page)">
+                      <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            [disabled]="i === 0" aria-label="Move up"
+                            (click)="moveUp(i)">
+                      <i class="bi bi-arrow-up" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            [disabled]="i === pages.length - 1" aria-label="Move down"
+                            (click)="moveDown(i)">
+                      <i class="bi bi-arrow-down" aria-hidden="true"></i>
+                    </button>
+                    @if (page.deleted) {
+                      <button type="button" class="btn btn-outline-success"
+                              aria-label="Restore page" (click)="toggleDelete(page)">
+                        <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore
+                      </button>
+                    } @else {
+                      <button type="button" class="btn btn-outline-danger"
+                              aria-label="Delete page" (click)="toggleDelete(page)">
+                        <i class="bi bi-trash" aria-hidden="true"></i>
+                      </button>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+
+            @if (remainingCount === 0) {
+              <div class="alert alert-warning mt-3 mb-0" role="alert">
+                <i class="bi bi-exclamation-circle me-2" aria-hidden="true"></i>
+                Every page is deleted — restore at least one to download.
+              </div>
+            }
+          } @else if (!loading) {
+            <p class="text-muted mb-0">Upload a PDF to start organizing its pages.</p>
+          }
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
