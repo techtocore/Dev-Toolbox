@@ -23,6 +23,9 @@ import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
 import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
 import { DataProfiler } from './data-profiler/data-profiler';
 import { IpInfo } from './ip-info/ip-info';
+import { BubbleLevel } from './bubble-level/bubble-level';
+import { Compass } from './compass/compass';
+import { SoundMeter } from './sound-meter/sound-meter';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -48,6 +51,9 @@ const routes: Routes = [
   { path: 'sqlQueryBuilder', component: SqlQueryBuilder },
   { path: 'dataProfiler', component: DataProfiler },
   { path: 'ipInfo', component: IpInfo },
+  { path: 'bubbleLevel', component: BubbleLevel },
+  { path: 'compass', component: Compass },
+  { path: 'soundMeter', component: SoundMeter },
   {
     path: 'localAi',
     loadComponent: () => import('./local-ai/local-ai').then((m) => m.LocalAi),

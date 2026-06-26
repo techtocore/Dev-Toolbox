@@ -32,6 +32,9 @@ import { CsvJsonConverter } from './csv-json-converter/csv-json-converter';
 import { SqlQueryBuilder } from './sql-query-builder/sql-query-builder';
 import { DataProfiler } from './data-profiler/data-profiler';
 import { IpInfo } from './ip-info/ip-info';
+import { BubbleLevel } from './bubble-level/bubble-level';
+import { Compass } from './compass/compass';
+import { SoundMeter } from './sound-meter/sound-meter';
 import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
 import { CommandPaletteComponent } from './command-palette/command-palette.component';
 import { AiAssist } from './ai/ai-assist/ai-assist';
@@ -64,6 +67,9 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     SqlQueryBuilder,
     DataProfiler,
     IpInfo,
+    BubbleLevel,
+    Compass,
+    SoundMeter,
     ToastOutletComponent,
     CommandPaletteComponent
   ],

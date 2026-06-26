@@ -244,6 +244,35 @@ export class ToolsService {
       category: 'Development Tools',
       icon: 'bi-globe',
       keywords: ['ip', 'address', 'isp', 'hostname', 'location', 'timezone', 'browser', 'user agent', 'geolocation', 'network']
+    },
+
+    // ── Device & Sensors ────────────────────────────────────────────────────
+    // On-device hardware sensors with graceful fallbacks when a form factor
+    // (e.g. desktop) lacks the sensor.
+    {
+      name: 'Bubble Level',
+      description: 'Turn your phone into a spirit level using its motion sensor — bullseye, calibration, and haptics',
+      route: '/bubbleLevel',
+      category: 'Device & Sensors',
+      icon: 'bi-bullseye',
+      keywords: ['level', 'bubble', 'spirit', 'tilt', 'angle', 'accelerometer', 'gyroscope', 'orientation', 'sensor', 'inclinometer', 'flat'],
+      featured: true
+    },
+    {
+      name: 'Compass',
+      description: 'A magnetic compass powered by your device\'s magnetometer, with a live rotating rose',
+      route: '/compass',
+      category: 'Device & Sensors',
+      icon: 'bi-compass',
+      keywords: ['compass', 'heading', 'bearing', 'north', 'magnetometer', 'direction', 'orientation', 'sensor', 'navigation']
+    },
+    {
+      name: 'Sound Level Meter',
+      description: 'Live microphone loudness meter with peak/average stats — works on desktop and mobile',
+      route: '/soundMeter',
+      category: 'Device & Sensors',
+      icon: 'bi-soundwave',
+      keywords: ['sound', 'noise', 'decibel', 'db', 'spl', 'loudness', 'microphone', 'mic', 'meter', 'audio', 'volume', 'sensor']
     }
   ];
 

@@ -85,7 +85,8 @@ export class HomeComponent implements OnInit {
       'Encoding & Security': 'bi-shield-lock',
       'Data Analysis': 'bi-bar-chart-line',
       'Text Processing': 'bi-file-text',
-      'Development Tools': 'bi-wrench'
+      'Development Tools': 'bi-wrench',
+      'Device & Sensors': 'bi-phone-vibrate'
     };
     return icons[category] || 'bi-tools';
   }

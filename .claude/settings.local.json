@@ -9,7 +9,12 @@
       "Bash(npm update:*)",
       "Bash(npm audit:*)",
       "Bash(npx ng update:*)",
-      "Bash(npx ng *)"
+      "Bash(npx ng *)",
+      "PowerShell(npm run *)",
+      "PowerShell(npx eslint *)",
+      "Bash(git commit *)",
+      "Bash(npm --version)",
+      "Bash(xargs wc -l)"
     ]
   }
 }

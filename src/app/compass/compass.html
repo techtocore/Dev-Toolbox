@@ -1,0 +1,175 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Compass</h2>
+      <p class="text-muted mb-4">
+        A magnetic compass driven by your device's magnetometer. Hold the device flat and the
+        rose rotates to keep north pointing north. Readings are computed on-device — nothing is
+        sent anywhere.
+      </p>
+    </div>
+  </div>
+
+  <!-- Insecure context -->
+  @if (status === 'insecure') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-warning">
+          <div class="card-header bg-warning text-dark d-flex align-items-center">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <h5 class="mb-0">Secure connection required</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-0">
+              Browsers only expose orientation sensors over a secure (<code>https://</code>)
+              connection or on <code>localhost</code>. Open this page over HTTPS and try again.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- No sensor (desktop / unsupported form factor) -->
+  @if (status === 'unsupported') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-secondary text-white d-flex align-items-center">
+            <i class="bi bi-pc-display me-2"></i>
+            <h5 class="mb-0">No compass sensor detected</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-2">
+              This device doesn't report a heading — most desktops and laptops have no
+              magnetometer. Phones and tablets do.
+            </p>
+            <p class="text-muted mb-3">Open this page on your phone to try it out:</p>
+            <div class="input-group url-share">
+              <input type="text" class="form-control font-monospace" [value]="pageUrl" readonly
+                aria-label="Page link">
+              <button class="btn btn-outline-primary" (click)="copyUrl()" title="Copy link">
+                <i class="bi bi-clipboard me-1"></i>Copy link
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- iOS permission denied -->
+  @if (status === 'denied') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-danger">
+          <div class="card-header bg-danger text-white d-flex align-items-center">
+            <i class="bi bi-hand-index-thumb me-2"></i>
+            <h5 class="mb-0">Sensor access blocked</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">
+              Orientation access was denied. On iOS you can re-enable it under
+              <strong>Settings → Safari → Motion &amp; Orientation Access</strong>, then tap
+              Try again.
+            </p>
+            <button class="btn btn-primary" (click)="retry()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- iOS start gate -->
+  @if (status === 'idle' && needsGesture) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-compass me-2"></i>
+            <h5 class="mb-0">Ready when you are</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="mb-3">Your device needs a tap to grant access to its compass.</p>
+            <button class="btn btn-primary btn-lg" (click)="start()">
+              <i class="bi bi-play-fill me-1"></i>Start compass
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Waiting for first reading -->
+  @if (status === 'waiting') {
+    <div class="row mb-4">
+      <div class="col-12 text-center text-muted py-5">
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Waiting for the compass sensor…
+      </div>
+    </div>
+  }
+
+  <!-- Live compass -->
+  @if (status === 'active') {
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6 d-flex justify-content-center">
+        <!-- Decorative dial; the heading is exposed textually in the card beside it. -->
+        <div class="compass" aria-hidden="true">
+          <div class="fixed-pointer"></div>
+          <div class="rose" [style.transform]="'rotate(' + roseDegrees + 'deg)'">
+            @for (t of ticks; track t) {
+              <span class="tick" [class.tick-major]="t % 90 === 0"
+                [style.transform]="'translateX(-50%) rotate(' + t + 'deg)'"></span>
+            }
+            <span class="needle"></span>
+            <span class="card-label north">N</span>
+            <span class="card-label east">E</span>
+            <span class="card-label south">S</span>
+            <span class="card-label west">W</span>
+          </div>
+          <div class="hub"></div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+            <span class="d-flex align-items-center">
+              <i class="bi bi-compass me-2"></i>
+              <h5 class="mb-0">Heading</h5>
+            </span>
+            <span class="badge bg-light text-dark">live</span>
+          </div>
+          <div class="card-body text-center">
+            <div class="heading-value" aria-hidden="true">{{ headingRounded }}°</div>
+            <div class="heading-cardinal" aria-hidden="true">{{ cardinal }}</div>
+            <div class="visually-hidden" aria-live="polite" aria-atomic="true" role="status">{{ ariaHeading }}</div>
+
+            @if (accuracyText) {
+              <div class="text-muted small mt-2">
+                <i class="bi bi-bullseye me-1"></i>Accuracy: {{ accuracyText }}
+              </div>
+            }
+
+            @if (!absolute) {
+              <div class="alert alert-warning text-start small mt-3 mb-0">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Your browser only provides <strong>relative</strong> orientation, so this heading
+                isn't tied to true north. It still tracks how far you turn, but the absolute
+                direction may be off.
+              </div>
+            }
+
+            <p class="text-muted small mt-3 mb-0">
+              Points to <strong>magnetic</strong> north. Keep clear of magnets, speakers, and
+              metal desks, and wave the device in a figure-8 if it drifts.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

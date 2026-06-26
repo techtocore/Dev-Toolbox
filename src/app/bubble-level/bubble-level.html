@@ -1,0 +1,187 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Bubble Level</h2>
+      <p class="text-muted mb-4">
+        Turn your phone into a spirit level. Lay the device flat on a surface and centre the
+        bubble — it glows green and buzzes when you're dead level. Everything runs on your
+        device's motion sensor; nothing leaves the browser.
+      </p>
+    </div>
+  </div>
+
+  <!-- Insecure context -->
+  @if (status === 'insecure') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-warning">
+          <div class="card-header bg-warning text-dark d-flex align-items-center">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <h5 class="mb-0">Secure connection required</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-0">
+              Browsers only expose motion sensors over a secure (<code>https://</code>)
+              connection or on <code>localhost</code>. Open this page over HTTPS and try again.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- No sensor (desktop / unsupported form factor) -->
+  @if (status === 'unsupported') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-secondary text-white d-flex align-items-center">
+            <i class="bi bi-pc-display me-2"></i>
+            <h5 class="mb-0">No motion sensor detected</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-2">
+              This looks like a device without a tilt sensor — most likely a desktop or laptop.
+              The bubble level needs an accelerometer, which phones and tablets have.
+            </p>
+            <p class="text-muted mb-3">
+              Open this page on your phone to try it out:
+            </p>
+            <div class="input-group url-share">
+              <input type="text" class="form-control font-monospace" [value]="pageUrl" readonly
+                aria-label="Page link">
+              <button class="btn btn-outline-primary" (click)="copyUrl()" title="Copy link">
+                <i class="bi bi-clipboard me-1"></i>Copy link
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- iOS permission denied -->
+  @if (status === 'denied') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-danger">
+          <div class="card-header bg-danger text-white d-flex align-items-center">
+            <i class="bi bi-hand-index-thumb me-2"></i>
+            <h5 class="mb-0">Sensor access blocked</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">
+              Motion access was denied. On iOS you can re-enable it under
+              <strong>Settings → Safari → Motion &amp; Orientation Access</strong>, then tap
+              Try again.
+            </p>
+            <button class="btn btn-primary" (click)="retry()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- iOS start gate -->
+  @if (status === 'idle' && needsGesture) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-bullseye me-2"></i>
+            <h5 class="mb-0">Ready when you are</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="mb-3">Your device needs a tap to grant access to its motion sensor.</p>
+            <button class="btn btn-primary btn-lg" (click)="start()">
+              <i class="bi bi-play-fill me-1"></i>Start leveling
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Waiting for first reading -->
+  @if (status === 'waiting') {
+    <div class="row mb-4">
+      <div class="col-12 text-center text-muted py-5">
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Waiting for the motion sensor…
+      </div>
+    </div>
+  }
+
+  <!-- Live level -->
+  @if (status === 'active') {
+    <div aria-live="polite" aria-atomic="true" class="visually-hidden">{{ announcement }}</div>
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6 d-flex justify-content-center">
+        <div class="plate" [class.is-level]="isLevel">
+          <div class="ring ring-outer"></div>
+          <div class="ring ring-inner"></div>
+          <div class="crosshair crosshair-h"></div>
+          <div class="crosshair crosshair-v"></div>
+          <div class="target"></div>
+          <div class="bubble" [style.--bx]="bubbleNx" [style.--by]="bubbleNy"></div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header text-white d-flex align-items-center justify-content-between"
+            [class.bg-success]="isLevel" [class.bg-primary]="!isLevel">
+            <span class="d-flex align-items-center">
+              <i class="bi me-2" [class.bi-check-circle-fill]="isLevel"
+                [class.bi-rulers]="!isLevel"></i>
+              <h5 class="mb-0">{{ isLevel ? 'Level' : 'Adjust to level' }}</h5>
+            </span>
+            <span class="badge bg-light text-dark">live</span>
+          </div>
+          <div class="card-body">
+            <div class="row text-center g-3">
+              <div class="col-6">
+                <div class="reading">
+                  <div class="reading-value">{{ pitch.toFixed(1) }}°</div>
+                  <div class="reading-label">Pitch <span class="text-muted">(front / back)</span></div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="reading">
+                  <div class="reading-value">{{ roll.toFixed(1) }}°</div>
+                  <div class="reading-label">Roll <span class="text-muted">(left / right)</span></div>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary" (click)="calibrate()"
+                title="Treat the current surface as perfectly flat">
+                <i class="bi bi-crosshair me-1"></i>Set as flat
+              </button>
+              <button class="btn btn-outline-secondary" (click)="resetCalibration()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+              </button>
+              @if (hapticsSupported) {
+                <button class="btn ms-auto" [class.btn-success]="haptics"
+                  [class.btn-outline-secondary]="!haptics" (click)="toggleHaptics()"
+                  [title]="haptics ? 'Haptics on' : 'Haptics off'">
+                  <i class="bi bi-phone-vibrate me-1"></i>{{ haptics ? 'Haptics on' : 'Haptics off' }}
+                </button>
+              }
+            </div>
+
+            <p class="text-muted small mb-0 mt-3">
+              Tip: rest the device on the surface you're checking, then hit
+              <em>Set as flat</em> to zero out any case wobble or sensor bias.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

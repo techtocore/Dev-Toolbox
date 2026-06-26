@@ -1,0 +1,179 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Sound Level Meter</h2>
+      <p class="text-muted mb-4">
+        A live loudness meter built from your microphone — and unlike the tilt tools, it works
+        on laptops and desktops too. Audio is analysed in the browser in real time and never
+        recorded or uploaded.
+      </p>
+    </div>
+  </div>
+
+  <!-- Insecure context -->
+  @if (status === 'insecure') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-warning">
+          <div class="card-header bg-warning text-dark d-flex align-items-center">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <h5 class="mb-0">Secure connection required</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-0">
+              Microphone access needs a secure (<code>https://</code>) connection or
+              <code>localhost</code>. Open this page over HTTPS and try again.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- No mic / generic error -->
+  @if (status === 'nomic' || status === 'error') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-danger">
+          <div class="card-header bg-danger text-white d-flex align-items-center">
+            <i class="bi bi-mic-mute me-2"></i>
+            <h5 class="mb-0">{{ status === 'nomic' ? 'No microphone found' : 'Microphone unavailable' }}</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">
+              @if (status === 'nomic') {
+                No input device was detected. Connect or enable a microphone, then try again.
+              } @else {
+                {{ errorDetail || 'The microphone could not be started.' }}
+              }
+            </p>
+            <button class="btn btn-primary" (click)="start()" [disabled]="!supported">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Permission denied -->
+  @if (status === 'denied') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm border-danger">
+          <div class="card-header bg-danger text-white d-flex align-items-center">
+            <i class="bi bi-hand-index-thumb me-2"></i>
+            <h5 class="mb-0">Microphone access blocked</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">
+              Permission was denied. Allow microphone access for this site in your browser's
+              address-bar permissions (the camera/mic icon), then try again.
+            </p>
+            <button class="btn btn-primary" (click)="start()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Start gate -->
+  @if (status === 'idle') {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-mic me-2"></i>
+            <h5 class="mb-0">Start the meter</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="mb-3">
+              Grant microphone access to begin. Nothing is recorded — samples are measured and
+              immediately discarded.
+            </p>
+            <button class="btn btn-primary btn-lg" (click)="start()" [disabled]="!supported">
+              <i class="bi bi-soundwave me-1"></i>Start listening
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Live meter -->
+  @if (status === 'running') {
+    <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between"
+          [class.bg-primary]="meterClass === 'meter-ok'"
+          [class.bg-warning]="meterClass === 'meter-warn'"
+          [class.bg-danger]="meterClass === 'meter-danger'"
+          [class.text-white]="meterClass !== 'meter-warn'"
+          [class.text-dark]="meterClass === 'meter-warn'">
+          <span class="d-flex align-items-center">
+            @if (meterClass === 'meter-danger') {
+              <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+            } @else {
+              <i class="bi bi-soundwave me-2" aria-hidden="true"></i>
+            }
+            <h5 #liveHeading class="mb-0" tabindex="-1">Listening — {{ meterLabel }}</h5>
+          </span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="reset()" title="Reset stats" aria-label="Reset stats">
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-sm btn-light" (click)="stop()" title="Stop" aria-label="Stop listening">
+              <i class="bi bi-stop-fill" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="text-center mb-3">
+            <span class="db-value" aria-hidden="true">{{ estDb.toFixed(0) }}</span>
+            <span class="db-unit" aria-hidden="true">≈ dB SPL</span>
+            <span class="visually-hidden" aria-live="polite" aria-atomic="true">{{ announce }}</span>
+          </div>
+
+          <div class="meter-track mb-3">
+            <div class="meter-fill" [class]="meterClass" [style.width.%]="levelPct"></div>
+          </div>
+
+          <canvas #scope class="scope mb-3" aria-hidden="true"></canvas>
+
+          <div class="row text-center g-2 stats">
+            <div class="col-4">
+              <div class="stat-value">{{ minDb.toFixed(0) }}</div>
+              <div class="stat-label">Min</div>
+            </div>
+            <div class="col-4">
+              <div class="stat-value">{{ avgDb.toFixed(0) }}</div>
+              <div class="stat-label">Average</div>
+            </div>
+            <div class="col-4">
+              <div class="stat-value">{{ maxDb.toFixed(0) }}</div>
+              <div class="stat-label">Peak</div>
+            </div>
+          </div>
+
+          <hr>
+
+          <label class="form-label small mb-1" for="calOffset">
+            Calibration offset: <strong>{{ calibrationOffset }} dB</strong>
+          </label>
+          <input id="calOffset" type="range" class="form-range" min="60" max="110" step="1"
+            [(ngModel)]="calibrationOffset">
+          <p class="text-muted small mb-0 mt-2">
+            <i class="bi bi-info-circle me-1"></i>
+            A microphone reports relative level, not absolute loudness. This reading is an
+            <strong>approximation</strong> — nudge the offset until a known sound (e.g. a quiet
+            room ≈ 30&nbsp;dB) looks right. Not a substitute for a calibrated meter.
+          </p>
+        </div>
+      </div>
+    </div>
+    </div>
+  }
+</div>

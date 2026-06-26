@@ -1,0 +1,136 @@
+// Bullseye plate — a fixed 260px disc the bubble travels inside. The travel
+// radius in the component (96px) is tuned to this size and the 56px bubble.
+$plate-size: 260px;
+$bubble-size: 56px;
+
+.plate {
+  position: relative;
+  // Responsive size token; aspect-ratio:1 keeps the disc a perfect circle even
+  // when the width is capped on a narrow phone (no oval, no distorted rings).
+  --plate-size: min(#{$plate-size}, 80vw);
+  // Bubble travel radius = plate radius − bubble radius − a small rim margin,
+  // scaled to the plate so the bubble can't overrun on smaller screens.
+  --travel: calc(var(--plate-size) / 2 - 32px);
+  width: var(--plate-size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 38%, #ffffff 0%, #eef2f7 60%, #dfe6ee 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.12),
+    inset 0 -2px 6px rgba(255, 255, 255, 0.8),
+    0 6px 18px rgba(0, 0, 0, 0.18);
+  border: 1px solid #cdd6e0;
+  transition: box-shadow 0.2s ease;
+
+  &.is-level {
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.1),
+      0 0 0 3px rgba(25, 135, 84, 0.5),
+      0 6px 22px rgba(25, 135, 84, 0.35);
+  }
+}
+
+.ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(1, 124, 173, 0.35);
+}
+
+.ring-outer {
+  width: 66%;
+  height: 66%;
+}
+
+.ring-inner {
+  width: $bubble-size + 14px;
+  height: $bubble-size + 14px;
+  border-color: rgba(25, 135, 84, 0.55);
+  border-style: dashed;
+}
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: rgba(1, 124, 173, 0.25);
+  transform: translate(-50%, -50%);
+}
+
+.crosshair-h {
+  width: 78%;
+  height: 1px;
+}
+
+.crosshair-v {
+  width: 1px;
+  height: 78%;
+}
+
+.target {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6c757d;
+  transform: translate(-50%, -50%);
+}
+
+.bubble {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: $bubble-size;
+  height: $bubble-size;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(13, 202, 240, 0.65) 55%, rgba(1, 124, 173, 0.75) 100%);
+  box-shadow:
+    inset 0 1px 3px rgba(255, 255, 255, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+  // --bx/--by are the unit-vector offset bound from the component; scaling by
+  // --travel keeps the bubble inside the rim at any (responsive) plate size.
+  transform: translate(-50%, -50%)
+    translate(calc(var(--bx, 0) * var(--travel)), calc(var(--by, 0) * var(--travel)));
+  // No CSS transition on transform — the component already low-pass filters the
+  // readings, and a transition here would add visible lag on top of that.
+  will-change: transform;
+
+  .is-level & {
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(52, 211, 153, 0.7) 55%, rgba(25, 135, 84, 0.85) 100%);
+  }
+}
+
+.reading {
+  padding: 0.5rem 0;
+
+  .reading-value {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #212529;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .reading-label {
+    font-size: 0.8rem;
+    color: #495057;
+    margin-top: 0.35rem;
+  }
+}
+
+.url-share .form-control[readonly] {
+  background: #f8f9fa;
+}
+
+@media (max-width: 575.98px) {
+  .reading .reading-value {
+    font-size: 1.9rem;
+  }
+}
