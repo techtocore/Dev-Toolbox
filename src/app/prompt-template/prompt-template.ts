@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface PromptVariable {
@@ -17,6 +17,7 @@ interface SavedPromptTemplate {
   selector: 'app-prompt-template',
   standalone: false,
   templateUrl: './prompt-template.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./prompt-template.scss']
 })
 export class PromptTemplate {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -6,6 +6,7 @@ import { ToastService } from '../services/toast.service';
   selector: 'app-image-base64',
   standalone: false,
   templateUrl: './image-base64.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-base64.scss',
 })
 export class ImageBase64 implements OnDestroy {

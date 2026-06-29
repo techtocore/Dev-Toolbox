@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -9,6 +9,7 @@ type Mode = 'text' | 'file';
   selector: 'app-base64',
   templateUrl: './base64.component.html',
   styleUrls: ['./base64.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class Base64Component implements OnInit {

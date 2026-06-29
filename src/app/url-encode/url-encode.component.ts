@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 type Mode = 'component' | 'full-url' | 'form';
@@ -12,6 +12,7 @@ interface QueryParam {
   selector: 'app-url-encode',
   templateUrl: './url-encode.component.html',
   styleUrls: ['./url-encode.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class UrlEncodeComponent implements OnInit {

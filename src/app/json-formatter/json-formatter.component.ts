@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -8,6 +8,7 @@ type Mode = 'format' | 'minify' | 'sort';
   selector: 'app-json-formatter',
   templateUrl: './json-formatter.component.html',
   styleUrls: ['./json-formatter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class JsonFormatterComponent implements OnInit {

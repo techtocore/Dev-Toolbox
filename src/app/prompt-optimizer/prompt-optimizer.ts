@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ToastService } from '../services/toast.service';
 
 interface AnalysisResult {
@@ -15,6 +15,7 @@ type TargetModel = 'generic' | 'claude' | 'gpt' | 'gemini';
   selector: 'app-prompt-optimizer',
   standalone: false,
   templateUrl: './prompt-optimizer.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./prompt-optimizer.scss']
 })
 export class PromptOptimizer {

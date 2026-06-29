@@ -1,5 +1,6 @@
 import {
-  Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild
+  Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Collapse } from 'bootstrap';
@@ -15,6 +16,7 @@ const VERTICAL_NOISE_LIMIT_PX = 40;   // ignore mostly-vertical gestures
   selector: 'app-sidebar-menu',
   templateUrl: './sidebar-menu.component.html',
   styleUrls: ['./sidebar-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SidebarMenuComponent implements OnInit, OnDestroy {

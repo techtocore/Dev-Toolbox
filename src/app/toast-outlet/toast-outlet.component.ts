@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Toast, ToastService } from '../services/toast.service';
 
@@ -6,6 +6,7 @@ import { Toast, ToastService } from '../services/toast.service';
   selector: 'app-toast-outlet',
   standalone: false,
   templateUrl: './toast-outlet.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './toast-outlet.component.scss',
 })
 export class ToastOutletComponent implements OnInit, OnDestroy {

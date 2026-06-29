@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -6,6 +6,7 @@ import { ToastService } from '../services/toast.service';
   selector: 'app-pdf-split',
   standalone: false,
   templateUrl: './pdf-split.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pdf-split.scss'
 })
 export class PdfSplit implements OnDestroy {

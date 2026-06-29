@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface ClaimRow {
@@ -34,6 +34,7 @@ const STANDARD_CLAIMS: Record<string, string> = {
   selector: 'app-jwt-decoder',
   standalone: false,
   templateUrl: './jwt-decoder.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './jwt-decoder.scss',
 })
 export class JwtDecoder implements OnInit {

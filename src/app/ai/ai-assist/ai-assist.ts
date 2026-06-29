@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LlmService } from '../llm.service';
@@ -34,6 +34,7 @@ let _uid = 0;
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ai-assist.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ai-assist.scss',
 })
 export class AiAssist implements OnInit {

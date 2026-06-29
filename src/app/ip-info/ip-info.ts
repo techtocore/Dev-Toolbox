@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface NetworkInfo {
@@ -53,6 +53,7 @@ const CONSENT_STORAGE_KEY = 'ipInfo:lookupConsent';
   selector: 'app-ip-info',
   standalone: false,
   templateUrl: './ip-info.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ip-info.scss',
 })
 export class IpInfo implements OnInit {

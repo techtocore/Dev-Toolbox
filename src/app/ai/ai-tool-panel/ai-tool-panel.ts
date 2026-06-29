@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LlmService } from '../llm.service';
@@ -26,6 +26,7 @@ import { LOCAL_MODELS, LocalModel, DEFAULT_MODEL_ID, findModel } from '../model-
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ai-tool-panel.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ai-tool-panel.scss',
 })
 export class AiToolPanel implements OnInit {

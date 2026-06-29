@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 type GenMode = 'password' | 'passphrase';
@@ -8,6 +8,7 @@ type Separator = '-' | '_' | '.' | ' ';
   selector: 'app-password-generator',
   standalone: false,
   templateUrl: './password-generator.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './password-generator.scss',
 })
 export class PasswordGenerator implements OnInit {

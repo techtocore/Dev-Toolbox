@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { SensorService } from '../services/sensor.service';
 
@@ -27,6 +27,7 @@ interface OrientationEventLike {
   selector: 'app-compass',
   standalone: false,
   templateUrl: './compass.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './compass.scss',
 })
 export class Compass implements OnInit, OnDestroy {

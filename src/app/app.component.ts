@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from './services/utility.service';
 import { CommandPaletteService } from './services/command-palette.service';
 
@@ -10,6 +10,7 @@ const MOBILE_BREAKPOINT = 768;
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class AppComponent implements OnInit {

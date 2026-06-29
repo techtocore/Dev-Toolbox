@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LlmService } from '../ai/llm.service';
@@ -28,6 +28,7 @@ interface DisplayMessage {
   standalone: true,
   imports: [CommonModule, FormsModule, AiToolPanel],
   templateUrl: './local-ai.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './local-ai.scss',
 })
 export class LocalAi {

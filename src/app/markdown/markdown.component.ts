@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 import * as marked from 'marked';
@@ -7,6 +7,7 @@ import * as marked from 'marked';
   selector: 'app-markdown',
   templateUrl: './markdown.component.html',
   styleUrls: ['./markdown.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class MarkdownComponent implements OnInit {

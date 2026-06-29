@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 import { extractJson } from '../ai/output-parser';
@@ -17,6 +17,7 @@ interface SchemaField {
   selector: 'app-json-schema-generator',
   standalone: false,
   templateUrl: './json-schema-generator.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./json-schema-generator.scss']
 })
 export class JsonSchemaGenerator {

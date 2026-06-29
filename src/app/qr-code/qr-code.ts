@@ -4,6 +4,7 @@ import {
   ElementRef,
   OnDestroy,
   ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
@@ -16,6 +17,7 @@ type WifiEncryption = 'WPA' | 'WEP' | 'nopass';
   selector: 'app-qr-code',
   standalone: false,
   templateUrl: './qr-code.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './qr-code.scss',
 })
 export class QrCode implements AfterViewInit, OnDestroy {

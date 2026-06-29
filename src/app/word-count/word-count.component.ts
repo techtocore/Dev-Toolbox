@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface Stat {
@@ -12,6 +12,7 @@ interface Stat {
   selector: 'app-word-count',
   templateUrl: './word-count.component.html',
   styleUrls: ['./word-count.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class WordCountComponent implements OnInit {

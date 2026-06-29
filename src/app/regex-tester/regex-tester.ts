@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -19,6 +19,7 @@ interface PatternRecipe {
   selector: 'app-regex-tester',
   standalone: false,
   templateUrl: './regex-tester.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './regex-tester.scss',
 })
 export class RegexTester implements OnInit {

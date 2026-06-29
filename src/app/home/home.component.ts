@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToolsService, Tool } from '../services/tools.service';
 import { environment } from '../../environments/environment';
@@ -11,6 +11,7 @@ const SIDEBAR_ANIMATION_DELAY = 350;
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class HomeComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface WordSegment {
@@ -20,6 +20,7 @@ type ViewMode = 'unified' | 'side-by-side';
   selector: 'app-diff-checker',
   standalone: false,
   templateUrl: './diff-checker.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './diff-checker.scss',
 })
 export class DiffChecker implements OnInit {

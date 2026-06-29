@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service'
 
 @Component({
   selector: 'app-numeric-summary',
   templateUrl: './numeric-summary.component.html',
   styleUrls: ['./numeric-summary.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class NumericSummaryComponent implements OnInit {

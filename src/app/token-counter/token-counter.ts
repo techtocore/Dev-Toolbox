@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 interface ModelPricing {
   provider: string;
@@ -18,6 +18,7 @@ interface ModelPricing {
   selector: 'app-token-counter',
   standalone: false,
   templateUrl: './token-counter.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./token-counter.scss']
 })
 export class TokenCounter {

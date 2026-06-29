@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -22,6 +22,7 @@ interface ColumnProfile {
   selector: 'app-data-profiler',
   standalone: false,
   templateUrl: './data-profiler.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./data-profiler.scss']
 })
 export class DataProfiler {

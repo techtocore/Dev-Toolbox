@@ -1,5 +1,6 @@
 import {
-  Component, ElementRef, HostListener, OnInit, OnDestroy, ViewChild, AfterViewInit
+  Component, ElementRef, HostListener, OnInit, OnDestroy, ViewChild, AfterViewInit,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -10,6 +11,7 @@ import { CommandPaletteService } from '../services/command-palette.service';
   selector: 'app-command-palette',
   standalone: false,
   templateUrl: './command-palette.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './command-palette.component.scss'
 })
 export class CommandPaletteComponent implements OnInit, OnDestroy, AfterViewInit {

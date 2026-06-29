@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface OutputRow {
@@ -12,6 +12,7 @@ interface OutputRow {
   selector: 'app-timestamp-converter',
   standalone: false,
   templateUrl: './timestamp-converter.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './timestamp-converter.scss',
 })
 export class TimestampConverter implements OnInit {

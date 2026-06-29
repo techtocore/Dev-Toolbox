@@ -1,6 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -96,7 +97,13 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     AppRoutingModule,
     FormsModule,
     // Standalone AI co-pilot panel, shared by the SLM-powered tools below.
-    AiAssist
+    AiAssist,
+    // PWA: register the service worker in production builds only. Waits until the
+    // app is stable (or 30s) so the SW registration doesn't compete with startup.
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
   providers: [
     UtilityService

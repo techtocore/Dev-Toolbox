@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { SensorService } from '../services/sensor.service';
 
@@ -20,6 +20,7 @@ const NO_SIGNAL_MS = 2000;
   selector: 'app-bubble-level',
   standalone: false,
   templateUrl: './bubble-level.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './bubble-level.scss',
 })
 export class BubbleLevel implements OnInit, OnDestroy {

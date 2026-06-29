@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -19,6 +19,7 @@ interface JoinClause {
   selector: 'app-sql-query-builder',
   standalone: false,
   templateUrl: './sql-query-builder.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sql-query-builder.scss']
 })
 export class SqlQueryBuilder {

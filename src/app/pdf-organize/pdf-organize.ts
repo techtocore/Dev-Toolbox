@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -15,6 +15,7 @@ interface PageEntry {
   selector: 'app-pdf-organize',
   standalone: false,
   templateUrl: './pdf-organize.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pdf-organize.scss'
 })
 export class PdfOrganize implements OnDestroy {

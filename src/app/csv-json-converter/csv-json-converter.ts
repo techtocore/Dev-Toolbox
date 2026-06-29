@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -6,6 +6,7 @@ import { ToastService } from '../services/toast.service';
   selector: 'app-csv-json-converter',
   standalone: false,
   templateUrl: './csv-json-converter.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./csv-json-converter.scss']
 })
 export class CsvJsonConverter {

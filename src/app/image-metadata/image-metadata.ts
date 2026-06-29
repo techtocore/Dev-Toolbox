@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -17,6 +17,7 @@ interface MetaGroup {
   selector: 'app-image-metadata',
   standalone: false,
   templateUrl: './image-metadata.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-metadata.scss'
 })
 export class ImageMetadata implements OnDestroy {

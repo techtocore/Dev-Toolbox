@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -13,6 +13,7 @@ interface MergeEntry {
   selector: 'app-pdf-merge',
   standalone: false,
   templateUrl: './pdf-merge.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pdf-merge.scss'
 })
 export class PdfMerge implements OnDestroy {

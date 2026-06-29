@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import * as Forge from 'node-forge';
 
@@ -28,6 +28,7 @@ interface CertificateInfo {
   selector: 'app-cert-info',
   templateUrl: './cert-info.component.html',
   styleUrls: ['./cert-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class CertInfoComponent implements OnInit {

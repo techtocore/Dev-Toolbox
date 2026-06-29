@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -8,6 +8,7 @@ type OutputFormat = 'png' | 'jpeg' | 'webp';
   selector: 'app-image-resizer',
   standalone: false,
   templateUrl: './image-resizer.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-resizer.scss',
 })
 export class ImageResizer implements OnDestroy {

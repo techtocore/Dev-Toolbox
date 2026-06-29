@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 type UuidVersion = 'v4' | 'v7' | 'v1' | 'nil';
@@ -7,6 +7,7 @@ type UuidVersion = 'v4' | 'v7' | 'v1' | 'nil';
   selector: 'app-uuid-generator',
   standalone: false,
   templateUrl: './uuid-generator.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './uuid-generator.scss',
 })
 export class UuidGenerator implements OnInit {

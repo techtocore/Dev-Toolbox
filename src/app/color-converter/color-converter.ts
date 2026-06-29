@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface ContrastResult {
@@ -14,6 +14,7 @@ interface ContrastResult {
   selector: 'app-color-converter',
   standalone: false,
   templateUrl: './color-converter.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './color-converter.scss',
 })
 export class ColorConverter implements OnInit {

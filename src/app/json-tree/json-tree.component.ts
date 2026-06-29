@@ -1,10 +1,11 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-json-tree',
   templateUrl: './json-tree.component.html',
   styleUrls: ['./json-tree.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 
 })

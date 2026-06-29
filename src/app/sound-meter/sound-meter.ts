@@ -1,5 +1,6 @@
 import {
   AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
@@ -16,6 +17,7 @@ const READOUT_EVERY = 6;
   selector: 'app-sound-meter',
   standalone: false,
   templateUrl: './sound-meter.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sound-meter.scss',
 })
 export class SoundMeter implements AfterViewInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -17,6 +17,7 @@ const MAX_FILE_BYTES = 40 * 1024 * 1024; // 40 MB per image
   selector: 'app-images-to-pdf',
   standalone: false,
   templateUrl: './images-to-pdf.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './images-to-pdf.scss',
 })
 export class ImagesToPdf implements OnDestroy {

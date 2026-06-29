@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 import * as CryptoJS from 'crypto-js';
@@ -14,6 +14,7 @@ interface HashRow {
   selector: 'app-hash-generator',
   standalone: false,
   templateUrl: './hash-generator.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './hash-generator.scss',
 })
 export class HashGenerator implements OnInit {
