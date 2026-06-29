@@ -49,15 +49,18 @@ export class WordCountComponent implements OnInit {
 
     const wordTokens: string[] = trimmed === ''
       ? []
-      : (trimmed.match(/[\p{L}\p{N}'’-]+/gu) as string[] | null) ?? [];
+      : (trimmed.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) as string[] | null) ?? [];
+    // Measure word length by code point (spread iterates code points) so astral
+    // letters/emoji count as one, consistent with charCount.
+    const cpLen = (w: string) => [...w].length;
     this.wordCount = wordTokens.length;
     this.uniqueWordCount = new Set(wordTokens.map(w => w.toLowerCase())).size;
     this.longestWord = wordTokens.reduce(
-      (longest, w) => (w.length > longest.length ? w : longest),
+      (longest, w) => (cpLen(w) > cpLen(longest) ? w : longest),
       ''
     );
     this.averageWordLength = this.wordCount > 0
-      ? Math.round((wordTokens.reduce((s, w) => s + w.length, 0) / this.wordCount) * 10) / 10
+      ? Math.round((wordTokens.reduce((s, w) => s + cpLen(w), 0) / this.wordCount) * 10) / 10
       : 0;
 
     // 238 wpm ≈ average silent reading speed; 150 wpm ≈ public speaking pace.

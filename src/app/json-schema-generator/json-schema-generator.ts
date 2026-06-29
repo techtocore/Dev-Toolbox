@@ -41,9 +41,6 @@ export class JsonSchemaGenerator {
   ];
 
   arrayItemType: string = 'string';
-  showEnumInput: boolean = false;
-  currentEnumField: number = -1;
-  enumValues: string = '';
 
   outputFormat:
     | 'json-schema'
@@ -227,9 +224,7 @@ export class JsonSchemaGenerator {
 
   onTypeChange(field: SchemaField, index: number): void {
     if (field.type === 'enum') {
-      this.showEnumInput = true;
-      this.currentEnumField = index;
-      this.enumValues = field.enum?.join(', ') || '';
+      field.enum = field.enum ?? [];
     } else {
       delete field.enum;
     }
@@ -241,36 +236,25 @@ export class JsonSchemaGenerator {
     }
   }
 
-  saveEnumValues(): void {
-    if (this.currentEnumField >= 0) {
-      const field = this.fields[this.currentEnumField];
-      field.enum = this.enumValues
-        .split(',')
-        .map(v => v.trim())
-        .filter(v => v.length > 0);
-    }
-    this.showEnumInput = false;
-    this.currentEnumField = -1;
-    this.enumValues = '';
-  }
-
   generateSchema(): any {
     const properties: any = {};
     const required: string[] = [];
 
     this.fields.forEach(field => {
-      const propDef: any = {
-        description: field.description
-      };
+      const propDef: any = {};
 
-      if (field.type === 'enum' && field.enum) {
+      if (field.type === 'enum') {
         propDef.type = 'string';
-        propDef.enum = field.enum;
+        propDef.enum = field.enum ?? [];
       } else if (field.type === 'array' && field.items) {
         propDef.type = 'array';
         propDef.items = field.items;
       } else {
         propDef.type = field.type;
+      }
+
+      if (field.description?.trim()) {
+        propDef.description = field.description;
       }
 
       properties[field.name] = propDef;
@@ -465,7 +449,12 @@ export class JsonSchemaGenerator {
   }
 
   downloadSchema(): void {
-    const filename = `${this.schemaTitle.toLowerCase().replace(/\s+/g, '-')}-schema.json`;
+    const base =
+      (this.schemaTitle || 'schema')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'schema';
+    const filename = `${base}-schema.json`;
     this.utilityService.downloadFile(this.generatedSchema, 'application/json', filename);
   }
 

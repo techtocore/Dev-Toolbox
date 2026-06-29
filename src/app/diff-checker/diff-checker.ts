@@ -157,6 +157,9 @@ export class DiffChecker implements OnInit {
       const nxt = this.diffLines[i + 1];
 
       if (cur.type === 'removed' && nxt.type === 'added') {
+        // Skip inline word-diff for very long lines: tokenizing + the O(tokA*tokB)
+        // LCS DP would freeze the tab. The pair still renders as plain removed/added.
+        if (cur.content.length > 2000 || nxt.content.length > 2000) continue;
         const sim = this.similarity(cur.content, nxt.content);
         if (sim > 0.3) {
           const { left, right } = this.wordDiff(cur.content, nxt.content);

@@ -334,20 +334,26 @@ export class TokenCounter {
     this.outputText = '';
   }
 
+  // Sanitized request multiplier: at least 1, whole number. Null/empty/negative
+  // entries collapse to 1 so batch stats never go negative or silently zero out.
+  private get batchCount(): number {
+    return Math.max(1, Math.floor(Number(this.batchRequests) || 1));
+  }
+
   get batchInputTokens(): number {
-    return this.inputTokens * this.batchRequests;
+    return this.inputTokens * this.batchCount;
   }
 
   get batchOutputTokens(): number {
-    return this.outputTokens * this.batchRequests;
+    return this.outputTokens * this.batchCount;
   }
 
   get batchTotalCost(): number {
     // Include the one-time cache-write fee (no-ops to 0 when caching is unused).
-    return this.totalCost * this.batchRequests + this.cacheWriteCost;
+    return this.totalCost * this.batchCount + this.cacheWriteCost;
   }
 
   get batchCacheSavings(): number {
-    return Math.max(0, this.cacheSavings * this.batchRequests - this.cacheWriteCost);
+    return Math.max(0, this.cacheSavings * this.batchCount - this.cacheWriteCost);
   }
 }

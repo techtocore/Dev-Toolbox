@@ -20,6 +20,7 @@
           <textarea
             class="form-control font-monospace"
             rows="10"
+            aria-label="JWT token input"
             [(ngModel)]="jwtInput"
             (ngModelChange)="decodeJwt()"
             placeholder="Paste a JWT here (header.payload.signature)"></textarea>

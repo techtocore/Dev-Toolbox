@@ -150,7 +150,9 @@ export class DataProfiler {
     const csv = [headers, ...rows].map(r =>
       r.map(v => {
         const s = String(v);
-        return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+        return s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')
+          ? `"${s.replace(/"/g, '""')}"`
+          : s;
       }).join(',')
     ).join('\n');
     this.utilityService.downloadFile(csv, 'text/csv', 'profile.csv');
@@ -226,7 +228,12 @@ export class DataProfiler {
   profileData(data: any[]): void {
     if (data.length === 0) return;
 
-    const columns = Object.keys(data[0]);
+    // Union of keys across all rows so heterogeneous JSON (keys present only in
+    // later rows) is not silently dropped. CSV rows are uniform, so this is a
+    // no-op there.
+    const columns = Array.from(
+      new Set(data.flatMap(row => (row && typeof row === 'object' ? Object.keys(row) : [])))
+    );
 
     columns.forEach(columnName => {
       const values = data.map(row => row[columnName]);
@@ -257,35 +264,49 @@ export class DataProfiler {
     // Detect type
     profile.type = this.detectType(nonNullValues);
 
-    // Count unique values
-    const uniqueValues = new Set(nonNullValues);
+    // Normalize complex (object/array) cell values to a stable JSON string key so
+    // equal objects/arrays collapse instead of being compared by reference.
+    const normalizedValues = nonNullValues.map(v =>
+      v && typeof v === 'object' ? JSON.stringify(v) : v
+    );
+
+    // Count unique values (recomputed on normalized values below for nested JSON).
+    const uniqueValues = new Set(normalizedValues);
     profile.uniqueCount = uniqueValues.size;
-    profile.uniquePercent = (profile.uniqueCount / nonNullValues.length) * 100;
+    profile.uniquePercent = (profile.uniqueCount / normalizedValues.length) * 100;
 
     // Calculate statistics based on type
     if (profile.type === 'number') {
-      const numbers = nonNullValues.map(v => Number(v));
-      // Single O(n) pass — Math.min/max(...spread) throws RangeError (call-stack
-      // argument limit) on large columns. `numbers` is non-empty here.
-      let min = numbers[0];
-      let max = numbers[0];
-      for (const n of numbers) {
-        if (n < min) min = n;
-        if (n > max) max = n;
+      // Only finite numbers contribute to numeric stats; mostly-numeric columns
+      // may still contain non-numeric cells that would otherwise coerce to NaN
+      // and poison mean/median.
+      const numbers = nonNullValues.map(v => Number(v)).filter(n => Number.isFinite(n));
+      if (numbers.length === 0) {
+        // No usable numbers after filtering — fall back to non-numeric stats.
+        profile.mode = this.calculateMode(normalizedValues);
+      } else {
+        // Single O(n) pass — Math.min/max(...spread) throws RangeError (call-stack
+        // argument limit) on large columns. `numbers` is non-empty here.
+        let min = numbers[0];
+        let max = numbers[0];
+        for (const n of numbers) {
+          if (n < min) min = n;
+          if (n > max) max = n;
+        }
+        profile.min = min;
+        profile.max = max;
+        profile.mean = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
+        profile.median = this.calculateMedian(numbers);
+        profile.mode = this.calculateMode(numbers);
       }
-      profile.min = min;
-      profile.max = max;
-      profile.mean = numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
-      profile.median = this.calculateMedian(numbers);
-      profile.mode = this.calculateMode(numbers);
     } else {
       // For non-numeric columns the unsorted first/last values aren't a
       // meaningful min/max, so leave them undefined (exports coalesce to blank).
-      profile.mode = this.calculateMode(nonNullValues);
+      profile.mode = this.calculateMode(normalizedValues);
     }
 
     // Get top values
-    profile.topValues = this.getTopValues(nonNullValues, 5);
+    profile.topValues = this.getTopValues(normalizedValues, 5);
 
     return profile;
   }
@@ -319,8 +340,17 @@ export class DataProfiler {
   }
 
   isDate(value: any): boolean {
-    const date = new Date(value);
-    return !isNaN(date.getTime());
+    if (typeof value !== 'string') return false;
+    // Require an ISO-ish (YYYY-MM-DD...) or common numeric (D/M/Y, M-D-Y, etc.)
+    // shape before trusting new Date(), so free text like 'May 5' or '12 12'
+    // isn't mislabeled as a date.
+    if (
+      !/^\d{4}-\d{1,2}-\d{1,2}([T ]|$)/.test(value) &&
+      !/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}$/.test(value)
+    ) {
+      return false;
+    }
+    return !isNaN(new Date(value).getTime());
   }
 
   calculateMedian(numbers: number[]): number {

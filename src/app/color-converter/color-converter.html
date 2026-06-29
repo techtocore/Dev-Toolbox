@@ -63,9 +63,9 @@
           <!-- RGB -->
           <label class="form-label small mb-1">RGB</label>
           <div class="row g-2 mb-3">
-            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbR" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="R"></div>
-            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbG" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="G"></div>
-            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbB" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="B"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbR" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="R" aria-label="Red (0-255)"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbG" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="G" aria-label="Green (0-255)"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="rgbB" (ngModelChange)="onRgbChange()" min="0" max="255" placeholder="B" aria-label="Blue (0-255)"></div>
             <div class="col-auto">
               <button class="btn btn-outline-secondary" (click)="copy('rgb(' + rgbR + ', ' + rgbG + ', ' + rgbB + ')', 'RGB')" title="Copy rgb()">
                 <i class="bi bi-clipboard"></i>
@@ -76,9 +76,9 @@
           <!-- HSL -->
           <label class="form-label small mb-1">HSL</label>
           <div class="row g-2 mb-3">
-            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslH" (ngModelChange)="onHslChange()" min="0" max="360" placeholder="H"></div>
-            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslS" (ngModelChange)="onHslChange()" min="0" max="100" placeholder="S%"></div>
-            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslL" (ngModelChange)="onHslChange()" min="0" max="100" placeholder="L%"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslH" (ngModelChange)="onHslChange()" min="0" max="360" placeholder="H" aria-label="Hue (0-360)"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslS" (ngModelChange)="onHslChange()" min="0" max="100" placeholder="S%" aria-label="Saturation %"></div>
+            <div class="col"><input type="number" class="form-control" [(ngModel)]="hslL" (ngModelChange)="onHslChange()" min="0" max="100" placeholder="L%" aria-label="Lightness %"></div>
             <div class="col-auto">
               <button class="btn btn-outline-secondary" (click)="copy('hsl(' + hslH + ', ' + hslS + '%, ' + hslL + '%)', 'HSL')" title="Copy hsl()">
                 <i class="bi bi-clipboard"></i>

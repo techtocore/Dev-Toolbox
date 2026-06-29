@@ -10,7 +10,6 @@ interface CertificateInfo {
   validTill?: Date;
   signatureOid?: string;
   signAlgorithmOid?: string;
-  signParameters?: string;
   thumbprintSha1?: string;
   thumbprintSha256?: string;
   publicKeyType?: string;
@@ -39,6 +38,10 @@ export class CertInfoComponent implements OnInit {
   encodedCert: string = '';
   certInfo: CertificateInfo = {};
   isMobile: boolean = false;
+
+  // No-op comparator for KeyValuePipe so Subject/Issuer DN components keep their
+  // original certificate order instead of being sorted alphabetically.
+  keepOrder = (): number => 0;
 
   constructor(public utilityService: UtilityService) {}
 
@@ -85,7 +88,6 @@ export class CertInfoComponent implements OnInit {
       this.certInfo.signatureOid =
         (sigOid && (Forge.pki.oids as Record<string, string>)[sigOid]) || sigOid;
       this.certInfo.signAlgorithmOid = parsedCert?.siginfo?.algorithmOid;
-      this.certInfo.signParameters = parsedCert?.siginfo?.parameters as any;
 
       const der = Forge.asn1.toDer(Forge.pki.certificateToAsn1(parsedCert)).getBytes();
       const sha1 = Forge.md.sha1.create();
@@ -101,16 +103,16 @@ export class CertInfoComponent implements OnInit {
       if (pubKey?.n) {
         this.certInfo.publicKeyType = 'RSA';
         this.certInfo.publicKeyBits = pubKey.n.bitLength();
-      } else if (pubKey?.curve) {
-        this.certInfo.publicKeyType = 'EC';
       }
+      // Note: node-forge throws ("OID is not RSA") in certificateFromPem above for
+      // EC/Ed certificates, so only RSA keys ever reach this point.
 
       // SAN extension
       const sanExt: any = parsedCert.getExtension('subjectAltName');
       if (sanExt?.altNames) {
         this.certInfo.subjectAltNames = sanExt.altNames.map((n: any) => {
           if (n.type === 2) return `DNS:${n.value}`;
-          if (n.type === 7) return `IP:${n.value}`;
+          if (n.type === 7) return `IP:${n.ip || n.value}`;
           if (n.type === 1) return `email:${n.value}`;
           if (n.type === 6) return `URI:${n.value}`;
           return String(n.value);
@@ -138,8 +140,13 @@ export class CertInfoComponent implements OnInit {
 
       this.certInfo.pemBytes = new Blob([cert]).size;
     } catch (err: any) {
-      this.certInfo.message = 'Error parsing certificate';
-      this.certInfo.error = err?.message || 'Unknown error';
+      if (/OID is not RSA/i.test(err?.message)) {
+        this.certInfo.message = 'Unsupported key type';
+        this.certInfo.error = 'This appears to be an ECDSA/EdDSA certificate. node-forge can only parse RSA certificates; EC/Ed certs are not supported.';
+      } else {
+        this.certInfo.message = 'Error parsing certificate';
+        this.certInfo.error = err?.message || 'Unknown error';
+      }
     }
   }
 

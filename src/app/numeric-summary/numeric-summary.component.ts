@@ -123,8 +123,10 @@ export class NumericSummaryComponent implements OnInit {
       // newlines) as a single delimiter, so mixed separators across lines work.
       let arr: number[] = this.inputTxt.trim().split(/[\s,]+/).map(Number);
 
-      // Remove NaN values (also drops any stray empty token).
-      arr = arr.filter(n => !isNaN(n));
+      // Remove non-finite values (also drops any stray empty token, plus
+      // NaN, +/-Infinity, and overflow literals like 1e999 that would
+      // otherwise corrupt every downstream statistic).
+      arr = arr.filter(n => Number.isFinite(n));
 
       if (arr.length === 0) {
         throw new Error('No valid numeric data found');
@@ -164,9 +166,10 @@ export class NumericSummaryComponent implements OnInit {
       const variancePop = arr.reduce((acc, val) => acc + Math.pow(val - this.mean, 2), 0) / this.count;
       this.stdDevPop = Math.sqrt(variancePop);
 
-      // Coefficient of Variation — undefined when mean is 0 (avoids NaN in UI).
+      // Coefficient of Variation — undefined when mean is 0; set NaN so
+      // formatNumber renders 'N/A' (consistent with skewness/kurtosis).
       this.coefficientOfVariation = this.mean === 0
-        ? 0
+        ? NaN
         : (this.stdDev / Math.abs(this.mean)) * 100;
 
       // Skewness and Kurtosis are undefined without variation — guard the
@@ -205,6 +208,12 @@ export class NumericSummaryComponent implements OnInit {
   formatNumber(num: number, decimals: number = 2): string {
     if (num === undefined || num === null || isNaN(num)) return 'N/A';
     return num.toFixed(decimals);
+  }
+
+  // Templates cannot call the global isNaN; use this helper to gate the
+  // shape captions so they stay hidden when a stat is undefined (NaN).
+  isDefined(n: number): boolean {
+    return !isNaN(n);
   }
 
   async onFileSelected(event: Event): Promise<void> {
@@ -266,8 +275,11 @@ export class NumericSummaryComponent implements OnInit {
 
   exportCsv(): void {
     if (!this.hasResults) return;
-    const rows = this.currentStats().map(s => `${s.label},${s.value}`);
-    rows.push(`Outliers,"${this.outliers.join(', ')}"`);
+    // RFC-4180-quote every field so embedded commas (e.g. a multi-mode Mode
+    // value) and quotes never break column alignment.
+    const esc = (v: string | number) => '"' + String(v).replace(/"/g, '""') + '"';
+    const rows = this.currentStats().map(s => `${esc(s.label)},${esc(s.value)}`);
+    rows.push(`${esc('Outliers')},${esc(this.outliers.join(', '))}`);
     this.utilityService.downloadFile('Statistic,Value\n' + rows.join('\n'), 'text/csv', 'stats.csv');
   }
 }

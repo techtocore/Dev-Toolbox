@@ -116,7 +116,7 @@
                     <th>Query params</th>
                     <td>
                       <table class="param-table">
-                        @for (p of parsed.params; track p.key) {
+                        @for (p of parsed.params; track $index) {
                           <tr>
                             <td><code class="param-key">{{ p.key }}</code></td>
                             <td>{{ p.value }}</td>

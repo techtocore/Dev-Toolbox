@@ -94,6 +94,7 @@
           <textarea
             #markdownTextarea
             class="markdown-editor bg-light-custom"
+            aria-label="Markdown editor"
             [(ngModel)]="markdownText"
             (ngModelChange)="updatePreview()"
             (keydown)="onKey($event)"

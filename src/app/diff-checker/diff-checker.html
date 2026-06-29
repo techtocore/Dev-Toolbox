@@ -61,7 +61,7 @@
         </div>
         <div class="card-body">
           <textarea class="form-control font-monospace" rows="10" [(ngModel)]="text1"
-            (ngModelChange)="compareTexts()" placeholder="Paste original text…"></textarea>
+            (ngModelChange)="compareTexts()" aria-label="Original text" placeholder="Paste original text…"></textarea>
         </div>
       </div>
     </div>
@@ -72,7 +72,7 @@
         </div>
         <div class="card-body">
           <textarea class="form-control font-monospace" rows="10" [(ngModel)]="text2"
-            (ngModelChange)="compareTexts()" placeholder="Paste modified text…"></textarea>
+            (ngModelChange)="compareTexts()" aria-label="Modified text" placeholder="Paste modified text…"></textarea>
         </div>
       </div>
     </div>

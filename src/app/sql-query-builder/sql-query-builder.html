@@ -175,11 +175,11 @@
             <div class="row mb-3">
               <div class="col-md-6">
                 <label class="form-label">LIMIT</label>
-                <input type="number" class="form-control" [(ngModel)]="limit" placeholder="10">
+                <input type="number" min="0" step="1" class="form-control" [(ngModel)]="limit" placeholder="10">
               </div>
               <div class="col-md-6">
                 <label class="form-label">OFFSET <small class="text-muted">(needs LIMIT)</small></label>
-                <input type="number" class="form-control" [(ngModel)]="offset" placeholder="0">
+                <input type="number" min="0" step="1" class="form-control" [(ngModel)]="offset" placeholder="0">
               </div>
             </div>
           }
@@ -242,7 +242,7 @@
                           type="text"
                           class="form-control form-control-sm"
                           [(ngModel)]="condition.value"
-                          placeholder="Value"
+                          [placeholder]="condition.operator === 'LIKE' ? '%term% (add your own wildcards)' : 'Value'"
                           [disabled]="condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL'">
                       </div>
                       <div class="col-md-1">

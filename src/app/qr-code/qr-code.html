@@ -114,6 +114,9 @@
                     type="text"
                     class="form-control"
                     placeholder="Network password"
+                    autocomplete="off"
+                    spellcheck="false"
+                    autocapitalize="off"
                     [(ngModel)]="wifiPassword"
                     (ngModelChange)="onInputChange()"
                   />
@@ -154,7 +157,8 @@
                 max="1024"
                 step="8"
                 [(ngModel)]="size"
-                (ngModelChange)="onSizeChange()"
+                (ngModelChange)="onInputChange()"
+                (blur)="onSizeBlur()"
               />
             </div>
             <div class="col-6 col-md-3">
@@ -181,7 +185,8 @@
                 max="20"
                 step="1"
                 [(ngModel)]="margin"
-                (ngModelChange)="onMarginChange()"
+                (ngModelChange)="onInputChange()"
+                (blur)="onMarginBlur()"
               />
             </div>
             <div class="col-6 col-md-3 d-flex gap-3">
@@ -224,6 +229,12 @@
           @if (errorMessage) {
             <div class="alert alert-danger" role="alert">
               <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (contrastWarning && !errorMessage) {
+            <div class="alert alert-warning" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ contrastWarning }}
             </div>
           }
 

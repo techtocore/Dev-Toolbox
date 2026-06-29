@@ -110,8 +110,10 @@ export class PasswordGenerator implements OnInit {
     }
 
     this.result = this.shuffle(out).join('');
-    // Entropy uses the full pool size for every position (the conservative,
-    // industry-standard estimate for a uniformly drawn password).
+    // Entropy uses the full pool size for every position. Because we guarantee
+    // at least one character from each selected set, some positions are drawn
+    // from a subset rather than the full pool, so this is a slight upper bound
+    // on the true entropy (the gap is sub-bit except at the minimum length).
     this.entropyBits = len * Math.log2(pool.length);
   }
 
@@ -177,7 +179,7 @@ export class PasswordGenerator implements OnInit {
 
   private clampWordCount(): number {
     const n = Math.round(Number(this.wordCount) || 0);
-    const clamped = Math.max(3, Math.min(n, 8));
+    const clamped = Math.max(3, Math.min(n, 12));
     this.wordCount = clamped;
     return clamped;
   }

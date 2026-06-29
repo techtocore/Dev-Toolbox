@@ -17,10 +17,14 @@ export class UuidGenerator implements OnInit {
   uppercase = false;
   isMobile = false;
 
+  // RFC 9562 method-3 monotonic v7 state (12-bit counter in rand_a).
+  private v7LastMs = -1n;
+  private v7Seq = 0;
+
   versions: { value: UuidVersion; label: string; hint: string }[] = [
     { value: 'v4', label: 'v4 (random)',          hint: '122-bit random — most common choice.' },
     { value: 'v7', label: 'v7 (Unix epoch)',       hint: 'Time-ordered, monotonic — great as a primary key.' },
-    { value: 'v1', label: 'v1 (timestamp + node)', hint: 'Time-ordered using gregorian epoch + random node.' },
+    { value: 'v1', label: 'v1 (timestamp + node)', hint: 'Time-based (gregorian epoch) with random clock-seq + node; not guaranteed ordered within a batch.' },
     { value: 'nil',label: 'nil',                   hint: 'All zeros — useful for tests / placeholders.' }
   ];
 
@@ -35,6 +39,12 @@ export class UuidGenerator implements OnInit {
     const clamped = Math.max(1, Math.min(this.count || 1, 1000));
     this.count = clamped;
     this.uuids = Array.from({ length: clamped }, () => this.generateOne());
+  }
+
+  // Presentation-only: re-case the already-generated UUIDs without
+  // regenerating, so toggling Uppercase preserves the displayed set.
+  applyCase(): void {
+    this.uuids = this.uuids.map(u => this.uppercase ? u.toUpperCase() : u.toLowerCase());
   }
 
   private generateOne(): string {
@@ -57,7 +67,9 @@ export class UuidGenerator implements OnInit {
     return this.formatUuid(bytes);
   }
 
-  // Draft v7 — 48-bit Unix-ms timestamp + 74 bits of randomness, time-ordered.
+  // RFC 9562 v7 — 48-bit Unix-ms timestamp + monotonic 12-bit counter (rand_a)
+  // + 62 bits of randomness. Method-3 monotonic: a same-ms batch is strictly
+  // increasing, so sorting reproduces emission order.
   private uuidV7(): string {
     const bytes = this.randomBytes(16);
     const nowMs = BigInt(Date.now());
@@ -67,6 +79,20 @@ export class UuidGenerator implements OnInit {
     bytes[3] = Number((nowMs >> 16n) & 0xffn);
     bytes[4] = Number((nowMs >> 8n)  & 0xffn);
     bytes[5] = Number(nowMs & 0xffn);
+
+    // Monotonic 12-bit counter in rand_a. On a fresh millisecond, seed it from
+    // the random bytes already in 6/7 (kept below the 0xfff cap); within the
+    // same millisecond, increment so ordering is preserved.
+    if (nowMs === this.v7LastMs) {
+      this.v7Seq = (this.v7Seq + 1) & 0x0fff;
+    } else {
+      this.v7LastMs = nowMs;
+      this.v7Seq = ((bytes[6] << 8) | bytes[7]) & 0x0fff;
+    }
+    // Write the counter into rand_a BEFORE stamping the version nibble.
+    bytes[6] = (this.v7Seq >> 8) & 0x0f;
+    bytes[7] = this.v7Seq & 0xff;
+
     bytes[6] = (bytes[6] & 0x0f) | 0x70; // version 7
     bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant
     return this.formatUuid(bytes);

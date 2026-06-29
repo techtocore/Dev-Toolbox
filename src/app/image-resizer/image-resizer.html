@@ -21,7 +21,7 @@
                (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
                (keydown.enter)="fileInput.click()"
                (keydown.space)="$event.preventDefault(); fileInput.click()">
-            <input #fileInput type="file" hidden accept="image/*" [multiple]="false" (change)="onPick($event)">
+            <input #fileInput type="file" hidden accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" [multiple]="false" (change)="onPick($event)">
             <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
             <strong>Drop an image</strong> or click to browse.
           </div>

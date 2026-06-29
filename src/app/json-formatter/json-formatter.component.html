@@ -94,7 +94,7 @@
             rows="18"
             aria-label="JSON input"
             [(ngModel)]="input"
-            (input)="inputBytes = input.length"
+            (input)="onInput()"
             placeholder='Paste JSON here, e.g. {"key": "value"}'></textarea>
         </div>
       </div>

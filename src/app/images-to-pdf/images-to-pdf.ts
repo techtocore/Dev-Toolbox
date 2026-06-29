@@ -13,6 +13,12 @@ interface ImageItem {
 
 const MAX_FILE_BYTES = 40 * 1024 * 1024; // 40 MB per image
 
+// 'Fit to image' maps source pixels to PDF points. Treating images as 96 DPI
+// (the CSS reference density) keeps pages at a sane physical size instead of
+// 1px -> 1pt, which would yield multi-foot pages. The image is still drawn at
+// full resolution; only the page's physical dimensions change.
+const PX_TO_PT = 72 / 96;
+
 @Component({
   selector: 'app-images-to-pdf',
   standalone: false,
@@ -145,15 +151,19 @@ export class ImagesToPdf implements OnDestroy {
           try {
             if (item.file.type === 'image/png') {
               embedded = await pdf.embedPng(bytes);
-            } else if (item.file.type === 'image/jpeg') {
-              embedded = await pdf.embedJpg(bytes);
             } else {
+              // JPEGs (and everything else) go through the browser canvas. Drawing
+              // an <img> to a 2D canvas applies EXIF orientation (CSS
+              // image-orientation defaults to from-image) and decodes CMYK to RGBA,
+              // so toDataURL('image/png') yields an upright DeviceRGB PNG.
+              // embedJpg, by contrast, ignores EXIF orientation and reproduces CMYK
+              // via the DeviceCMYK path, producing sideways or mis-coloured pages.
               embedded = await pdf.embedPng(await this.toPngDataUrl(item.url));
             }
           } catch {
-            // pdf-lib's own parser rejects some valid-but-unusual encodings (CMYK
-            // or progressive JPEG, interlaced PNG). Fall back to a browser canvas
-            // rasterisation, which decodes far more of them.
+            // Some valid-but-unusual encodings (e.g. interlaced PNG) can still trip
+            // up pdf-lib's parser. Fall back to a browser canvas rasterisation,
+            // which decodes far more of them.
             embedded = await pdf.embedPng(await this.toPngDataUrl(item.url));
           }
 
@@ -161,8 +171,12 @@ export class ImagesToPdf implements OnDestroy {
           const imgH = embedded.height;
 
           if (this.pageSize === 'fit') {
-            const page = pdf.addPage([imgW, imgH]);
-            page.drawImage(embedded, { x: 0, y: 0, width: imgW, height: imgH });
+            // Scale source pixels to points at 96 DPI so the page gets a sane
+            // physical size; the image still fills it at full resolution.
+            const w = imgW * PX_TO_PT;
+            const h = imgH * PX_TO_PT;
+            const page = pdf.addPage([w, h]);
+            page.drawImage(embedded, { x: 0, y: 0, width: w, height: h });
           } else {
             const [pageW, pageH] = fixedPage!;
             const page = pdf.addPage([pageW, pageH]);

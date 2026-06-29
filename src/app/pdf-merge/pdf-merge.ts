@@ -49,6 +49,9 @@ export class PdfMerge implements OnDestroy {
 
   onDrop(e: DragEvent): void {
     e.preventDefault();
+    if (this.isLoading) {
+      return;
+    }
     const fs = e.dataTransfer?.files;
     if (fs?.length) {
       this.handleFiles(fs);
@@ -57,6 +60,10 @@ export class PdfMerge implements OnDestroy {
 
   onPick(e: Event): void {
     const i = e.target as HTMLInputElement;
+    if (this.isLoading) {
+      i.value = '';
+      return;
+    }
     if (i.files?.length) {
       this.handleFiles(i.files);
     }

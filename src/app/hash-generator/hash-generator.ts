@@ -28,6 +28,8 @@ export class HashGenerator implements OnInit {
   fileSize = 0;
   fileHashing = false;
 
+  private hashSeq = 0;
+
   hashes: HashRow[] = [
     { algo: 'MD5', value: '' },
     { algo: 'SHA-1', value: '' },
@@ -47,6 +49,7 @@ export class HashGenerator implements OnInit {
   }
 
   setMode(m: Mode): void {
+    this.hashSeq++;
     this.mode = m;
     this.clearHashes();
   }
@@ -99,6 +102,7 @@ export class HashGenerator implements OnInit {
   }
 
   private async hashFile(file: File): Promise<void> {
+    const seq = ++this.hashSeq;
     this.fileName = file.name;
     this.fileSize = file.size;
     this.fileHashing = true;
@@ -106,6 +110,7 @@ export class HashGenerator implements OnInit {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
+      if (seq !== this.hashSeq) return;
       const wordArray = CryptoJS.lib.WordArray.create(new Uint8Array(arrayBuffer) as any);
       this.hashes = [
         { algo: 'MD5',     value: CryptoJS.MD5(wordArray).toString() },
@@ -113,11 +118,17 @@ export class HashGenerator implements OnInit {
         { algo: 'SHA-256', value: CryptoJS.SHA256(wordArray).toString() },
         { algo: 'SHA-512', value: CryptoJS.SHA512(wordArray).toString() }
       ];
-      this.toastService.success(`Hashed ${file.name} (${this.formatBytes(file.size)})`);
+      if (seq === this.hashSeq) {
+        this.toastService.success(`Hashed ${file.name} (${this.formatBytes(file.size)})`);
+      }
     } catch (e: any) {
-      this.toastService.error(`Failed to hash file: ${e?.message || 'unknown error'}`);
+      if (seq === this.hashSeq) {
+        this.toastService.error(`Failed to hash file: ${e?.message || 'unknown error'}`);
+      }
     } finally {
-      this.fileHashing = false;
+      if (seq === this.hashSeq) {
+        this.fileHashing = false;
+      }
     }
   }
 

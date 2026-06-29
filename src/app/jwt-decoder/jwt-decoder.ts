@@ -203,7 +203,8 @@ export class JwtDecoder implements OnInit {
   }
 
   private formatTime(unixSec: number): string {
-    return new Date(unixSec * 1000).toLocaleString();
+    const d = new Date(unixSec * 1000);
+    return Number.isNaN(d.getTime()) ? String(unixSec) : d.toLocaleString();
   }
 
   private formatDuration(seconds: number): string {

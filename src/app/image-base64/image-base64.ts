@@ -26,8 +26,21 @@ export class ImageBase64 implements OnDestroy {
   decodeInput = '';
   /** Validated, displayable data URI for the live preview (or '' if invalid). */
   decodePreview = '';
+  /**
+   * The validated data URI kept for download/fetch. Unlike decodePreview it
+   * survives an <img> render failure, so non-previewable formats stay downloadable.
+   */
+  decodeUri = '';
+  /**
+   * True once the pasted data URI parses as a valid image, independent of
+   * whether the browser can render it as an <img>. Gates the Download button so
+   * formats the browser can't preview (TIFF/ICO/AVIF) stay downloadable.
+   */
+  decodeValid = false;
   decodeMime = '';
   decodeError = '';
+  /** Softer note shown when the data URI is valid but the browser won't preview it. */
+  decodeNote = '';
 
   constructor(
     public utilityService: UtilityService,
@@ -158,7 +171,10 @@ export class ImageBase64 implements OnDestroy {
 
   onDecodeInput(): void {
     this.decodeError = '';
+    this.decodeNote = '';
     this.decodePreview = '';
+    this.decodeUri = '';
+    this.decodeValid = false;
     this.decodeMime = '';
 
     const raw = this.decodeInput.trim();
@@ -178,7 +194,19 @@ export class ImageBase64 implements OnDestroy {
     }
 
     this.decodePreview = raw;
+    this.decodeUri = raw;
+    this.decodeValid = true;
     this.decodeMime = parsed.mime;
+  }
+
+  /** True when the active decode-side image is an SVG (can carry scripts). */
+  get decodeIsSvg(): boolean {
+    return this.decodeMime === 'image/svg+xml';
+  }
+
+  /** True when the active encode-side image is an SVG (can carry scripts). */
+  get encodeIsSvg(): boolean {
+    return this.fileMime === 'image/svg+xml';
   }
 
   /**
@@ -209,20 +237,25 @@ export class ImageBase64 implements OnDestroy {
     return { mime };
   }
 
-  /** The decoded data URI parsed but didn't render as a real image. */
+  /**
+   * The browser couldn't render the data URI as an <img>. This happens both for
+   * genuinely broken data and for valid-but-unrenderable formats (TIFF/ICO/AVIF
+   * in some browsers), so we only drop the inline preview — the URI parsed, so
+   * we keep it downloadable and show a soft note rather than a hard error.
+   */
   onPreviewError(): void {
     this.decodePreview = '';
-    this.decodeMime = '';
-    this.decodeError = 'That data URI is not a valid / decodable image.';
+    this.decodeNote =
+      'Preview unavailable in this browser, but the data URI is valid — you can still download the image.';
   }
 
   async downloadDecoded(): Promise<void> {
-    if (!this.decodePreview) {
+    if (!this.decodeValid) {
       return;
     }
     this.decodeError = '';
     try {
-      const res = await fetch(this.decodePreview);
+      const res = await fetch(this.decodeUri);
       const blob = await res.blob();
       const ext = this.extForMime(this.decodeMime || blob.type);
       this.utilityService.downloadBlob(blob, `image.${ext}`);
@@ -237,8 +270,11 @@ export class ImageBase64 implements OnDestroy {
   clearDecode(): void {
     this.decodeInput = '';
     this.decodePreview = '';
+    this.decodeUri = '';
+    this.decodeValid = false;
     this.decodeMime = '';
     this.decodeError = '';
+    this.decodeNote = '';
   }
 
   private extForMime(mime: string): string {

@@ -152,7 +152,6 @@ country=United States`;
 
   swap(): void {
     [this.decoded, this.encoded] = [this.encoded, this.decoded];
-    this.encode();
   }
 
   clear(): void {

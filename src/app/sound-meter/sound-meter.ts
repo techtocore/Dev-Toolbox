@@ -179,6 +179,9 @@ export class SoundMeter implements AfterViewInit, OnDestroy {
     this.count = 0;
     this.accMin = Infinity;
     this.accMax = -Infinity;
+    // Restart the frame counter so the next loop iteration is frame 0 and
+    // immediately refreshes the bound read-outs (frame % READOUT_EVERY === 0).
+    this.frame = 0;
     this.history = [];
     this.estDb = 0;
     this.levelPct = 0;
@@ -218,26 +221,32 @@ export class SoundMeter implements AfterViewInit, OnDestroy {
     const rms = Math.sqrt(sumSquares / this.buffer.length);
     const dbfs = rms > 0 ? 20 * Math.log10(rms) : FLOOR_DBFS;
 
-    const est = Math.max(0, dbfs + this.calibrationOffset);
     const pct = Math.max(0, Math.min(100, ((dbfs - FLOOR_DBFS) / -FLOOR_DBFS) * 100));
 
-    this.sum += est;
+    // Accumulate the raw RMS dBFS, not the calibrated value, so moving the
+    // calibration slider mid-session re-derives Min/Avg/Peak consistently with
+    // the live reading (the offset + 0-clamp are applied only at display time).
+    this.sum += dbfs;
     this.count++;
-    if (est < this.accMin) this.accMin = est;
-    if (est > this.accMax) this.accMax = est;
+    if (dbfs < this.accMin) this.accMin = dbfs;
+    if (dbfs > this.accMax) this.accMax = dbfs;
 
     this.history.push(pct);
     this.drawScope();
 
     if (this.frame++ % READOUT_EVERY === 0) {
-      const avg = this.count > 0 ? this.sum / this.count : 0;
+      // Apply the calibration offset (and the 0-clamp) only here, at display
+      // time. Adding a constant and clamping at 0 are monotonic, so Min/Avg/Peak
+      // stay mutually consistent and update the instant the slider moves.
+      const est = Math.max(0, dbfs + this.calibrationOffset);
+      const avg = this.count > 0 ? Math.max(0, this.sum / this.count + this.calibrationOffset) : 0;
       const band = est >= 85 ? 'loud' : est >= 70 ? 'moderate' : 'quiet';
       const now = typeof performance !== 'undefined' ? performance.now() : 0;
       this.zone.run(() => {
         this.estDb = est;
         this.levelPct = pct;
-        this.minDb = this.accMin === Infinity ? 0 : this.accMin;
-        this.maxDb = this.accMax === -Infinity ? 0 : this.accMax;
+        this.minDb = this.accMin === Infinity ? 0 : Math.max(0, this.accMin + this.calibrationOffset);
+        this.maxDb = this.accMax === -Infinity ? 0 : Math.max(0, this.accMax + this.calibrationOffset);
         this.avgDb = avg;
         // Refresh the live region only on a band change or ~once a second, so a
         // screen reader isn't flooded by the 10 Hz numeric updates.

@@ -71,7 +71,7 @@ function hello(name: string) {
     this.compiledMarkdown = this.sanitizeHtml(raw);
 
     this.charCount = this.markdownText.length;
-    this.wordCount = (this.markdownText.match(/[\p{L}\p{N}'’-]+/gu) || []).length;
+    this.wordCount = (this.markdownText.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
     this.readingTimeMin = Math.max(1, Math.round(this.wordCount / 238));
   }
 
@@ -91,8 +91,14 @@ function hello(name: string) {
       .replace(/\s+on[a-z]+\s*=\s*[^\s"'>]+/gi, '')
       // Neutralize javascript:/vbscript: always, and data: URLs except inline
       // images (data:image/...), which are legitimate and safe to render.
+      // Quoted values: href="javascript:..." / src='data:text/html,...'
       .replace(/(href|src|xlink:href)\s*=\s*("|')\s*(?:(?:javascript|vbscript)\s*:|data\s*:(?!\s*image\/))[^"']*\2/gi,
-        '$1=$2#$2');
+        '$1=$2#$2')
+      // Unquoted values: href=javascript:alert(1) / src=data:text/html,... —
+      // value runs until whitespace or '>'. Replace the whole attribute with a
+      // harmless empty quoted value.
+      .replace(/(href|src|xlink:href)\s*=\s*(?:(?:javascript|vbscript)\s*:|data\s*:(?!\s*image\/))[^\s>]*/gi,
+        '$1="#"');
   }
 
   private buildToc(): void {

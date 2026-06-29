@@ -46,6 +46,9 @@ export class QrCode implements AfterViewInit, OnDestroy {
   isRendering = false;
   errorMessage = '';
 
+  /** Non-blocking warning when foreground/background contrast is too low to scan. */
+  contrastWarning = '';
+
   /** True once a QR has been drawn to the canvas (gates the download buttons). */
   hasRendered = false;
 
@@ -79,8 +82,11 @@ export class QrCode implements AfterViewInit, OnDestroy {
     void this.render();
   }
 
-  /** Clamp the size to a sensible, render-safe range. */
-  onSizeChange(): void {
+  /**
+   * Clamp the size to a sensible, render-safe range. Runs on blur (not on every
+   * keystroke) so the field isn't rewritten mid-edit, which would reset the caret.
+   */
+  onSizeBlur(): void {
     if (!this.size || isNaN(this.size) || this.size < 64) {
       this.size = 64;
     } else if (this.size > 1024) {
@@ -89,8 +95,8 @@ export class QrCode implements AfterViewInit, OnDestroy {
     this.onInputChange();
   }
 
-  /** Clamp the quiet-zone margin (modules). */
-  onMarginChange(): void {
+  /** Clamp the quiet-zone margin (modules). Runs on blur, see onSizeBlur. */
+  onMarginBlur(): void {
     if (this.margin == null || isNaN(this.margin) || this.margin < 0) {
       this.margin = 0;
     } else if (this.margin > 20) {
@@ -142,6 +148,49 @@ export class QrCode implements AfterViewInit, OnDestroy {
 
   // ---- Rendering ---------------------------------------------------------
 
+  /** Render-safe size, clamped without mutating the bound (still-editable) field. */
+  private get renderWidth(): number {
+    return Math.min(1024, Math.max(64, this.size || 256));
+  }
+
+  /** Render-safe quiet-zone margin, clamped without mutating the bound field. */
+  private get renderMargin(): number {
+    if (this.margin == null || isNaN(this.margin)) {
+      return 4;
+    }
+    return Math.min(20, Math.max(0, this.margin));
+  }
+
+  /** Relative luminance of an #rrggbb colour per WCAG 2.x. */
+  private relativeLuminance(hex: string): number | null {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+    if (!m) {
+      return null;
+    }
+    const int = parseInt(m[1], 16);
+    const channel = (c: number): number => {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    };
+    const r = channel((int >> 16) & 0xff);
+    const g = channel((int >> 8) & 0xff);
+    const b = channel(int & 0xff);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  /** Set or clear contrastWarning based on the current foreground/background. */
+  private updateContrastWarning(): void {
+    const lf = this.relativeLuminance(this.foreground);
+    const lb = this.relativeLuminance(this.background);
+    if (lf == null || lb == null) {
+      this.contrastWarning = '';
+      return;
+    }
+    const ratio = (Math.max(lf, lb) + 0.05) / (Math.min(lf, lb) + 0.05);
+    this.contrastWarning =
+      ratio < 3 ? 'Low colour contrast — this QR may not scan reliably.' : '';
+  }
+
   private async render(): Promise<void> {
     if (!this.viewReady) {
       return;
@@ -161,10 +210,12 @@ export class QrCode implements AfterViewInit, OnDestroy {
       this.clearCanvas(canvas);
       this.hasRendered = false;
       this.errorMessage = '';
+      this.contrastWarning = '';
       this.isRendering = false;
       return;
     }
 
+    this.updateContrastWarning();
     this.isRendering = true;
     try {
       const QRCode = (await import('qrcode')).default;
@@ -173,8 +224,8 @@ export class QrCode implements AfterViewInit, OnDestroy {
         return;
       }
       await QRCode.toCanvas(canvas, data, {
-        width: this.size,
-        margin: this.margin,
+        width: this.renderWidth,
+        margin: this.renderMargin,
         errorCorrectionLevel: this.errorCorrectionLevel,
         color: { dark: this.foreground, light: this.background },
       });
@@ -238,7 +289,8 @@ export class QrCode implements AfterViewInit, OnDestroy {
       const QRCode = (await import('qrcode')).default;
       const svg = await QRCode.toString(data, {
         type: 'svg',
-        margin: this.margin,
+        width: this.renderWidth,
+        margin: this.renderMargin,
         errorCorrectionLevel: this.errorCorrectionLevel,
         color: { dark: this.foreground, light: this.background },
       });

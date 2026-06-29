@@ -95,6 +95,9 @@ export class ImageMetadata implements OnDestroy {
     }
 
     this.selectedFile = file;
+    // Default the export format to the source so transparency-bearing inputs
+    // (PNG/WebP) default to a lossless, alpha-preserving format instead of JPEG.
+    this.exportFormat = file.type === 'image/jpeg' ? 'jpeg' : 'png';
     this.fileName = file.name;
     this.fileSizeLabel = this.formatBytes(file.size);
 
@@ -272,6 +275,12 @@ export class ImageMetadata implements OnDestroy {
           if (!ctx) {
             reject(new Error('Canvas 2D context unavailable.'));
             return;
+          }
+          // JPEG has no alpha channel; without a backdrop, transparent pixels
+          // composite against transparent-black and turn black. Paint white first.
+          if (format === 'jpeg') {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
           ctx.drawImage(img, 0, 0);
           const mime = format === 'png' ? 'image/png' : 'image/jpeg';

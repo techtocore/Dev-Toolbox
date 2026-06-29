@@ -61,6 +61,12 @@ export class PdfSplit implements OnDestroy {
     const file = files[0];
     this.errorMessage = '';
 
+    // Drop any previously loaded document up front so an invalid pick/drop
+    // leaves the tool in a clean empty state instead of showing the old
+    // success banner alongside the new error.
+    this.resetDocument();
+    this.fileName = '';
+
     const name = (file.name || '').toLowerCase();
     if (!name.endsWith('.pdf') && file.type !== 'application/pdf') {
       this.errorMessage = 'Please choose a PDF file.';

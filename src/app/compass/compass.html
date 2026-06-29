@@ -44,14 +44,20 @@
               This device doesn't report a heading — most desktops and laptops have no
               magnetometer. Phones and tablets do.
             </p>
-            <p class="text-muted mb-3">Open this page on your phone to try it out:</p>
-            <div class="input-group url-share">
+            <p class="text-muted mb-3">
+              If your device has a compass but the sensor was just slow to start, you can
+              re-arm it. Otherwise, open this page on your phone to try it out:
+            </p>
+            <div class="input-group url-share mb-3">
               <input type="text" class="form-control font-monospace" [value]="pageUrl" readonly
                 aria-label="Page link">
               <button class="btn btn-outline-primary" (click)="copyUrl()" title="Copy link">
                 <i class="bi bi-clipboard me-1"></i>Copy link
               </button>
             </div>
+            <button class="btn btn-outline-secondary" (click)="retry()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try again
+            </button>
           </div>
         </div>
       </div>

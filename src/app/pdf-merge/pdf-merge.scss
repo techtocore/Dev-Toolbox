@@ -16,6 +16,12 @@
   color: #017cad;
 }
 
+.file-dropzone.disabled {
+  pointer-events: none;
+  opacity: .6;
+  cursor: not-allowed;
+}
+
 .order-badge {
   min-width: 1.75rem;
   text-align: center;

@@ -144,14 +144,39 @@ export class BubbleLevel implements OnInit, OnDestroy {
     const beta = event.beta ?? 0; // front/back, -180..180
     const gamma = event.gamma ?? 0; // left/right, -90..90
 
+    // The device-frame beta/gamma are reported relative to the device's natural
+    // orientation. Rotate them into the current screen frame so pitch/roll (and the
+    // bubble direction) stay correct when the screen is rotated to landscape.
+    const angle = this.screenAngle();
+    let p: number;
+    let r: number;
+    switch (angle) {
+      case 90:
+        p = gamma;
+        r = -beta;
+        break;
+      case 180:
+        p = -beta;
+        r = -gamma;
+        break;
+      case 270:
+        p = -gamma;
+        r = beta;
+        break;
+      default:
+        p = beta;
+        r = gamma;
+        break;
+    }
+
     if (!this.seededSmoothing) {
       // Jump straight to the first reading so the bubble doesn't glide in from 0.
-      this.rawPitch = beta;
-      this.rawRoll = gamma;
+      this.rawPitch = p;
+      this.rawRoll = r;
       this.seededSmoothing = true;
     } else {
-      this.rawPitch += (beta - this.rawPitch) * SMOOTHING;
-      this.rawRoll += (gamma - this.rawRoll) * SMOOTHING;
+      this.rawPitch += (p - this.rawPitch) * SMOOTHING;
+      this.rawRoll += (r - this.rawRoll) * SMOOTHING;
     }
 
     this.pitch = this.rawPitch - this.zeroPitch;
@@ -195,6 +220,15 @@ export class BubbleLevel implements OnInit, OnDestroy {
   private clampUnit(n: number): number {
     if (Number.isNaN(n)) return 0;
     return Math.max(-1, Math.min(1, n));
+  }
+
+  /** Current screen rotation in degrees (0/90/180/270), normalised; 0 if unknown. */
+  private screenAngle(): number {
+    const raw =
+      (typeof screen !== 'undefined' && screen.orientation
+        ? screen.orientation.angle
+        : (window as unknown as { orientation?: number }).orientation) ?? 0;
+    return ((raw % 360) + 360) % 360;
   }
 
   /** Treat the current orientation as dead flat (e.g. a surface you trust). */

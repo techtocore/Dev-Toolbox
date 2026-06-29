@@ -181,14 +181,13 @@ export class PdfOrganize implements OnDestroy {
       });
       const out = await PDFDocument.create();
 
-      for (const entry of this.pages) {
-        if (entry.deleted) continue;
-        const [copied] = await out.copyPages(src, [entry.srcIndex]);
-        const srcPage = src.getPage(entry.srcIndex);
-        const base = srcPage.getRotation().angle;
-        copied.setRotation(degrees(this.normalize(base + entry.rotation)));
-        out.addPage(copied);
-      }
+      const kept = this.pages.filter(p => !p.deleted);
+      const copied = await out.copyPages(src, kept.map(p => p.srcIndex));
+      copied.forEach((pg, i) => {
+        const base = Math.round(src.getPage(kept[i].srcIndex).getRotation().angle / 90) * 90;
+        pg.setRotation(degrees(this.normalize(base + kept[i].rotation)));
+        out.addPage(pg);
+      });
 
       const bytes = await out.save();
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });

@@ -62,6 +62,17 @@ export class CsvJsonConverter {
     }
   }
 
+  onSettingsChange(): void {
+    // Clear stale output when conversion-affecting settings change so labels
+    // never contradict the displayed result.
+    this.outputText = '';
+    this.outputBytes = 0;
+    this.outputRowCount = 0;
+    this.errorMessage = '';
+    this.previewHeaders = [];
+    this.previewRows = [];
+  }
+
   private buildPreview(): void {
     this.previewHeaders = [];
     this.previewRows = [];
@@ -210,6 +221,20 @@ export class CsvJsonConverter {
       throw new Error('Empty JSON array');
     }
 
+    // Array-of-arrays (array-format JSON): emit inner arrays directly so
+    // CSV<->JSON round-trips stay lossless instead of producing numeric keys.
+    if (data.length > 0 && Array.isArray(data[0])) {
+      const out: string[] = [];
+      if (this.hasHeader) {
+        const width = Math.max(...data.map(r => (Array.isArray(r) ? r.length : 0)));
+        out.push(this.createCsvLine(Array.from({ length: width }, (_, i) => `col${i + 1}`)));
+      }
+      data.forEach(r => out.push(this.createCsvLine(
+        (Array.isArray(r) ? r : []).map(v => v == null ? '' : (typeof v === 'object' ? JSON.stringify(v) : String(v)))
+      )));
+      return out.join('\n');
+    }
+
     // Union of keys across all rows (first-seen order) so objects with extra
     // or differing keys are not silently dropped.
     const headers: string[] = [];
@@ -217,6 +242,11 @@ export class CsvJsonConverter {
     data.forEach(obj => Object.keys(obj ?? {}).forEach(k => {
       if (!seen.has(k)) { seen.add(k); headers.push(k); }
     }));
+
+    if (headers.length === 0) {
+      throw new Error('JSON contains no object fields to convert to CSV');
+    }
+
     const rows: string[] = [];
 
     if (this.hasHeader) {
@@ -225,8 +255,9 @@ export class CsvJsonConverter {
 
     // Convert each object to CSV row
     data.forEach(item => {
+      const src = (item == null || typeof item !== 'object') ? {} : item;
       const values = headers.map(header => {
-        const value = item[header];
+        const value = src[header];
         if (value === null || value === undefined) return '';
         if (typeof value === 'object') return JSON.stringify(value);
         return String(value);

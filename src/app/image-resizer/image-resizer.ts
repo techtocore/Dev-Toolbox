@@ -47,6 +47,9 @@ export class ImageResizer implements OnDestroy {
   private sourceImage: HTMLImageElement | null = null;
   private aspectRatio = 1;
 
+  /** Monotonic token so a stale decode can't clobber a newer load. */
+  private loadSeq = 0;
+
   constructor(
     public utilityService: UtilityService,
     private toastService: ToastService
@@ -78,8 +81,8 @@ export class ImageResizer implements OnDestroy {
     const file = files[0];
     this.errorMessage = '';
 
-    if (!file.type.startsWith('image/')) {
-      this.errorMessage = 'Please choose an image file.';
+    if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
+      this.errorMessage = 'Please choose a raster image (PNG, JPEG, WebP, GIF, or BMP).';
       return;
     }
     if (file.size > ImageResizer.MAX_BYTES) {
@@ -97,9 +100,20 @@ export class ImageResizer implements OnDestroy {
     this.hasResult = false;
     this.sourceImage = null;
 
+    const seq = ++this.loadSeq;
     const url = URL.createObjectURL(file);
     try {
       const img = await this.decode(url);
+      // A newer load started while we were decoding — drop this stale result.
+      if (seq !== this.loadSeq) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+      // Reject vector/SVG or otherwise zero-sized images: a 0×0 source would
+      // clamp to a silent 1×1 output and a misleading success toast.
+      if (!img.naturalWidth || !img.naturalHeight) {
+        throw new Error('This image has no usable pixel dimensions (vector/SVG images are not supported).');
+      }
       this.previewUrl = url;
       this.sourceImage = img;
       this.fileName = file.name;
@@ -111,9 +125,13 @@ export class ImageResizer implements OnDestroy {
 
       this.targetWidth = img.naturalWidth;
       this.targetHeight = img.naturalHeight;
-    } catch {
+    } catch (err: any) {
       URL.revokeObjectURL(url);
-      this.errorMessage = 'Could not read that image. It may be corrupt or unsupported.';
+      // Don't let a stale error clobber a newer successful load.
+      if (seq === this.loadSeq) {
+        this.errorMessage =
+          err?.message || 'Could not read that image. It may be corrupt or unsupported.';
+      }
     }
   }
 

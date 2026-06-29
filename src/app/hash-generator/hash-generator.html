@@ -113,9 +113,10 @@
             <div class="hash-row">
               <div class="hash-label">{{ row.algo }}</div>
               <input type="text" readonly [value]="row.value" class="form-control font-monospace"
-                placeholder="—">
+                [attr.aria-label]="row.algo + ' hash'" placeholder="—">
               <button class="btn btn-outline-secondary" (click)="copy(row.value, row.algo)"
-                [disabled]="!row.value" title="Copy {{ row.algo }}">
+                [disabled]="!row.value" title="Copy {{ row.algo }}"
+                [attr.aria-label]="'Copy ' + row.algo + ' hash'">
                 <i class="bi bi-clipboard"></i>
               </button>
             </div>

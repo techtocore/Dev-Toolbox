@@ -67,6 +67,8 @@ export class IpInfo implements OnInit {
   consentGiven = false;
   hasAttempted = false;
 
+  private lookupSeq = 0;
+
   constructor(public utilityService: UtilityService) {}
 
   ngOnInit(): void {
@@ -97,6 +99,9 @@ export class IpInfo implements OnInit {
 
   revokeConsent(): void {
     this.consentGiven = false;
+    // Invalidate any in-flight lookup so its post-await state mutations are ignored.
+    this.lookupSeq++;
+    this.loading = false;
     this.network = {};
     this.errorMessage = '';
     this.hasAttempted = false;
@@ -109,6 +114,8 @@ export class IpInfo implements OnInit {
 
   async lookup(): Promise<void> {
     if (!this.consentGiven) return;
+
+    const seq = ++this.lookupSeq;
 
     this.loading = true;
     this.errorMessage = '';
@@ -125,16 +132,20 @@ export class IpInfo implements OnInit {
     for (const fetchFn of providers) {
       try {
         const result = await fetchFn();
+        // Bail if a newer lookup started or consent was revoked while awaiting.
+        if (seq !== this.lookupSeq || !this.consentGiven) return;
         if (result.ip) {
           this.network = result;
           this.loading = false;
           return;
         }
       } catch (err: any) {
+        if (seq !== this.lookupSeq || !this.consentGiven) return;
         failures.push(err?.message || 'unknown error');
       }
     }
 
+    if (seq !== this.lookupSeq || !this.consentGiven) return;
     this.errorMessage =
       failures.length > 0
         ? `All IP lookup providers failed: ${failures.join('; ')}. The service may be rate-limited or blocked by a network filter / extension.`
@@ -163,11 +174,9 @@ export class IpInfo implements OnInit {
       throw new Error(`ipapi.co: ${data.reason || 'error'}`);
     }
 
-    const offset: string | undefined = data.utc_offset;
-    let timezoneUtc: string | undefined;
-    if (offset && offset.length >= 5) {
-      timezoneUtc = `${offset.slice(0, 3)}:${offset.slice(3)}`;
-    }
+    const raw = (data.utc_offset || '').trim();
+    const m = /^([+-])(\d{2})(\d{2})$/.exec(raw);
+    const timezoneUtc = m ? `${m[1]}${m[2]}:${m[3]}` : undefined;
 
     return {
       source: 'ipapi.co',
@@ -229,6 +238,14 @@ export class IpInfo implements OnInit {
 
     const nav = navigator as any;
 
+    const dnt = (navigator as any).doNotTrack ?? (window as any).doNotTrack ?? (navigator as any).msDoNotTrack;
+    const doNotTrack =
+      dnt === '1' || dnt === 'yes' || dnt === true
+        ? 'Enabled'
+        : dnt === '0' || dnt === 'no'
+          ? 'Disabled'
+          : 'Not set';
+
     this.browser = {
       userAgent: ua,
       browser: this.detectBrowser(ua),
@@ -238,7 +255,7 @@ export class IpInfo implements OnInit {
       platform: nav.userAgentData?.platform || navigator.platform || 'Unknown',
       cookiesEnabled: navigator.cookieEnabled,
       onlineStatus: navigator.onLine,
-      doNotTrack: navigator.doNotTrack === '1' ? 'Enabled' : 'Disabled / Not set',
+      doNotTrack,
       vendor: navigator.vendor || 'Unknown',
       screenResolution: `${screen.width} x ${screen.height}`,
       viewportSize: `${window.innerWidth} x ${window.innerHeight}`,
@@ -254,6 +271,10 @@ export class IpInfo implements OnInit {
   }
 
   detectBrowser(ua: string): string {
+    // iOS variants of Chrome/Edge/Firefox all carry Safari/AppleWebKit, so detect them first.
+    if (/CriOS\//.test(ua)) return 'Chrome';
+    if (/EdgiOS\//.test(ua)) return 'Microsoft Edge';
+    if (/FxiOS\//.test(ua)) return 'Firefox';
     if (/Edg\//.test(ua)) return 'Microsoft Edge';
     if (/OPR\//.test(ua) || /Opera/.test(ua)) return 'Opera';
     if (/Firefox\//.test(ua)) return 'Firefox';
@@ -271,6 +292,8 @@ export class IpInfo implements OnInit {
     if (/Windows/.test(ua)) return 'Windows';
     if (/Android/.test(ua)) return 'Android';
     if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
+    // iPadOS reports a desktop Mac UA but exposes multiple touch points.
+    if (/Mac OS X/.test(ua) && (navigator as any).maxTouchPoints > 1) return 'iPadOS';
     if (/Mac OS X/.test(ua)) return 'macOS';
     if (/Linux/.test(ua)) return 'Linux';
     return 'Unknown';

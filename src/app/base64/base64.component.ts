@@ -13,6 +13,8 @@ type Mode = 'text' | 'file';
   standalone: false
 })
 export class Base64Component implements OnInit {
+  private static readonly MAX_BYTES = 50 * 1024 * 1024;
+
   decoded = '';
   encoded = '';
 
@@ -37,7 +39,14 @@ export class Base64Component implements OnInit {
 
   setVariant(v: Variant): void {
     this.variant = v;
-    if (this.mode === 'text' && this.decoded) this.encode();
+    if (this.mode === 'text' && this.decoded) {
+      this.encode();
+    } else if (this.mode === 'file' && this.encoded) {
+      // Convert through the standard form first so the result is correct
+      // regardless of which variant is currently stored.
+      const std = this.padBase64(this.fromUrlSafe(this.encoded));
+      this.encoded = v === 'urlsafe' ? this.toUrlSafe(std) : std;
+    }
   }
 
   setMode(m: Mode): void {
@@ -68,7 +77,7 @@ export class Base64Component implements OnInit {
       return;
     }
     try {
-      const normalized = this.fromUrlSafe(this.encoded.trim());
+      const normalized = this.fromUrlSafe(this.encoded.replace(/\s+/g, ''));
       const padded = this.padBase64(normalized);
       const raw = atob(padded);
       // Convert raw byte string back through UTF-8 decoding.
@@ -117,6 +126,24 @@ export class Base64Component implements OnInit {
 
   private async encodeFile(file: File): Promise<void> {
     this.errorMessage = '';
+
+    if (file.size === 0) {
+      this.errorMessage = 'That file is empty.';
+      this.fileName = '';
+      this.fileMime = '';
+      this.fileSize = 0;
+      this.encoded = '';
+      return;
+    }
+    if (file.size > Base64Component.MAX_BYTES) {
+      this.errorMessage = `That file is ${this.formatBytes(file.size)} — the limit is 50 MB.`;
+      this.fileName = '';
+      this.fileMime = '';
+      this.fileSize = 0;
+      this.encoded = '';
+      return;
+    }
+
     this.fileName = file.name;
     this.fileMime = file.type || 'application/octet-stream';
     this.fileSize = file.size;

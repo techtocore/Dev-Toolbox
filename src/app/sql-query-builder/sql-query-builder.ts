@@ -168,10 +168,10 @@ export class SqlQueryBuilder {
       query += `\nORDER BY ${this.orderBy} ${this.orderDirection}`;
     }
 
-    // Add LIMIT + optional OFFSET
-    if (this.limit) {
+    // Add LIMIT + optional OFFSET (non-negative integers only)
+    if (/^\d+$/.test(String(this.limit))) {
       query += `\nLIMIT ${this.limit}`;
-      if (this.offset) {
+      if (/^\d+$/.test(String(this.offset))) {
         query += ` OFFSET ${this.offset}`;
       }
     }
@@ -243,7 +243,9 @@ export class SqlQueryBuilder {
       if (condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL') {
         conditionStr += `${condition.field} ${condition.operator}`;
       } else if (condition.operator === 'LIKE') {
-        conditionStr += `${condition.field} LIKE '%${this.escapeSqlString(condition.value)}%'`;
+        // The user supplies their own % / _ wildcards (e.g. '%term%'); the
+        // value is used verbatim so prefix/suffix/exact patterns are possible.
+        conditionStr += `${condition.field} LIKE '${this.escapeSqlString(condition.value)}'`;
       } else if (condition.operator === 'IN') {
         // IN lists are passed through verbatim — user is expected to provide
         // a comma-separated literal list (e.g. 1, 2, 3 or 'a', 'b').
@@ -281,7 +283,23 @@ export class SqlQueryBuilder {
     this.utilityService.downloadFile(this.generatedQuery, 'text/plain', 'query.sql');
   }
 
+  // Reset all SELECT-relevant builder state so omitted fields from one
+  // example can't bleed into the next.
+  private resetSelectState(): void {
+    this.distinct = false;
+    this.selectedColumns = '*';
+    this.conditions = [];
+    this.joins = [];
+    this.groupBy = '';
+    this.having = '';
+    this.orderBy = '';
+    this.orderDirection = 'ASC';
+    this.limit = '';
+    this.offset = '';
+  }
+
   loadExample(type: string): void {
+    this.resetSelectState();
     switch (type) {
       case 'basic':
         this.queryType = 'SELECT';
@@ -330,7 +348,7 @@ export class SqlQueryBuilder {
         this.distinct = false;
         this.selectedColumns = 'id, title, author, published_at';
         this.conditions = [
-          { field: 'published_at', operator: '<', value: 'NOW()', logic: 'AND' }
+          { field: 'published_at', operator: '<', value: '2025-01-01', logic: 'AND' }
         ];
         this.joins = [];
         this.groupBy = '';
@@ -345,6 +363,7 @@ export class SqlQueryBuilder {
   }
 
   clearAll(): void {
+    this.queryType = 'SELECT';
     this.tableName = 'users';
     this.selectedColumns = '*';
     this.distinct = false;
@@ -353,8 +372,12 @@ export class SqlQueryBuilder {
     this.groupBy = '';
     this.having = '';
     this.orderBy = '';
+    this.orderDirection = 'ASC';
     this.limit = '';
     this.offset = '';
+    this.insertColumns = '';
+    this.insertValues = '';
+    this.updateSet = '';
     this.generatedQuery = '';
   }
 }

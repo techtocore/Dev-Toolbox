@@ -84,14 +84,18 @@ export class TimestampConverter implements OnInit {
   }
 
   useCurrentTimestamp(): void {
-    this.updateFromDate(new Date(), 'unix');
+    // Use a neutral source ('tz') so all three echo lines run and every input
+    // field is populated (a source of 'unix' would skip the unixInput write).
+    this.updateFromDate(new Date(), 'tz');
   }
 
   private updateFromDate(date: Date, source: 'unix' | 'datetime' | 'iso' | 'tz'): void {
     this.hasValidInput = true;
     this.outputDate = date;
 
-    const unixSec = Math.floor(date.getTime() / 1000);
+    // Truncate toward zero (not floor) so sub-second negative (pre-1970)
+    // timestamps just drop the fractional part instead of losing a second.
+    const unixSec = Math.trunc(date.getTime() / 1000);
     const unixMs = date.getTime();
 
     // Local datetime-local input always in user's local zone (HTML5 limitation).

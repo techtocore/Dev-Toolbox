@@ -15,21 +15,21 @@
         <div class="card-body">
           <div class="row g-3 align-items-end">
             <div class="col-md-3">
-              <label class="form-label small mb-1">Version</label>
-              <select class="form-select" [(ngModel)]="version" (change)="generate()">
+              <label class="form-label small mb-1" for="uuid-version">Version</label>
+              <select id="uuid-version" class="form-select" [(ngModel)]="version" (change)="generate()">
                 @for (v of versions; track v.value) {
                   <option [value]="v.value">{{ v.label }}</option>
                 }
               </select>
             </div>
             <div class="col-md-2">
-              <label class="form-label small mb-1">Count</label>
-              <input type="number" class="form-control" [(ngModel)]="count" min="1" max="1000">
+              <label class="form-label small mb-1" for="uuid-count">Count</label>
+              <input id="uuid-count" type="number" class="form-control" [(ngModel)]="count" min="1" max="1000">
             </div>
             <div class="col-md-3 d-flex align-items-end pb-1">
               <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="uppercase"
-                  [(ngModel)]="uppercase" (change)="generate()">
+                  [(ngModel)]="uppercase" (change)="applyCase()">
                 <label class="form-check-label" for="uppercase">Uppercase</label>
               </div>
             </div>
@@ -78,8 +78,8 @@
             <div class="uuid-list">
               @for (uuid of uuids; track $index) {
                 <div class="uuid-item">
-                  <input type="text" readonly [value]="uuid" class="form-control font-monospace" />
-                  <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard(uuid)" title="Copy">
+                  <input type="text" readonly [value]="uuid" class="form-control font-monospace" aria-label="Generated UUID" />
+                  <button class="btn btn-sm btn-outline-secondary" (click)="copyToClipboard(uuid)" title="Copy" aria-label="Copy UUID">
                     <i class="bi bi-clipboard"></i>
                   </button>
                 </div>

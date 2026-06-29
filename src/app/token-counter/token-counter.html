@@ -19,16 +19,16 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Provider</label>
-              <select class="form-select" [(ngModel)]="selectedProvider" (change)="onProviderChange()">
+              <label class="form-label" for="tc-provider">Provider</label>
+              <select id="tc-provider" class="form-select" aria-label="Provider" [(ngModel)]="selectedProvider" (change)="onProviderChange()">
                 @for (provider of providers; track provider.value) {
                   <option [value]="provider.value">{{ provider.label }}</option>
                 }
               </select>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Model</label>
-              <select class="form-select" [(ngModel)]="selectedModel">
+              <label class="form-label" for="tc-model">Model</label>
+              <select id="tc-model" class="form-select" aria-label="Model" [(ngModel)]="selectedModel">
                 @for (model of filteredModels; track model.model) {
                   <option [value]="model.model">{{ model.displayName }}</option>
                 }
@@ -105,6 +105,7 @@
           <textarea
             class="form-control font-monospace mb-3"
             rows="12"
+            aria-label="Input prompt text"
             [(ngModel)]="inputText"
             placeholder="Paste your input prompt here..."></textarea>
 
@@ -133,6 +134,7 @@
           <textarea
             class="form-control font-monospace mb-3"
             rows="12"
+            aria-label="Output response text"
             [(ngModel)]="outputText"
             placeholder="Paste expected output/response here..."></textarea>
 
@@ -165,10 +167,12 @@
           <div class="card-body">
             <div class="row align-items-center">
               <div class="col-md-5">
-                <label class="form-label">% of input that is cached (reused prefix)</label>
+                <label class="form-label" for="tc-cache-pct">% of input that is cached (reused prefix)</label>
                 <input
+                  id="tc-cache-pct"
                   type="range"
                   class="form-range"
+                  aria-label="Percent of input that is cached"
                   min="0"
                   max="100"
                   step="5"
@@ -264,13 +268,18 @@
               <h6 class="card-title">Batch Cost Calculator</h6>
               <div class="row align-items-center">
                 <div class="col-md-4">
-                  <label class="form-label">Number of Requests</label>
+                  <label class="form-label" for="tc-batch">Number of Requests</label>
                   <input
+                    id="tc-batch"
                     type="number"
                     class="form-control"
+                    aria-label="Number of requests"
                     [(ngModel)]="batchRequests"
                     min="1"
                     step="100">
+                  @if (batchRequests == null || batchRequests < 1) {
+                    <div class="text-danger small mt-1">Enter 1 or more requests.</div>
+                  }
                 </div>
                 <div class="col-md-8">
                   <div class="row text-center">

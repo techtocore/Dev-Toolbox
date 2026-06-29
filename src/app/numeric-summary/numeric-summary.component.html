@@ -252,12 +252,16 @@
                     <span class="metric-value">{{ formatNumber(skewness, 4) }}</span>
                   </div>
                   <small class="text-muted">
-                    @if (skewness > 0.5) {
-                      Right-skewed (positive skew, tail on right)
-                    } @else if (skewness < -0.5) {
-                      Left-skewed (negative skew, tail on left)
+                    @if (isDefined(skewness)) {
+                      @if (skewness > 0.5) {
+                        Right-skewed (positive skew, tail on right)
+                      } @else if (skewness < -0.5) {
+                        Left-skewed (negative skew, tail on left)
+                      } @else {
+                        Approximately symmetric
+                      }
                     } @else {
-                      Approximately symmetric
+                      Not defined (no variation)
                     }
                   </small>
                 </div>
@@ -267,12 +271,16 @@
                     <span class="metric-value">{{ formatNumber(kurtosis, 4) }}</span>
                   </div>
                   <small class="text-muted">
-                    @if (kurtosis > 0) {
-                      Leptokurtic (heavy tails, more outliers)
-                    } @else if (kurtosis < 0) {
-                      Platykurtic (light tails, fewer outliers)
+                    @if (isDefined(kurtosis)) {
+                      @if (kurtosis > 0) {
+                        Leptokurtic (heavy tails, more outliers)
+                      } @else if (kurtosis < 0) {
+                        Platykurtic (light tails, fewer outliers)
+                      } @else {
+                        Mesokurtic (normal distribution)
+                      }
                     } @else {
-                      Mesokurtic (normal distribution)
+                      Not defined (no variation)
                     }
                   </small>
                 </div>

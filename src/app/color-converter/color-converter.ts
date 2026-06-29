@@ -32,7 +32,7 @@ export class ColorConverter implements OnInit {
   isMobile = false;
 
   presets: string[] = [
-    '#017cad', '#017cad', '#198754', '#dc3545', '#ffc107',
+    '#017cad', '#0d6efd', '#198754', '#dc3545', '#ffc107',
     '#0dcaf0', '#6f42c1', '#fd7e14', '#212529', '#ffffff'
   ];
 

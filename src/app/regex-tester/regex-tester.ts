@@ -192,22 +192,8 @@ export class RegexTester implements OnInit {
 
   run(): void {
     if (!this.regexPattern || !this.testString) {
-      this.clearResults();
-      return;
-    }
-
-    // ReDoS guard: a nested-quantifier pattern (e.g. (a+)+, (a*)*, (.*)+) can
-    // trigger catastrophic backtracking that hangs the tab — and it does so even
-    // on a handful of characters, so this is checked on ALL inputs, not just
-    // large ones. JS regex matching cannot be interrupted once started, so the
-    // only safe option is to refuse the pattern before running it. (A Web Worker
-    // with a terminate-on-timeout would let such patterns run safely; that's the
-    // robust follow-up.)
-    const SUSPECT = /(\([^)]*[+*][^)]*\)[+*]|\.[+*]\?[*+])/;
-    if (SUSPECT.test(this.regexPattern)) {
-      this.isValid = false;
-      this.errorMessage =
-        'Pattern contains nested quantifiers (e.g. (x+)+) that can cause catastrophic backtracking — refused to run to avoid freezing the browser. Simplify the pattern.';
+      this.isValid = true;
+      this.errorMessage = '';
       this.clearResults();
       return;
     }
@@ -250,10 +236,22 @@ export class RegexTester implements OnInit {
     let m: RegExpExecArray | null;
     let iterations = 0;
 
+    // Wall-clock bound: a pathological pattern (e.g. (a+)+ on a long string) can
+    // make a single exec() backtrack catastrophically. JS regex matching cannot be
+    // interrupted mid-call, but we can stop iterating between matches if the overall
+    // run gets too slow, so the tab never hangs indefinitely. (A terminable Web
+    // Worker is the robust long-term follow-up.)
+    const start = Date.now();
+
     while ((m = r.exec(this.testString)) !== null) {
       out.push({ index: m.index, length: m[0].length });
       if (!this.flags.global) break;
       if (m[0].length === 0) r.lastIndex++;
+      if (Date.now() - start > 1000) {
+        this.errorMessage = 'Pattern took too long — refine it.';
+        this.isValid = false;
+        break;
+      }
       if (++iterations >= MAX) {
         this.errorMessage = `Too many matches (>${MAX}). Refine your pattern.`;
         this.isValid = false;

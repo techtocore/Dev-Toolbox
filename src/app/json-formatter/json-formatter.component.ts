@@ -33,9 +33,14 @@ export class JsonFormatterComponent implements OnInit {
     this.isMobile = this.utilityService.getIsMobile();
   }
 
+  onInput(): void {
+    this.inputBytes = new Blob([this.input]).size;
+  }
+
   process(): void {
     this.errorMessage = '';
     this.output = '';
+    this.outputBytes = 0;
     this.inputBytes = new Blob([this.input]).size;
 
     if (!this.input.trim()) {
@@ -49,6 +54,12 @@ export class JsonFormatterComponent implements OnInit {
     } catch (e: any) {
       this.errorMessage = this.diagnoseParseError(e?.message || 'Invalid JSON');
       return;
+    }
+
+    const bigIntLiterals = this.input.match(/-?\d{16,}/g);
+    const lossy = bigIntLiterals?.some(n => String(Number(n)) !== n);
+    if (lossy) {
+      this.toastService.warning('Large numbers exceed JS safe-integer range and may have lost precision; formatting was still applied.');
     }
 
     const indent = this.mode === 'minify' ? 0 : (this.indentSize === 'tab' ? '\t' : this.indentSize);

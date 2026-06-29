@@ -17,9 +17,11 @@
         </div>
         <div class="card-body">
           <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload PDF files"
-               (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
-               (keydown.enter)="fileInput.click()"
-               (keydown.space)="$event.preventDefault(); fileInput.click()">
+               [class.disabled]="isLoading"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)"
+               (click)="!isLoading && fileInput.click()"
+               (keydown.enter)="!isLoading && fileInput.click()"
+               (keydown.space)="$event.preventDefault(); !isLoading && fileInput.click()">
             <input #fileInput type="file" hidden accept=".pdf" [multiple]="true" (change)="onPick($event)">
             <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
             <strong>Drop PDF files</strong> or click to browse. Add two or more to merge.

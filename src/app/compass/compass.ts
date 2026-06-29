@@ -7,9 +7,10 @@ type CompassStatus = 'idle' | 'waiting' | 'active' | 'unsupported' | 'denied' | 
 // Vector low-pass factor for the heading. Smoothing a raw angle would jump at the
 // 0°/360° wrap, so we filter the unit vector (cos, sin) instead.
 const SMOOTHING = 0.15;
-// Generous enough that a phone's cold-start magnetometer won't flash the desktop
-// "no sensor" card before the first reading arrives.
-const NO_SIGNAL_MS = 2000;
+// Generous enough that a phone's cold-start magnetometer — which can emit sparse,
+// null-alpha events for a moment before the first usable reading — won't flash the
+// desktop "no sensor" card prematurely.
+const NO_SIGNAL_MS = 5000;
 
 const CARDINALS = [
   'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
@@ -117,7 +118,13 @@ export class Compass implements OnInit, OnDestroy {
     window.addEventListener('deviceorientationabsolute', this.onAbsolute, true);
     window.addEventListener('deviceorientation', this.onPlain, true);
     this.noSignalTimer = setTimeout(() => {
-      if (this.status === 'waiting') this.status = 'unsupported';
+      if (this.status === 'waiting') {
+        // Drop the orientation listeners and clear `listening` before switching to
+        // the dead-end card, so a later retry()/start() isn't blocked by the
+        // `if (this.listening) return` guard in beginListening().
+        this.stopListening();
+        this.status = 'unsupported';
+      }
     }, NO_SIGNAL_MS);
   }
 

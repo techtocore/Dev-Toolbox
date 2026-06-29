@@ -266,9 +266,12 @@ Translate the text from {{source_lang}} to {{target_lang}}, preserving {{preserv
   }
 
   addVariable(): void {
-    const newVarNum = this.variables.length + 1;
+    let n = this.variables.length + 1;
+    while (this.variables.some(v => v.name === `variable${n}`)) {
+      n++;
+    }
     this.variables.push({
-      name: `variable${newVarNum}`,
+      name: `variable${n}`,
       value: '',
       description: ''
     });
@@ -341,9 +344,13 @@ Translate the text from {{source_lang}} to {{target_lang}}, preserving {{preserv
     const stored = localStorage.getItem('promptTemplates');
     if (stored) {
       try {
-        this.savedTemplates = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        this.savedTemplates = Array.isArray(parsed)
+          ? parsed.filter(t => t && typeof t.name === 'string' && typeof t.template === 'string' && Array.isArray(t.variables))
+          : [];
       } catch (e) {
         console.error('Failed to load templates from storage', e);
+        this.savedTemplates = [];
       }
     }
   }

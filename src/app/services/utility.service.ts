@@ -112,8 +112,12 @@ export class UtilityService {
       const reader = new FileReader();
       reader.readAsText(file, "UTF-8");
       reader.onload = (evt: ProgressEvent<FileReader>) => {
-        if (evt.target?.result) {
-          resolve(evt.target.result as string);
+        // For a successful readAsText the result is always a string ('' for a
+        // 0-byte file) — null-check rather than truthiness so an empty or
+        // whitespace-only file resolves to '' instead of being rejected.
+        const result = evt.target?.result;
+        if (result != null) {
+          resolve(result as string);
         } else {
           reject("No content read from file");
         }

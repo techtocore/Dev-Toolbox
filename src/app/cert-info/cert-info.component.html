@@ -91,7 +91,7 @@
                 <tr>
                   <th>Subject</th>
                   <td>
-                    @for (entry of certInfo.subject | keyvalue; track entry.key) {
+                    @for (entry of certInfo.subject | keyvalue: keepOrder; track entry.key) {
                       <div><strong>{{ entry.key }}:</strong> {{ entry.value }}</div>
                     }
                   </td>
@@ -99,7 +99,7 @@
                 <tr>
                   <th>Issuer</th>
                   <td>
-                    @for (entry of certInfo.issuer | keyvalue; track entry.key) {
+                    @for (entry of certInfo.issuer | keyvalue: keepOrder; track entry.key) {
                       <div><strong>{{ entry.key }}:</strong> {{ entry.value }}</div>
                     }
                   </td>

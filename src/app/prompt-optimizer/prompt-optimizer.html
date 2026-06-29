@@ -20,8 +20,8 @@
         <div class="card-body">
           <div class="row g-3 align-items-end">
             <div class="col-md-5">
-              <label class="form-label small mb-1">Target model</label>
-              <select class="form-select form-select-sm" [(ngModel)]="targetModel" (change)="analyzePrompt()">
+              <label class="form-label small mb-1" for="targetModel">Target model</label>
+              <select id="targetModel" class="form-select form-select-sm" [(ngModel)]="targetModel" (change)="analyzePrompt()">
                 <option value="generic">Generic / unspecified</option>
                 <option value="claude">Anthropic Claude</option>
                 <option value="gpt">OpenAI GPT / o-series</option>
@@ -78,6 +78,7 @@
           <textarea
             class="form-control font-monospace mb-3"
             rows="20"
+            aria-label="Your prompt"
             [(ngModel)]="prompt"
             (input)="analyzePrompt()"
             placeholder="Enter your prompt here..."></textarea>
@@ -111,7 +112,11 @@
                 [class.bg-warning]="score >= 60 && score < 80"
                 [class.bg-danger]="score < 60"
                 [style.width.%]="score"
-                role="progressbar">
+                role="progressbar"
+                [attr.aria-valuenow]="score"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-label]="'Prompt quality score: ' + score + ' percent, ' + getScoreLabel()">
                 {{ score }}%
               </div>
             </div>

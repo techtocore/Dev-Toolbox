@@ -44,6 +44,13 @@
               <dd class="col-8">{{ formatBytes(encodeBytes) }}</dd>
             </dl>
 
+            @if (encodeIsSvg) {
+              <div class="alert alert-warning py-2 small" role="alert">
+                <i class="bi bi-shield-exclamation me-2" aria-hidden="true"></i>
+                Heads up: SVG files can contain scripts. The in-app preview is safe, but inlining this snippet into a page that renders SVG as a document — or opening a downloaded SVG directly in a browser — can execute embedded JavaScript.
+              </div>
+            }
+
             @if (encodeTooLarge) {
               <div class="alert alert-warning py-2 small" role="alert">
                 <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>
@@ -98,7 +105,7 @@
 
           <div class="d-flex flex-wrap gap-2 mb-3">
             <button type="button" class="btn btn-primary btn-sm"
-                    [disabled]="!decodePreview" (click)="downloadDecoded()">
+                    [disabled]="!decodeValid" (click)="downloadDecoded()">
               <i class="bi bi-download me-1" aria-hidden="true"></i>Download image
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm"
@@ -113,14 +120,27 @@
             </div>
           }
 
-          @if (decodePreview) {
+          @if (decodeIsSvg) {
+            <div class="alert alert-warning py-2 small" role="alert">
+              <i class="bi bi-shield-exclamation me-2" aria-hidden="true"></i>
+              Heads up: SVG files can contain scripts. The in-app preview is safe, but opening a downloaded SVG directly in a browser — or inlining it into a page that renders SVG as a document — can execute embedded JavaScript.
+            </div>
+          }
+
+          @if (decodeValid) {
             <dl class="row mb-2 small">
               <dt class="col-4 text-muted">MIME type</dt>
               <dd class="col-8">{{ decodeMime }}</dd>
             </dl>
-            <div class="preview-frame">
-              <img [src]="decodePreview" alt="Decoded image preview" class="preview-img" (error)="onPreviewError()">
-            </div>
+            @if (decodePreview) {
+              <div class="preview-frame">
+                <img [src]="decodePreview" alt="Decoded image preview" class="preview-img" (error)="onPreviewError()">
+              </div>
+            } @else if (decodeNote) {
+              <div class="alert alert-info py-2 small mb-0" role="alert">
+                <i class="bi bi-info-circle me-2" aria-hidden="true"></i>{{ decodeNote }}
+              </div>
+            }
           } @else if (!decodeError) {
             <p class="text-muted small mb-0">Paste an image data URI above to preview and download it.</p>
           }

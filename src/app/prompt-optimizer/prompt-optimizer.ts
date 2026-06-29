@@ -94,13 +94,19 @@ export class PromptOptimizer {
     if (fence) {
       text = fence[1].trim();
     }
-    // Strip a single pair of matching surrounding quotes.
-    if (
-      (text.startsWith('"') && text.endsWith('"')) ||
-      (text.startsWith('“') && text.endsWith('”')) ||
-      (text.startsWith("'") && text.endsWith("'"))
-    ) {
-      text = text.slice(1, -1).trim();
+    // Strip a single pair of matching surrounding quotes — but only when the
+    // first/last quotes are an actual wrapping pair, i.e. the same quote char
+    // does not reappear in the interior. This leaves text like
+    // '"Summarize X" and then "do Y"' untouched.
+    if (text.length >= 2) {
+      const inner = text.slice(1, -1);
+      const wrapped =
+        (text.startsWith('"') && text.endsWith('"') && inner.indexOf('"') === -1) ||
+        (text.startsWith('“') && text.endsWith('”') && inner.indexOf('”') === -1 && inner.indexOf('“') === -1) ||
+        (text.startsWith("'") && text.endsWith("'") && inner.indexOf("'") === -1);
+      if (wrapped) {
+        text = inner.trim();
+      }
     }
     if (!text) {
       this.toastService.error('The model returned an empty rewrite. Try again.');
