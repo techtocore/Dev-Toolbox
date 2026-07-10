@@ -34,7 +34,7 @@
           @if (showResults && filteredTools.length > 0) {
             <div class="search-results">
               @for (tool of filteredTools; track tool) {
-                <div class="search-result-item" (click)="selectTool(tool)">
+                <div class="search-result-item" (mousedown)="$event.preventDefault()" (click)="selectTool(tool)">
                   <div class="result-icon">
                     <i [class]="tool.icon || 'bi-tools'"></i>
                   </div>
