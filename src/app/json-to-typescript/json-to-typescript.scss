@@ -1,0 +1,31 @@
+.code-area {
+  min-height: 22rem;
+  resize: vertical;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.code-output {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: #212529;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-height: 30rem;
+  overflow: auto;
+
+  code {
+    color: inherit;
+    background: transparent;
+    padding: 0;
+    white-space: pre;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .code-area { min-height: 14rem; }
+}

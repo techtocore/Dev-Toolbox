@@ -1,0 +1,106 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">JSON → TypeScript</h2>
+      <p class="text-muted mb-4">
+        Paste a JSON sample and get TypeScript interfaces. Nested objects become their own
+        interfaces; arrays of objects are merged into one shape — keys missing from some elements
+        are marked <code>?optional</code> and differing types become unions. All local, nothing uploaded.
+      </p>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-6 col-md-3">
+              <label class="form-label small mb-1" for="root-name">Root name</label>
+              <input id="root-name" type="text" class="form-control" [(ngModel)]="rootName" (ngModelChange)="generate()"
+                placeholder="Root" aria-label="Root interface name">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label small mb-1" for="decl">Declaration</label>
+              <select id="decl" class="form-select" [(ngModel)]="useType" (ngModelChange)="generate()">
+                <option [ngValue]="false">interface</option>
+                <option [ngValue]="true">type alias</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-5">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="export-decls" [(ngModel)]="exportDecls" (change)="generate()">
+                <label class="form-check-label" for="export-decls">Add <code>export</code> keyword</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-braces me-2"></i>JSON input</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-light" (click)="loadSample()" title="Load sample JSON">
+              <i class="bi bi-file-earmark-text me-1"></i>Sample
+            </button>
+            <button class="btn btn-sm btn-outline-light" (click)="clear()" [disabled]="!input" title="Clear">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea
+            id="json-input"
+            class="form-control font-monospace code-area"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="Paste JSON here…"
+            aria-label="JSON input"
+            [(ngModel)]="input"
+            (ngModelChange)="generate()"></textarea>
+          @if (error) {
+            <div class="alert alert-danger mt-3 mb-0 py-2 small">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-filetype-tsx me-2"></i>TypeScript
+            @if (interfaceCount > 0) {
+              <span class="badge bg-secondary ms-1">{{ interfaceCount }} interface{{ interfaceCount === 1 ? '' : 's' }}</span>
+            }
+          </h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="copyOutput()" [disabled]="!output" title="Copy">
+              <i class="bi bi-clipboard me-1"></i>Copy
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="downloadOutput()" [disabled]="!output" title="Download .ts">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          @if (output) {
+            <pre class="code-output mb-0"><code>{{ output }}</code></pre>
+          } @else if (!error) {
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-filetype-tsx" style="font-size: 2.5rem; opacity: 0.4;"></i>
+              <p class="mt-2 mb-0">Your generated interfaces will appear here.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

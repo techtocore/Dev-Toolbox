@@ -1,0 +1,50 @@
+.base-badge {
+  min-width: 3rem;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+}
+
+.base-select {
+  max-width: 8rem;
+  flex: 0 0 auto;
+}
+
+.stat-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px 6px;
+
+  .stat-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #017cad;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+.readonly-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 6px 10px;
+
+  code {
+    color: #212529;
+    background: transparent;
+    padding: 0;
+    word-break: break-all;
+  }
+}

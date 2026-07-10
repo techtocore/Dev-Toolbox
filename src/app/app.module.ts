@@ -45,6 +45,10 @@ import { ImageMetadata } from './image-metadata/image-metadata';
 import { ImageBase64 } from './image-base64/image-base64';
 import { QrCode } from './qr-code/qr-code';
 import { PasswordGenerator } from './password-generator/password-generator';
+import { CaseConverter } from './case-converter/case-converter';
+import { BaseConverter } from './base-converter/base-converter';
+import { CronHelper } from './cron-helper/cron-helper';
+import { JsonToTypescript } from './json-to-typescript/json-to-typescript';
 import { ToastOutletComponent } from './toast-outlet/toast-outlet.component';
 import { CommandPaletteComponent } from './command-palette/command-palette.component';
 import { AiAssist } from './ai/ai-assist/ai-assist';
@@ -89,6 +93,10 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     ImageBase64,
     QrCode,
     PasswordGenerator,
+    CaseConverter,
+    BaseConverter,
+    CronHelper,
+    JsonToTypescript,
     ToastOutletComponent,
     CommandPaletteComponent
   ],

@@ -20,6 +20,7 @@
 
 ### 🧩 Parsing & Formatting
 - **JSON Formatter** — Validate and pretty-print JSON with a collapsible tree view.
+- **JSON to TypeScript** — Generate TypeScript interfaces (or type aliases) from a JSON sample; nested objects and arrays of objects are merged into clean, optional-aware types.
 - **Timestamp Converter** — Convert between Unix timestamps, ISO 8601, and human-readable formats.
 
 ### 🔐 Encoding & Security
@@ -40,10 +41,13 @@
 - **Diff Checker** — Side-by-side difference highlighting.
 - **Markdown Editor** — Live markdown preview and editing.
 - **Word Counter** — Words, characters, lines, and more.
+- **Case Converter** — Convert between `camelCase`, `snake_case`, `kebab-case`, `CONSTANT_CASE`, `Title Case`, slugs and more — identifier styles re-tokenize, prose styles keep your layout.
 
 ### 🧰 Development Tools
 - **Regex Tester** — Live matching/highlighting, or generate a pattern from plain English (on-device AI).
 - **UUID Generator** — Generate UUIDs (v4 and more) in bulk.
+- **Number Base Converter** — Convert integers between binary, octal, decimal, hex and any base from 2–36; `BigInt`-backed so huge values stay exact.
+- **Cron Expression Helper** — Explain a 5-field cron schedule (and `@daily`/`@hourly` nicknames) in plain English, expand each field, and preview the next run times.
 - **Color Converter** — HEX ⇄ RGB ⇄ HSL ⇄ HSV ⇄ CMYK with a picker and a WCAG contrast check.
 - **IP & Browser Info** — Your public IP, ISP, location, timezone, and browser/device details.
 - **QR Code Generator** — QR codes from text, URLs, or Wi-Fi credentials; download as PNG or SVG.

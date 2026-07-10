@@ -1,0 +1,48 @@
+.cron-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 3px 10px 3px 3px;
+  font-size: 0.8rem;
+  color: #334155;
+
+  small {
+    color: #64748b;
+    font-size: 0.72rem;
+  }
+
+  .pos {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #017cad;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+}
+
+.cron-table {
+  code {
+    color: #017cad;
+    background: rgba(1, 124, 173, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+}
+
+.run-count {
+  width: auto;
+}

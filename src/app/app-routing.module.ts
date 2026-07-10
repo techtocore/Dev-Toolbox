@@ -35,6 +35,10 @@ import { ImageMetadata } from './image-metadata/image-metadata';
 import { ImageBase64 } from './image-base64/image-base64';
 import { QrCode } from './qr-code/qr-code';
 import { PasswordGenerator } from './password-generator/password-generator';
+import { CaseConverter } from './case-converter/case-converter';
+import { BaseConverter } from './base-converter/base-converter';
+import { CronHelper } from './cron-helper/cron-helper';
+import { JsonToTypescript } from './json-to-typescript/json-to-typescript';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -72,6 +76,10 @@ const routes: Routes = [
   { path: 'imageBase64', component: ImageBase64 },
   { path: 'qrCode', component: QrCode },
   { path: 'passwordGenerator', component: PasswordGenerator },
+  { path: 'caseConverter', component: CaseConverter },
+  { path: 'baseConverter', component: BaseConverter },
+  { path: 'cronHelper', component: CronHelper },
+  { path: 'jsonToTypescript', component: JsonToTypescript },
   {
     path: 'localAi',
     loadComponent: () => import('./local-ai/local-ai').then((m) => m.LocalAi),

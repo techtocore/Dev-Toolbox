@@ -105,6 +105,14 @@ export class ToolsService {
       icon: 'bi-clock-history',
       keywords: ['timestamp', 'unix', 'epoch', 'date', 'time', 'iso', 'convert']
     },
+    {
+      name: 'JSON to TypeScript',
+      description: 'Generate TypeScript interfaces or type aliases from a JSON sample',
+      route: '/jsonToTypescript',
+      category: 'Parsing & Formatting',
+      icon: 'bi-filetype-tsx',
+      keywords: ['json', 'typescript', 'ts', 'interface', 'type', 'generate', 'model', 'dto', 'codegen', 'convert']
+    },
 
     // ── Encoding & Security ─────────────────────────────────────────────────
     {
@@ -218,6 +226,14 @@ export class ToolsService {
       icon: 'bi-calculator',
       keywords: ['word', 'count', 'character', 'text', 'statistics']
     },
+    {
+      name: 'Case Converter',
+      description: 'Convert text between camelCase, snake_case, kebab-case, CONSTANT_CASE, Title Case and more',
+      route: '/caseConverter',
+      category: 'Text Processing',
+      icon: 'bi-type',
+      keywords: ['case', 'camel', 'camelcase', 'snake', 'snake_case', 'kebab', 'pascal', 'constant', 'title', 'sentence', 'slug', 'uppercase', 'lowercase', 'convert', 'text']
+    },
 
     // ── Development Tools ───────────────────────────────────────────────────
     {
@@ -260,6 +276,22 @@ export class ToolsService {
       category: 'Development Tools',
       icon: 'bi-qr-code',
       keywords: ['qr', 'qrcode', 'barcode', 'generate', 'wifi', 'url', 'vcard', 'png', 'svg', 'scan']
+    },
+    {
+      name: 'Number Base Converter',
+      description: 'Convert integers between binary, octal, decimal, hex, and any base from 2 to 36',
+      route: '/baseConverter',
+      category: 'Development Tools',
+      icon: 'bi-123',
+      keywords: ['base', 'radix', 'binary', 'octal', 'decimal', 'hexadecimal', 'hex', 'convert', 'number', 'bigint', 'bits', 'bitwise']
+    },
+    {
+      name: 'Cron Expression Helper',
+      description: 'Explain a cron schedule in plain English and preview its next run times',
+      route: '/cronHelper',
+      category: 'Development Tools',
+      icon: 'bi-alarm',
+      keywords: ['cron', 'crontab', 'schedule', 'expression', 'job', 'timer', 'next run', 'parser', 'explain', 'quartz']
     },
 
     // ── Device & Sensors ────────────────────────────────────────────────────

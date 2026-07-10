@@ -1,0 +1,130 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Cron Expression Helper</h2>
+      <p class="text-muted mb-4">
+        Decode a standard 5-field cron expression into plain English, see each field expanded,
+        and preview the next scheduled runs in your local timezone. Nicknames like
+        <code>&#64;daily</code> and <code>&#64;hourly</code> and names like <code>MON</code>/<code>JAN</code>
+        are supported. Parsed entirely in your browser.
+      </p>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <label class="form-label small mb-1" for="cron-expr">Cron expression</label>
+          <div class="input-group input-group-lg">
+            <input
+              id="cron-expr"
+              type="text"
+              class="form-control font-monospace"
+              spellcheck="false"
+              autocomplete="off"
+              placeholder="* * * * *"
+              aria-label="Cron expression"
+              [(ngModel)]="expression"
+              (ngModelChange)="parse()">
+            <button class="btn btn-outline-secondary" (click)="copyExpression()" [disabled]="!expression.trim()" title="Copy expression">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          <div class="cron-legend mt-2">
+            <span class="legend-chip"><span class="pos">1</span> minute <small>0–59</small></span>
+            <span class="legend-chip"><span class="pos">2</span> hour <small>0–23</small></span>
+            <span class="legend-chip"><span class="pos">3</span> day of month <small>1–31</small></span>
+            <span class="legend-chip"><span class="pos">4</span> month <small>1–12 / JAN–DEC</small></span>
+            <span class="legend-chip"><span class="pos">5</span> day of week <small>0–6 / SUN–SAT</small></span>
+          </div>
+
+          <div class="d-flex gap-2 mt-3 flex-wrap align-items-center">
+            <span class="small text-muted me-1">Examples:</span>
+            @for (ex of examples; track ex.expr) {
+              <button class="btn btn-sm btn-outline-primary" (click)="useExample(ex.expr)">{{ ex.label }}</button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+  }
+
+  @if (parsed && !error) {
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-card-text me-2"></i>Summary</h5>
+          </div>
+          <div class="card-body">
+            <p class="fs-5 mb-4">{{ description }}</p>
+
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0 cron-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Field</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Matches</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of fieldRows; track row.label) {
+                    <tr>
+                      <th scope="row" class="fw-semibold">{{ row.label }}</th>
+                      <td><code>{{ row.raw }}</code></td>
+                      <td class="text-muted">{{ row.expanded }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Next runs</h5>
+            <div class="d-flex align-items-center gap-2">
+              <label class="small text-muted mb-0" for="run-count">Show</label>
+              <select id="run-count" class="form-select form-select-sm run-count" [(ngModel)]="runCount" (ngModelChange)="parse()">
+                <option [ngValue]="5">5</option>
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (warning) {
+              <div class="alert alert-warning py-2 small">
+                <i class="bi bi-exclamation-circle me-2"></i>{{ warning }}
+              </div>
+            }
+            @if (nextRuns.length > 0) {
+              <p class="text-muted small mb-2">
+                <i class="bi bi-geo me-1"></i>Local time — {{ timeZone }}
+              </p>
+              <ol class="list-group list-group-numbered">
+                @for (run of nextRuns; track $index) {
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="font-monospace">{{ formatRun(run.date) }}</span>
+                    <span class="badge bg-light text-dark">{{ run.relative }}</span>
+                  </li>
+                }
+              </ol>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
