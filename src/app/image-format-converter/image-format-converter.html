@@ -1,0 +1,170 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Batch Image Format Converter</h2>
+      <p class="text-muted mb-4">
+        Convert PNG, JPEG, WebP, GIF, and BMP images locally. Files never leave your browser.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-images me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Source Images</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload images to convert"
+               [class.disabled]="isConverting"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)"
+               (click)="!isConverting && fileInput.click()"
+               (keydown.enter)="!isConverting && fileInput.click()"
+               (keydown.space)="$event.preventDefault(); !isConverting && fileInput.click()">
+            <input #fileInput type="file" hidden [multiple]="true"
+                   accept="image/png,image/jpeg,image/webp,image/gif,image/bmp"
+                   (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop images</strong> or click to browse. Up to 100 files.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-warning" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (items.length === 0) {
+            <p class="text-muted mb-0">No images added yet.</p>
+          } @else {
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+              <span class="text-muted small">{{ items.length }} image{{ items.length === 1 ? '' : 's' }}</span>
+              <div class="btn-group btn-group-sm" role="group" aria-label="Image list actions">
+                <button type="button" class="btn btn-outline-secondary" (click)="sortByName()"
+                        [disabled]="isConverting" title="Sort by file name" aria-label="Sort by file name">
+                  <i class="bi bi-sort-alpha-down" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="clearAll()"
+                        [disabled]="isConverting" title="Clear all images" aria-label="Clear all images">
+                  <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <ul class="list-group image-list">
+              @for (item of items; track item.url; let index = $index) {
+                <li class="list-group-item d-flex align-items-center gap-3">
+                  <img class="thumb" [src]="item.url" [alt]="item.name">
+                  <div class="file-details flex-grow-1 min-w-0">
+                    <div class="filename text-truncate" [title]="item.name">{{ item.name }}</div>
+                    <div class="text-muted small">
+                      {{ formatLabel(item.file.type) }} &middot; {{ formatBytes(item.file.size) }}
+                      @if (item.status === 'done') {
+                        &rarr; {{ formatBytes(item.outputBytes) }}
+                      }
+                    </div>
+                    @if (item.status === 'error') {
+                      <div class="text-danger small">{{ item.error }}</div>
+                    }
+                  </div>
+
+                  @if (item.status === 'converting') {
+                    <span class="spinner-border spinner-border-sm text-primary" role="status" aria-label="Converting"></span>
+                  } @else if (item.status === 'done') {
+                    <i class="bi bi-check-circle-fill text-success status-icon" aria-label="Converted"></i>
+                  } @else if (item.status === 'error') {
+                    <i class="bi bi-x-circle-fill text-danger status-icon" aria-label="Failed"></i>
+                  }
+
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(index)"
+                          [disabled]="isConverting" title="Remove image" aria-label="Remove image">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Conversion</h5>
+        </div>
+        <div class="card-body">
+          <fieldset [disabled]="isConverting">
+            <div class="mb-3">
+              <label class="form-label" for="converterFormat">Output format</label>
+              <select id="converterFormat" class="form-select" [(ngModel)]="format"
+                      (ngModelChange)="resetResults()">
+                <option value="png">PNG (lossless)</option>
+                <option value="jpeg">JPEG</option>
+                <option value="webp">WebP</option>
+              </select>
+            </div>
+
+            @if (isLossy) {
+              <div class="mb-3">
+                <label for="converterQuality" class="form-label d-flex justify-content-between">
+                  <span>Quality</span>
+                  <span class="badge text-bg-light">{{ quality.toFixed(2) }}</span>
+                </label>
+                <input id="converterQuality" type="range" class="form-range"
+                       min="0.1" max="1" step="0.05" [(ngModel)]="quality"
+                       (ngModelChange)="resetResults()">
+              </div>
+            }
+
+            @if (format === 'jpeg') {
+              <div class="alert alert-light border small" role="note">
+                <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                Transparent pixels are filled with white when converting to JPEG.
+              </div>
+            }
+
+            @if (hasAnimatedInput) {
+              <div class="alert alert-light border small" role="note">
+                Animated images are converted from their first frame.
+              </div>
+            }
+
+            <button type="button" class="btn btn-primary w-100"
+                    [disabled]="items.length === 0 || isConverting" (click)="convertAll()">
+              @if (isConverting) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                @if (processedCount < items.length) {
+                  Converting {{ processedCount + 1 }} of {{ items.length }}
+                } @else {
+                  Packaging download&hellip;
+                }
+              } @else {
+                <i class="bi bi-download me-2" aria-hidden="true"></i>
+                Convert &amp; download{{ items.length > 1 ? ' ZIP' : '' }}
+              }
+            </button>
+          </fieldset>
+
+          @if (isConverting) {
+            <div class="progress mt-3" role="progressbar" aria-label="Conversion progress"
+                 [attr.aria-valuenow]="progressPercent" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" [style.width.%]="progressPercent"></div>
+            </div>
+          }
+
+          @if (!isConverting && completedCount > 0) {
+            <dl class="row small mt-3 mb-0 result-summary">
+              <dt class="col-7 text-muted">Converted</dt>
+              <dd class="col-5 text-end">{{ completedCount }} / {{ items.length }}</dd>
+              <dt class="col-7 text-muted">Output size</dt>
+              <dd class="col-5 text-end">{{ formatBytes(totalOutputBytes) }}</dd>
+            </dl>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

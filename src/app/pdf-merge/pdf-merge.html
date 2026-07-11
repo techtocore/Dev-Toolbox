@@ -78,6 +78,15 @@
           <h5 class="mb-0">Summary</h5>
         </div>
         <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label" for="mergedPdfName">Output filename</label>
+            <div class="input-group">
+              <input id="mergedPdfName" type="text" class="form-control" maxlength="120"
+                     [(ngModel)]="outputName" [disabled]="isLoading" placeholder="merged">
+              <span class="input-group-text">.pdf</span>
+            </div>
+          </div>
+
           <dl class="row mb-3">
             <dt class="col-7">Files</dt>
             <dd class="col-5 text-end mb-2">{{ files.length }}</dd>

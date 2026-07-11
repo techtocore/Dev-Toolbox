@@ -59,6 +59,32 @@
               </div>
             </div>
 
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3" aria-label="Bulk page actions">
+              <span class="text-muted small me-1">All pages</span>
+              <div class="btn-group btn-group-sm" role="group" aria-label="Rotate all pages">
+                <button type="button" class="btn btn-outline-secondary" (click)="rotateAll(-90)"
+                        [disabled]="loading || remainingCount === 0" title="Rotate all left" aria-label="Rotate all left">
+                  <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="rotateAll(90)"
+                        [disabled]="loading || remainingCount === 0" title="Rotate all right" aria-label="Rotate all right">
+                  <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                </button>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="reverseOrder()"
+                      [disabled]="loading || pages.length < 2">
+                <i class="bi bi-arrow-down-up me-1" aria-hidden="true"></i>Reverse order
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success" (click)="restoreAll()"
+                      [disabled]="loading || remainingCount === pages.length">
+                <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore pages
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary ms-sm-auto" (click)="resetChanges()"
+                      [disabled]="loading || !hasChanges">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Reset changes
+              </button>
+            </div>
+
             <ul class="list-group">
               @for (page of pages; track trackByEntry($index, page); let i = $index) {
                 <li class="list-group-item d-flex flex-wrap align-items-center gap-2"

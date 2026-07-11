@@ -21,7 +21,7 @@
                (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="fileInput.click()"
                (keydown.enter)="fileInput.click()"
                (keydown.space)="$event.preventDefault(); fileInput.click()">
-            <input #fileInput type="file" hidden accept="image/*" [multiple]="true" (change)="onPick($event)">
+            <input #fileInput type="file" hidden accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" [multiple]="true" (change)="onPick($event)">
             <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
             <strong>Drop images</strong> or click to browse. JPEG, PNG, WebP, GIF, BMP.
           </div>
@@ -35,9 +35,20 @@
           } @else {
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="text-muted small">{{ images.length }} image(s) — top of list is the first page.</span>
-              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearAll()">
-                <i class="bi bi-trash me-1" aria-hidden="true"></i>Clear all
-              </button>
+              <div class="btn-group btn-group-sm" role="group" aria-label="Image list actions">
+                <button type="button" class="btn btn-outline-secondary" (click)="sortByName()"
+                        [disabled]="isBuilding" title="Sort by file name" aria-label="Sort by file name">
+                  <i class="bi bi-sort-alpha-down" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="reverseOrder()"
+                        [disabled]="isBuilding" title="Reverse page order" aria-label="Reverse page order">
+                  <i class="bi bi-arrow-down-up" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="clearAll()"
+                        [disabled]="isBuilding" title="Clear all images" aria-label="Clear all images">
+                  <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
+              </div>
             </div>
 
             <ul class="list-group image-list">
@@ -76,6 +87,15 @@
           <h5 class="mb-0">Options</h5>
         </div>
         <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label" for="imagesPdfName">Output filename</label>
+            <div class="input-group">
+              <input id="imagesPdfName" type="text" class="form-control" maxlength="120"
+                     [(ngModel)]="outputName" [disabled]="isBuilding" placeholder="images">
+              <span class="input-group-text">.pdf</span>
+            </div>
+          </div>
+
           <div class="mb-3">
             <label class="form-label" for="pageSize">Page size</label>
             <select id="pageSize" class="form-select" [(ngModel)]="pageSize">

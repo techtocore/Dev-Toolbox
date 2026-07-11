@@ -144,6 +144,28 @@ export class PdfOrganize implements OnDestroy {
     ];
   }
 
+  rotateAll(delta: -90 | 90): void {
+    this.pages
+      .filter(page => !page.deleted)
+      .forEach(page => page.rotation = this.normalize(page.rotation + delta));
+  }
+
+  reverseOrder(): void {
+    this.pages.reverse();
+  }
+
+  restoreAll(): void {
+    this.pages.forEach(page => page.deleted = false);
+  }
+
+  resetChanges(): void {
+    this.pages = Array.from({ length: this.pages.length }, (_, srcIndex) => ({
+      srcIndex,
+      rotation: 0,
+      deleted: false
+    }));
+  }
+
   private normalize(angle: number): number {
     return ((angle % 360) + 360) % 360;
   }
@@ -156,6 +178,12 @@ export class PdfOrganize implements OnDestroy {
 
   get remainingCount(): number {
     return this.pages.filter(p => !p.deleted).length;
+  }
+
+  get hasChanges(): boolean {
+    return this.pages.some((page, index) =>
+      page.srcIndex !== index || page.rotation !== 0 || page.deleted
+    );
   }
 
   /** Download is only meaningful when at least one page survives. */
@@ -191,7 +219,13 @@ export class PdfOrganize implements OnDestroy {
 
       const bytes = await out.save();
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
-      this.utilityService.downloadBlob(blob, 'organized.pdf');
+      const sourceName = this.fileName.replace(/\.pdf$/i, '');
+      const downloadName = this.utilityService.normalizeDownloadName(
+        `${sourceName}-organized`,
+        'pdf',
+        'organized'
+      );
+      this.utilityService.downloadBlob(blob, downloadName);
       this.toastService.success('Organized PDF downloaded');
     } catch (err: unknown) {
       this.errorMessage =

@@ -22,6 +22,7 @@ export class PdfMerge implements OnDestroy {
 
   isLoading: boolean = false;
   errorMessage: string = '';
+  outputName = 'merged';
 
   /** Reject absurdly large files early so we don't lock the browser. */
   private readonly maxBytes = 150 * 1024 * 1024; // 150 MB per file
@@ -98,6 +99,10 @@ export class PdfMerge implements OnDestroy {
         }
         if (file.size > this.maxBytes) {
           problems.push(`"${file.name}" — larger than 150 MB`);
+          continue;
+        }
+        if (this.files.some(entry => this.fileKey(entry.file) === this.fileKey(file))) {
+          problems.push(`"${file.name}" — already added`);
           continue;
         }
 
@@ -190,7 +195,7 @@ export class PdfMerge implements OnDestroy {
 
       const merged = await out.save();
       const blob = new Blob([merged as BlobPart], { type: 'application/pdf' });
-      this.utilityService.downloadBlob(blob, 'merged.pdf');
+      this.utilityService.downloadBlob(blob, this.downloadName);
       this.toastService.success('Merged PDF downloaded');
     } catch (err: unknown) {
       this.errorMessage = this.toMessage(
@@ -216,6 +221,14 @@ export class PdfMerge implements OnDestroy {
       unit++;
     }
     return `${size.toFixed(1)} ${units[unit]}`;
+  }
+
+  get downloadName(): string {
+    return this.utilityService.normalizeDownloadName(this.outputName, 'pdf', 'merged');
+  }
+
+  private fileKey(file: File): string {
+    return `${file.name}\u0000${file.size}\u0000${file.lastModified}`;
   }
 
   private toMessage(err: unknown, fallback: string): string {

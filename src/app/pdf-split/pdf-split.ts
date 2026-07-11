@@ -248,7 +248,13 @@ export class PdfSplit implements OnDestroy {
 
       const bytes = await out.save();
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
-      this.utilityService.downloadBlob(blob, 'extracted.pdf');
+      const sourceName = this.fileName.replace(/\.pdf$/i, '');
+      const downloadName = this.utilityService.normalizeDownloadName(
+        `${sourceName}-extracted`,
+        'pdf',
+        'extracted'
+      );
+      this.utilityService.downloadBlob(blob, downloadName);
       this.toastService.success(`Extracted ${indices.length} page${indices.length === 1 ? '' : 's'}`);
     } catch (err: any) {
       this.errorMessage = err?.message

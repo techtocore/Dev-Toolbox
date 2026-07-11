@@ -41,6 +41,7 @@ import { PdfSplit } from './pdf-split/pdf-split';
 import { PdfOrganize } from './pdf-organize/pdf-organize';
 import { ImagesToPdf } from './images-to-pdf/images-to-pdf';
 import { ImageResizer } from './image-resizer/image-resizer';
+import { ImageFormatConverter } from './image-format-converter/image-format-converter';
 import { ImageMetadata } from './image-metadata/image-metadata';
 import { ImageBase64 } from './image-base64/image-base64';
 import { QrCode } from './qr-code/qr-code';
@@ -89,6 +90,7 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     PdfOrganize,
     ImagesToPdf,
     ImageResizer,
+    ImageFormatConverter,
     ImageMetadata,
     ImageBase64,
     QrCode,

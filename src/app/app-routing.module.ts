@@ -31,6 +31,7 @@ import { PdfSplit } from './pdf-split/pdf-split';
 import { PdfOrganize } from './pdf-organize/pdf-organize';
 import { ImagesToPdf } from './images-to-pdf/images-to-pdf';
 import { ImageResizer } from './image-resizer/image-resizer';
+import { ImageFormatConverter } from './image-format-converter/image-format-converter';
 import { ImageMetadata } from './image-metadata/image-metadata';
 import { ImageBase64 } from './image-base64/image-base64';
 import { QrCode } from './qr-code/qr-code';
@@ -72,6 +73,7 @@ const routes: Routes = [
   { path: 'pdfOrganize', component: PdfOrganize },
   { path: 'imagesToPdf', component: ImagesToPdf },
   { path: 'imageResizer', component: ImageResizer },
+  { path: 'imageFormatConverter', component: ImageFormatConverter },
   { path: 'imageMetadata', component: ImageMetadata },
   { path: 'imageBase64', component: ImageBase64 },
   { path: 'qrCode', component: QrCode },

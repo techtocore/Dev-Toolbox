@@ -371,6 +371,14 @@ export class ToolsService {
       featured: true
     },
     {
+      name: 'Batch Image Format Converter',
+      description: 'Convert multiple PNG, JPEG, WebP, GIF, or BMP images and download the results as a ZIP',
+      route: '/imageFormatConverter',
+      category: 'Image & Media',
+      icon: 'bi-arrow-repeat',
+      keywords: ['image', 'batch', 'convert', 'format', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'zip']
+    },
+    {
       name: 'Image Metadata Viewer & Stripper',
       description: 'Inspect EXIF/GPS metadata in a photo and download a stripped, share-safe copy',
       route: '/imageMetadata',

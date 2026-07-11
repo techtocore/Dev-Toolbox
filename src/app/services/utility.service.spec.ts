@@ -13,4 +13,14 @@ describe('UtilityService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should normalize a download name and preserve one extension', () => {
+    expect(service.normalizeDownloadName(' Vacation / 2026.PDF ', 'pdf', 'images'))
+      .toBe('Vacation - 2026.pdf');
+  });
+
+  it('should use the fallback for an empty or invalid name', () => {
+    expect(service.normalizeDownloadName(' ... ', '.pdf', 'document'))
+      .toBe('document.pdf');
+  });
 });

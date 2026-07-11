@@ -14,6 +14,8 @@ type OutputFormat = 'png' | 'jpeg' | 'webp';
 export class ImageResizer implements OnDestroy {
   /** Maximum accepted file size (25 MB) to keep canvas work responsive. */
   private static readonly MAX_BYTES = 25 * 1024 * 1024;
+  /** Keep RGBA canvas allocation near 160 MB before browser overhead. */
+  private static readonly MAX_OUTPUT_PIXELS = 40_000_000;
 
   /** Object URL of the currently-loaded source image (revoked on replace). */
   previewUrl: string | null = null;
@@ -120,6 +122,11 @@ export class ImageResizer implements OnDestroy {
       this.originalWidth = img.naturalWidth;
       this.originalHeight = img.naturalHeight;
       this.originalBytes = file.size;
+      this.format = file.type === 'image/jpeg'
+        ? 'jpeg'
+        : file.type === 'image/webp'
+          ? 'webp'
+          : 'png';
       this.aspectRatio =
         img.naturalHeight === 0 ? 1 : img.naturalWidth / img.naturalHeight;
 
@@ -151,6 +158,7 @@ export class ImageResizer implements OnDestroy {
     if (this.lockAspect && this.aspectRatio > 0) {
       this.targetHeight = Math.max(1, Math.round(this.targetWidth / this.aspectRatio));
     }
+    this.onSettingsChange();
   }
 
   onHeightChange(): void {
@@ -158,6 +166,7 @@ export class ImageResizer implements OnDestroy {
     if (this.lockAspect && this.aspectRatio > 0) {
       this.targetWidth = Math.max(1, Math.round(this.targetHeight * this.aspectRatio));
     }
+    this.onSettingsChange();
   }
 
   onLockToggle(): void {
@@ -165,6 +174,22 @@ export class ImageResizer implements OnDestroy {
     if (this.lockAspect && this.aspectRatio > 0) {
       this.targetHeight = Math.max(1, Math.round(this.targetWidth / this.aspectRatio));
     }
+    this.onSettingsChange();
+  }
+
+  setScale(percent: number): void {
+    if (!this.originalWidth || !this.originalHeight) {
+      return;
+    }
+    const scale = Math.max(1, Math.min(100, percent)) / 100;
+    this.targetWidth = Math.max(1, Math.round(this.originalWidth * scale));
+    this.targetHeight = Math.max(1, Math.round(this.originalHeight * scale));
+    this.onSettingsChange();
+  }
+
+  onSettingsChange(): void {
+    this.revokeResult();
+    this.hasResult = false;
   }
 
   private clampDim(value: number): number {
@@ -180,6 +205,12 @@ export class ImageResizer implements OnDestroy {
     return this.format === 'jpeg' || this.format === 'webp';
   }
 
+  get isOutputSizeSafe(): boolean {
+    const width = this.clampDim(this.targetWidth);
+    const height = this.clampDim(this.targetHeight);
+    return width * height <= ImageResizer.MAX_OUTPUT_PIXELS;
+  }
+
   // ---- Processing --------------------------------------------------------
 
   async process(): Promise<void> {
@@ -193,6 +224,9 @@ export class ImageResizer implements OnDestroy {
     try {
       const w = this.clampDim(this.targetWidth);
       const h = this.clampDim(this.targetHeight);
+      if (w * h > ImageResizer.MAX_OUTPUT_PIXELS) {
+        throw new Error('Output is larger than 40 megapixels. Reduce the width or height.');
+      }
 
       const canvas = document.createElement('canvas');
       canvas.width = w;

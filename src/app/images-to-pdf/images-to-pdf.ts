@@ -12,6 +12,14 @@ interface ImageItem {
 }
 
 const MAX_FILE_BYTES = 40 * 1024 * 1024; // 40 MB per image
+const ACCEPTED_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/bmp',
+  'image/x-ms-bmp',
+]);
 
 // 'Fit to image' maps source pixels to PDF points. Treating images as 96 DPI
 // (the CSS reference density) keeps pages at a sane physical size instead of
@@ -31,6 +39,7 @@ export class ImagesToPdf implements OnDestroy {
   pageSize: PageSize = 'fit';
   orientation: Orientation = 'portrait';
   margin = 0;
+  outputName = 'images';
 
   isBuilding = false;
   errorMessage = '';
@@ -67,12 +76,16 @@ export class ImagesToPdf implements OnDestroy {
     const rejected: string[] = [];
 
     for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) {
-        rejected.push(`${file.name} (not an image)`);
+      if (!ACCEPTED_TYPES.has(file.type)) {
+        rejected.push(`${file.name} (unsupported format)`);
         continue;
       }
       if (file.size > MAX_FILE_BYTES) {
         rejected.push(`${file.name} (over 40 MB)`);
+        continue;
+      }
+      if (this.images.some(item => this.fileKey(item.file) === this.fileKey(file))) {
+        rejected.push(`${file.name} (already added)`);
         continue;
       }
       this.images.push({
@@ -102,6 +115,17 @@ export class ImagesToPdf implements OnDestroy {
   moveDown(index: number): void {
     if (index >= this.images.length - 1) return;
     [this.images[index + 1], this.images[index]] = [this.images[index], this.images[index + 1]];
+  }
+
+  sortByName(): void {
+    this.images.sort((left, right) => left.name.localeCompare(right.name, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    }));
+  }
+
+  reverseOrder(): void {
+    this.images.reverse();
   }
 
   clearAll(): void {
@@ -203,7 +227,7 @@ export class ImagesToPdf implements OnDestroy {
 
       const out = await pdf.save();
       const blob = new Blob([out as BlobPart], { type: 'application/pdf' });
-      this.utilityService.downloadBlob(blob, 'images.pdf');
+      this.utilityService.downloadBlob(blob, this.downloadName);
       const added = this.images.length - failed.length;
       this.toastService.success(`PDF built from ${added} image(s)`);
       if (failed.length) {
@@ -236,5 +260,13 @@ export class ImagesToPdf implements OnDestroy {
       img.onerror = () => reject(new Error('Could not decode image.'));
       img.src = objectUrl;
     });
+  }
+
+  get downloadName(): string {
+    return this.utilityService.normalizeDownloadName(this.outputName, 'pdf', 'images');
+  }
+
+  private fileKey(file: File): string {
+    return `${file.name}\u0000${file.size}\u0000${file.lastModified}`;
   }
 }

@@ -107,6 +107,22 @@ export class UtilityService {
     }, 100);
   }
 
+  normalizeDownloadName(name: string, extension: string, fallback: string): string {
+    const cleanExtension = extension.replace(/^\.+/, '').toLowerCase();
+    const suffix = `.${cleanExtension}`;
+    let base = (name || '').trim();
+    if (base.toLowerCase().endsWith(suffix)) {
+      base = base.slice(0, -suffix.length);
+    }
+    base = Array.from(base, character => character.charCodeAt(0) < 32 ? '-' : character)
+      .join('')
+      .replace(/[<>:"/\\|?*]/g, '-')
+      .replace(/\s+/g, ' ')
+      .replace(/[. ]+$/g, '')
+      .trim();
+    return `${base || fallback}${suffix}`;
+  }
+
   readTextFile(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();

@@ -80,6 +80,16 @@
               </div>
             </div>
 
+            <div class="mb-3">
+              <span class="form-label small d-block mb-1">Quick scale</span>
+              <div class="btn-group btn-group-sm w-100" role="group" aria-label="Resize percentage">
+                <button type="button" class="btn btn-outline-secondary" (click)="setScale(25)">25%</button>
+                <button type="button" class="btn btn-outline-secondary" (click)="setScale(50)">50%</button>
+                <button type="button" class="btn btn-outline-secondary" (click)="setScale(75)">75%</button>
+                <button type="button" class="btn btn-outline-secondary" (click)="setScale(100)">Original</button>
+              </div>
+            </div>
+
             <div class="form-check form-switch mb-3">
               <input class="form-check-input" type="checkbox" id="lockAspect"
                      [(ngModel)]="lockAspect" (ngModelChange)="onLockToggle()">
@@ -88,9 +98,16 @@
               </label>
             </div>
 
+            @if (!isOutputSizeSafe) {
+              <div class="alert alert-warning py-2 small" role="alert">
+                Output exceeds 40 megapixels. Reduce the width or height before processing.
+              </div>
+            }
+
             <div class="mb-3">
               <label for="outputFormat" class="form-label small mb-1">Output format</label>
-              <select id="outputFormat" class="form-select" [(ngModel)]="format">
+              <select id="outputFormat" class="form-select" [(ngModel)]="format"
+                      (ngModelChange)="onSettingsChange()">
                 <option value="png">PNG (lossless)</option>
                 <option value="jpeg">JPEG</option>
                 <option value="webp">WebP</option>
@@ -104,12 +121,13 @@
                   <span class="badge text-bg-light">{{ quality.toFixed(2) }}</span>
                 </label>
                 <input id="quality" type="range" class="form-range"
-                       min="0.1" max="1" step="0.05" [(ngModel)]="quality">
+                    min="0.1" max="1" step="0.05" [(ngModel)]="quality"
+                    (ngModelChange)="onSettingsChange()">
               </div>
             }
 
             <button type="button" class="btn btn-primary w-100"
-                    [disabled]="!previewUrl || isProcessing" (click)="process()">
+                  [disabled]="!previewUrl || isProcessing || !isOutputSizeSafe" (click)="process()">
               @if (isProcessing) {
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 Processing…

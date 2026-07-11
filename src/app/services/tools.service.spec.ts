@@ -25,6 +25,11 @@ describe('ToolsService', () => {
     expect(routes).toContain('/tokenCounter');
   });
 
+  it('finds the batch image format converter', () => {
+    const routes = service.searchTools('batch image').map(tool => tool.route);
+    expect(routes).toContain('/imageFormatConverter');
+  });
+
   it('returns the full set for an empty or whitespace query', () => {
     const total = service.getAllTools().length;
     expect(service.searchTools('').length).toBe(total);
