@@ -30,6 +30,11 @@ describe('ToolsService', () => {
     expect(routes).toContain('/imageFormatConverter');
   });
 
+  it('finds the bulk QR and Deflate tools', () => {
+    expect(service.searchTools('bulk qr').map(tool => tool.route)).toContain('/bulkQrCode');
+    expect(service.searchTools('gunzip').map(tool => tool.route)).toContain('/deflateToolkit');
+  });
+
   it('returns the full set for an empty or whitespace query', () => {
     const total = service.getAllTools().length;
     expect(service.searchTools('').length).toBe(total);

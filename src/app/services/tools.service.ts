@@ -149,6 +149,14 @@ export class ToolsService {
       keywords: ['url', 'encode', 'decode', 'uri', 'percent']
     },
     {
+      name: 'GZIP & Deflate Toolkit',
+      description: 'Compress or decompress GZIP, Zlib, and raw Deflate data locally',
+      route: '/deflateToolkit',
+      category: 'Encoding & Security',
+      icon: 'bi-file-earmark-zip',
+      keywords: ['gzip', 'gunzip', 'zlib', 'deflate', 'inflate', 'compress', 'decompress', 'archive']
+    },
+    {
       name: 'Certificate Information',
       description: 'Extract and view X.509 certificate details',
       route: '/certinfo',
@@ -276,6 +284,14 @@ export class ToolsService {
       category: 'Development Tools',
       icon: 'bi-qr-code',
       keywords: ['qr', 'qrcode', 'barcode', 'generate', 'wifi', 'url', 'vcard', 'png', 'svg', 'scan']
+    },
+    {
+      name: 'Bulk QR Code Generator',
+      description: 'Generate named PNG or SVG QR codes from a CSV column and download one ZIP',
+      route: '/bulkQrCode',
+      category: 'Development Tools',
+      icon: 'bi-qr-code-scan',
+      keywords: ['qr', 'qrcode', 'bulk', 'batch', 'csv', 'tsv', 'zip', 'png', 'svg', 'generate']
     },
     {
       name: 'Number Base Converter',

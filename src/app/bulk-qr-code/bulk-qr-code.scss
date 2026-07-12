@@ -1,0 +1,43 @@
+.file-dropzone {
+  border: 2px dashed #ced4da;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: .9rem;
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease;
+
+  &:hover:not(.disabled) {
+    border-color: #017cad;
+    background: #f1f7fb;
+    color: #017cad;
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: .65;
+  }
+}
+
+.preview-table {
+  max-height: 270px;
+  overflow: auto;
+
+  th,
+  td {
+    max-width: 220px;
+    padding: .55rem .7rem;
+    white-space: nowrap;
+  }
+}
+
+.progress {
+  height: 8px;
+}
+
+.result-summary {
+  border-top: 1px solid #dee2e6;
+  padding-top: 1rem;
+}

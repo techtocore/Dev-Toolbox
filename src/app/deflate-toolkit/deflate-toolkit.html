@@ -1,0 +1,158 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">GZIP &amp; Deflate Toolkit</h2>
+      <p class="text-muted mb-4">
+        Compress or decompress GZIP, Zlib, and raw Deflate data locally in your browser.
+      </p>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div class="btn-group" role="group" aria-label="Operation">
+      <button type="button" class="btn" [class.btn-primary]="operation === 'compress'"
+              [class.btn-outline-secondary]="operation !== 'compress'" (click)="setOperation('compress')">
+        <i class="bi bi-file-earmark-zip me-1" aria-hidden="true"></i>Compress
+      </button>
+      <button type="button" class="btn" [class.btn-primary]="operation === 'decompress'"
+              [class.btn-outline-secondary]="operation !== 'decompress'" (click)="setOperation('decompress')">
+        <i class="bi bi-file-earmark-arrow-up me-1" aria-hidden="true"></i>Decompress
+      </button>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearAll()"
+            [disabled]="isProcessing || (!inputText && !inputBytes)">
+      <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Clear
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger" role="alert">
+      <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+    </div>
+  }
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Input</h5>
+        </div>
+        <div class="card-body">
+          @if (operation === 'compress') {
+            <div class="btn-group btn-group-sm mb-3" role="group" aria-label="Input type">
+              <button type="button" class="btn" [class.btn-primary]="inputMode === 'text'"
+                      [class.btn-outline-secondary]="inputMode !== 'text'" (click)="setInputMode('text')">
+                <i class="bi bi-textarea-t me-1" aria-hidden="true"></i>Text
+              </button>
+              <button type="button" class="btn" [class.btn-primary]="inputMode === 'file'"
+                      [class.btn-outline-secondary]="inputMode !== 'file'" (click)="setInputMode('file')">
+                <i class="bi bi-file-earmark me-1" aria-hidden="true"></i>File
+              </button>
+            </div>
+          }
+
+          @if (inputMode === 'text') {
+            <label class="visually-hidden" for="deflateText">Text to compress</label>
+            <textarea id="deflateText" class="form-control font-monospace" rows="12"
+                      [(ngModel)]="inputText" (ngModelChange)="onSettingsChange()"
+                      placeholder="Type or paste text to compress..."></textarea>
+          } @else {
+            <div class="file-dropzone" role="button" tabindex="0" aria-label="Upload a file"
+                 [class.disabled]="isProcessing" (dragover)="onDragOver($event)" (drop)="onDrop($event)"
+                 (click)="!isProcessing && fileInput.click()"
+                 (keydown.enter)="!isProcessing && fileInput.click()"
+                 (keydown.space)="$event.preventDefault(); !isProcessing && fileInput.click()">
+              <input #fileInput type="file" hidden (change)="onPick($event)">
+              <i class="bi bi-cloud-arrow-up file-icon" aria-hidden="true"></i>
+              <strong>Drop a file</strong> or click to browse.
+              <span class="d-block text-muted small mt-1">Maximum input size: 50 MB</span>
+            </div>
+            @if (inputBytes) {
+              <div class="alert alert-info mt-3 mb-0 d-flex align-items-center">
+                <i class="bi bi-file-earmark me-2" aria-hidden="true"></i>
+                <span class="text-truncate" [title]="inputFileName">{{ inputFileName }}</span>
+                <span class="ms-auto ps-2 text-nowrap">{{ formatBytes(inputBytes.length) }}</span>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-sliders me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">{{ operation === 'compress' ? 'Compression' : 'Decompression' }}</h5>
+        </div>
+        <div class="card-body">
+          <fieldset [disabled]="isProcessing">
+            <div class="mb-3">
+              <label for="deflateFormat" class="form-label">Format</label>
+              <select id="deflateFormat" class="form-select" [(ngModel)]="format"
+                      (ngModelChange)="onSettingsChange()">
+                <option value="gzip">GZIP (.gz)</option>
+                <option value="zlib">Zlib</option>
+                <option value="deflate">Raw Deflate</option>
+              </select>
+              @if (operation === 'decompress') {
+                <div class="form-text">Select the wrapper used by the compressed file.</div>
+              }
+            </div>
+
+            @if (operation === 'compress') {
+              <div class="mb-3">
+                <label for="compressionLevel" class="form-label d-flex justify-content-between">
+                  <span>Compression level</span>
+                  <span class="badge text-bg-light">{{ compressionLevel }}</span>
+                </label>
+                <input id="compressionLevel" type="range" class="form-range" min="0" max="9" step="1"
+                       [(ngModel)]="compressionLevel" (ngModelChange)="onSettingsChange()">
+              </div>
+            }
+
+            <button type="button" class="btn btn-primary w-100" (click)="process()" [disabled]="!canProcess">
+              @if (isProcessing) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Working&hellip;
+              } @else {
+                <i class="bi bi-gear me-2" aria-hidden="true"></i>{{ operation === 'compress' ? 'Compress' : 'Decompress' }}
+              }
+            </button>
+          </fieldset>
+
+          @if (outputBytes) {
+            <div class="result-summary mt-3">
+              <dl class="row small mb-3">
+                <dt class="col-7 text-muted">Input</dt>
+                <dd class="col-5 text-end">{{ formatBytes(inputSize) }}</dd>
+                <dt class="col-7 text-muted">Output</dt>
+                <dd class="col-5 text-end">{{ formatBytes(outputSize) }}</dd>
+                <dt class="col-7 text-muted">Change</dt>
+                <dd class="col-5 text-end">{{ sizeChangeLabel }}</dd>
+              </dl>
+              <button type="button" class="btn btn-success w-100" (click)="download()">
+                <i class="bi bi-download me-2" aria-hidden="true"></i>Download {{ outputFileName }}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (previewAvailable) {
+    <div class="card shadow-sm mt-3">
+      <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+        <h5 class="mb-0"><i class="bi bi-file-text me-2" aria-hidden="true"></i>Text Preview</h5>
+        <button type="button" class="btn btn-sm btn-light" (click)="copyPreview()" aria-label="Copy output">
+          <i class="bi bi-clipboard" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <pre class="output-preview mb-0">{{ outputPreview }}</pre>
+      </div>
+    </div>
+  }
+</div>

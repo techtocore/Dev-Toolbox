@@ -35,6 +35,8 @@ import { ImageFormatConverter } from './image-format-converter/image-format-conv
 import { ImageMetadata } from './image-metadata/image-metadata';
 import { ImageBase64 } from './image-base64/image-base64';
 import { QrCode } from './qr-code/qr-code';
+import { BulkQrCode } from './bulk-qr-code/bulk-qr-code';
+import { DeflateToolkit } from './deflate-toolkit/deflate-toolkit';
 import { PasswordGenerator } from './password-generator/password-generator';
 import { CaseConverter } from './case-converter/case-converter';
 import { BaseConverter } from './base-converter/base-converter';
@@ -77,6 +79,8 @@ const routes: Routes = [
   { path: 'imageMetadata', component: ImageMetadata },
   { path: 'imageBase64', component: ImageBase64 },
   { path: 'qrCode', component: QrCode },
+  { path: 'bulkQrCode', component: BulkQrCode },
+  { path: 'deflateToolkit', component: DeflateToolkit },
   { path: 'passwordGenerator', component: PasswordGenerator },
   { path: 'caseConverter', component: CaseConverter },
   { path: 'baseConverter', component: BaseConverter },

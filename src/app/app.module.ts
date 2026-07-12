@@ -45,6 +45,8 @@ import { ImageFormatConverter } from './image-format-converter/image-format-conv
 import { ImageMetadata } from './image-metadata/image-metadata';
 import { ImageBase64 } from './image-base64/image-base64';
 import { QrCode } from './qr-code/qr-code';
+import { BulkQrCode } from './bulk-qr-code/bulk-qr-code';
+import { DeflateToolkit } from './deflate-toolkit/deflate-toolkit';
 import { PasswordGenerator } from './password-generator/password-generator';
 import { CaseConverter } from './case-converter/case-converter';
 import { BaseConverter } from './base-converter/base-converter';
@@ -94,6 +96,8 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     ImageMetadata,
     ImageBase64,
     QrCode,
+    BulkQrCode,
+    DeflateToolkit,
     PasswordGenerator,
     CaseConverter,
     BaseConverter,

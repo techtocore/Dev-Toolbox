@@ -1,0 +1,166 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Bulk QR Code Generator</h2>
+      <p class="text-muted mb-4">
+        Turn a CSV or TSV column into named QR codes and download one ZIP. Processing stays in your browser.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-table me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">CSV Data</h5>
+        </div>
+        <div class="card-body">
+          <div class="file-dropzone mb-3" role="button" tabindex="0" aria-label="Upload CSV or TSV"
+               [class.disabled]="isGenerating"
+               (dragover)="onDragOver($event)" (drop)="onDrop($event)"
+               (click)="!isGenerating && fileInput.click()"
+               (keydown.enter)="!isGenerating && fileInput.click()"
+               (keydown.space)="$event.preventDefault(); !isGenerating && fileInput.click()">
+            <input #fileInput type="file" hidden accept=".csv,.tsv,text/csv,text/tab-separated-values"
+                   (change)="onPick($event)">
+            <i class="bi bi-cloud-arrow-up me-2" aria-hidden="true"></i>
+            <strong>Drop a CSV or TSV</strong> or click to browse. First row must contain headers.
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-warning" role="alert">
+              <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorMessage }}
+            </div>
+          }
+
+          @if (rows.length > 0) {
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+              <div class="small text-muted text-truncate" [title]="fileName">
+                <i class="bi bi-paperclip me-1" aria-hidden="true"></i>{{ fileName }} &middot; {{ rows.length }} rows
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearData()"
+                      [disabled]="isGenerating">
+                <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Clear
+              </button>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-6">
+                <label for="qrPayloadColumn" class="form-label">QR content column</label>
+                <select id="qrPayloadColumn" class="form-select" [(ngModel)]="payloadColumn"
+                        (ngModelChange)="onMappingChange()" [disabled]="isGenerating">
+                  @for (header of headers; track $index) {
+                    <option [ngValue]="$index">{{ header }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="qrNameColumn" class="form-label">Filename column</label>
+                <select id="qrNameColumn" class="form-select" [(ngModel)]="nameColumn"
+                        (ngModelChange)="onMappingChange()" [disabled]="isGenerating">
+                  <option [ngValue]="null">Number automatically</option>
+                  @for (header of headers; track $index) {
+                    <option [ngValue]="$index">{{ header }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive preview-table border rounded">
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    @for (header of headers; track $index) {
+                      <th scope="col">{{ header }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of previewRows; track $index) {
+                    <tr>
+                      @for (header of headers; track $index; let column = $index) {
+                        <td class="text-truncate" [title]="row[column] || ''">{{ row[column] || '' }}</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (rows.length > previewRows.length) {
+              <p class="text-muted small mt-2 mb-0">Previewing 5 of {{ rows.length }} rows.</p>
+            }
+          } @else {
+            <p class="text-muted mb-0">Upload a table to choose its QR content and filename columns.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-qr-code me-2" aria-hidden="true"></i>
+          <h5 class="mb-0">Output</h5>
+        </div>
+        <div class="card-body">
+          <fieldset [disabled]="isGenerating">
+            <div class="mb-3">
+              <label for="bulkQrFormat" class="form-label">Format</label>
+              <select id="bulkQrFormat" class="form-select" [(ngModel)]="outputFormat"
+                      (ngModelChange)="onMappingChange()">
+                <option value="png">PNG</option>
+                <option value="svg">SVG</option>
+              </select>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label for="bulkQrSize" class="form-label">Size (px)</label>
+                <input id="bulkQrSize" type="number" class="form-control" min="128" max="1024" step="8"
+                       [(ngModel)]="size" (blur)="onSizeBlur()">
+              </div>
+              <div class="col-6">
+                <label for="bulkQrCorrection" class="form-label">Error correction</label>
+                <select id="bulkQrCorrection" class="form-select" [(ngModel)]="errorCorrectionLevel">
+                  <option value="L">Low</option>
+                  <option value="M">Medium</option>
+                  <option value="Q">Quartile</option>
+                  <option value="H">High</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary w-100" (click)="generateZip()"
+                    [disabled]="validRowCount === 0 || isGenerating">
+              @if (isGenerating) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                @if (processedCount < validRowCount) {
+                  Generating {{ processedCount + 1 }} of {{ validRowCount }}
+                } @else {
+                  Packaging ZIP&hellip;
+                }
+              } @else {
+                <i class="bi bi-file-zip me-2" aria-hidden="true"></i>Generate {{ validRowCount }} QR codes
+              }
+            </button>
+          </fieldset>
+
+          @if (isGenerating) {
+            <div class="progress mt-3" role="progressbar" aria-label="QR generation progress"
+                 [attr.aria-valuenow]="progressPercent" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" [style.width.%]="progressPercent"></div>
+            </div>
+          }
+
+          @if (!isGenerating && generatedCount > 0) {
+            <div class="result-summary small mt-3 text-success">
+              <i class="bi bi-check-circle me-1" aria-hidden="true"></i>
+              Generated {{ generatedCount }} QR code{{ generatedCount === 1 ? '' : 's' }}.
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
