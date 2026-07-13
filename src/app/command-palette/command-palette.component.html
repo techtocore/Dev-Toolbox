@@ -1,43 +1,59 @@
 @if (open) {
-  <div class="cmdk-overlay" (click)="close()">
-    <div class="cmdk-dialog" role="dialog" aria-modal="true" aria-label="Command palette" (click)="$event.stopPropagation()">
+  <div class="cmdk-overlay">
+    <button type="button" tabindex="-1" class="cmdk-backdrop" (click)="close()">
+      <span class="visually-hidden">Close tool search</span>
+    </button>
+    <div class="cmdk-dialog" role="dialog" aria-modal="true" aria-labelledby="cmdk-title">
+      <h2 id="cmdk-title" class="visually-hidden">Search tools</h2>
       <div class="cmdk-search">
-        <i class="bi bi-search"></i>
+        <i class="bi bi-search" aria-hidden="true"></i>
         <input
           #search
           type="text"
+          role="combobox"
+          aria-label="Search tools"
+          aria-autocomplete="list"
+          aria-controls="cmdk-results"
+          aria-expanded="true"
+          [attr.aria-activedescendant]="activeOptionId"
           [(ngModel)]="query"
           (input)="onInput()"
+          (keydown)="onInputKeydown($event)"
           placeholder="Search tools — try 'json', 'hash', 'color'…"
           autocomplete="off"
           spellcheck="false">
-        <kbd class="cmdk-esc">esc</kbd>
+        <kbd class="cmdk-esc" aria-hidden="true">esc</kbd>
       </div>
 
-      <div class="cmdk-results">
+      <div id="cmdk-results" class="cmdk-results" role="listbox" aria-label="Matching tools">
         @if (results.length === 0) {
           <div class="cmdk-empty">
-            <i class="bi bi-emoji-frown"></i>
+            <i class="bi bi-emoji-frown" aria-hidden="true"></i>
             <p>No tools matched "{{ query }}"</p>
           </div>
         } @else {
           @for (tool of results; track tool.route; let i = $index) {
-            <div class="cmdk-result"
+            <button type="button" role="option" class="cmdk-result"
+              [id]="'cmdk-option-' + i"
+              [attr.aria-selected]="i === selectedIndex"
+              tabindex="-1"
               [class.is-active]="i === selectedIndex"
               (mouseenter)="selectedIndex = i"
               (click)="activate(tool)">
               <div class="cmdk-result-icon">
-                <i class="bi" [class]="tool.icon || 'bi-tools'"></i>
+                <i class="bi" [class]="tool.icon || 'bi-tools'" aria-hidden="true"></i>
               </div>
               <div class="cmdk-result-body">
                 <div class="cmdk-result-name">{{ tool.name }}</div>
                 <div class="cmdk-result-desc">{{ tool.description }}</div>
               </div>
               <div class="cmdk-result-meta">{{ tool.category }}</div>
-            </div>
+            </button>
           }
         }
       </div>
+
+      <span class="visually-hidden" aria-live="polite">{{ results.length }} tools found</span>
 
       <div class="cmdk-footer">
         <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>

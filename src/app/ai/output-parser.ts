@@ -62,22 +62,44 @@ export function extractJson<T = unknown>(raw: string): T | undefined {
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = fenced ? fenced[1] : raw;
 
-  const start = candidate.search(/[[{]/);
-  if (start === -1) {
-    return undefined;
-  }
-  // Walk to the matching closing bracket to isolate the JSON span.
-  const open = candidate[start];
-  const close = open === '{' ? '}' : ']';
-  let depth = 0;
-  for (let i = start; i < candidate.length; i++) {
-    if (candidate[i] === open) depth++;
-    else if (candidate[i] === close) depth--;
-    if (depth === 0) {
-      try {
-        return JSON.parse(candidate.slice(start, i + 1)) as T;
-      } catch {
-        return undefined;
+  for (let start = 0; start < candidate.length; start++) {
+    if (candidate[start] !== '{' && candidate[start] !== '[') {
+      continue;
+    }
+
+    const stack: string[] = [];
+    let inString = false;
+    let escaped = false;
+
+    for (let i = start; i < candidate.length; i++) {
+      const character = candidate[i];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (character === '\\') {
+          escaped = true;
+        } else if (character === '"') {
+          inString = false;
+        }
+        continue;
+      }
+
+      if (character === '"') {
+        inString = true;
+      } else if (character === '{' || character === '[') {
+        stack.push(character);
+      } else if (character === '}' || character === ']') {
+        const expectedOpen = character === '}' ? '{' : '[';
+        if (stack.pop() !== expectedOpen) {
+          break;
+        }
+        if (stack.length === 0) {
+          try {
+            return JSON.parse(candidate.slice(start, i + 1)) as T;
+          } catch {
+            break;
+          }
+        }
       }
     }
   }

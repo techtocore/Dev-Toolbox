@@ -14,6 +14,7 @@ type Mode = 'text' | 'file';
 })
 export class Base64Component implements OnInit {
   private static readonly MAX_BYTES = 50 * 1024 * 1024;
+  private static readonly MAX_TEXT_BYTES = 10 * 1024 * 1024;
 
   decoded = '';
   encoded = '';
@@ -61,6 +62,10 @@ export class Base64Component implements OnInit {
       return;
     }
     try {
+      const inputBytes = new TextEncoder().encode(this.decoded).length;
+      if (inputBytes > Base64Component.MAX_TEXT_BYTES) {
+        throw new Error('Text input exceeds the 10 MB limit');
+      }
       const utf8 = unescape(encodeURIComponent(this.decoded));
       const std = btoa(utf8);
       this.encoded = this.variant === 'urlsafe' ? this.toUrlSafe(std) : std;
@@ -77,7 +82,14 @@ export class Base64Component implements OnInit {
       return;
     }
     try {
+      if (this.encoded.length > Math.ceil(Base64Component.MAX_TEXT_BYTES * 4 / 3) + 4) {
+        throw new Error('Encoded input exceeds the 10 MB decoded-data limit');
+      }
       const normalized = this.fromUrlSafe(this.encoded.replace(/\s+/g, ''));
+      const estimatedBytes = Math.floor(normalized.length * 3 / 4);
+      if (estimatedBytes > Base64Component.MAX_TEXT_BYTES) {
+        throw new Error('Encoded input exceeds the 10 MB decoded-data limit');
+      }
       const padded = this.padBase64(normalized);
       const raw = atob(padded);
       // Convert raw byte string back through UTF-8 decoding.
@@ -86,8 +98,10 @@ export class Base64Component implements OnInit {
           '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         ).join('')
       );
-    } catch (e: any) {
-      this.errorMessage = 'Invalid Base64 input — check for stray spaces, missing padding, or non-base64 characters.';
+    } catch (error: any) {
+      this.errorMessage = error?.message?.includes('10 MB')
+        ? error.message
+        : 'Invalid Base64 input — check for stray spaces, missing padding, or non-base64 characters.';
       this.decoded = '';
     }
   }

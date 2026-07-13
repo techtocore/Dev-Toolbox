@@ -62,4 +62,13 @@ describe('NumericSummaryComponent', () => {
     expect(Number.isNaN(component.skewness)).toBeTrue();
     expect(Number.isNaN(component.kurtosis)).toBeTrue();
   });
+
+  it('rejects oversized numeric input before splitting and sorting', () => {
+    component.inputTxt = '1'.repeat(10 * 1024 * 1024 + 1);
+
+    component.process();
+
+    expect(component.hasResults).toBeFalse();
+    expect(component.errorMessage).toBe('Input exceeds the 10 MB safety limit');
+  });
 });

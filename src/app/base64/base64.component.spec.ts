@@ -62,4 +62,13 @@ describe('Base64Component', () => {
     component.decode();
     expect(component.decoded).toBe('Hello');
   });
+
+  it('rejects encoded text that would exceed the decoded-data limit', () => {
+    component.encoded = 'A'.repeat(Math.ceil(10 * 1024 * 1024 * 4 / 3) + 5);
+
+    component.decode();
+
+    expect(component.decoded).toBe('');
+    expect(component.errorMessage).toContain('10 MB');
+  });
 });

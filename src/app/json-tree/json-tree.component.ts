@@ -81,7 +81,7 @@ export class JsonTreeComponent implements OnInit {
     if (!item['link']) {
       return false;
     }
-    let currentLink = this.router.url;
+    const currentLink = this.router.url;
     if (currentLink === item['link']) {
       return true;
     }

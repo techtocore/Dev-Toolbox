@@ -5,19 +5,28 @@
   <title>Dev Toolbox — Private, in-browser developer utilities</title>
   <base href="/">
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0L0DDGEHM"></script>
+  <!-- Basic page-usage telemetry for the official hosted app only. Tool inputs
+       are never sent, and self-hosted/local copies do not load Google Analytics. -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+    if (window.location.hostname === 'techtocore.github.io') {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-L0L0DDGEHM', {
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false
+      });
 
-    gtag('config', 'G-L0L0DDGEHM');
+      const analyticsScript = document.createElement('script');
+      analyticsScript.async = true;
+      analyticsScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-L0L0DDGEHM';
+      document.head.appendChild(analyticsScript);
+    }
   </script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description"
-    content="A fast collection of developer utilities — JSON, Base64, JWT, hashing, regex, diff, CSV/JSON, timestamps and more — plus an on-device AI that runs entirely in your browser. No servers, no accounts, no data leaves your device.">
+    content="Private developer utilities for JSON, Base64, JWT, hashing, regex, PDFs, images and more. Tool inputs are processed locally in your browser with no uploads or accounts.">
   <meta name="theme-color" content="#017cad">
   <meta name="color-scheme" content="dark">
 
@@ -25,7 +34,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Dev Toolbox">
   <meta property="og:description"
-    content="Private, in-browser developer utilities with an optional on-device AI assistant. Nothing leaves your browser.">
+    content="Private, in-browser developer utilities with local file and text processing and an optional on-device AI assistant.">
 
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">

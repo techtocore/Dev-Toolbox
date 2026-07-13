@@ -15,10 +15,12 @@
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Template Editor</h5>
           <div>
-            <button class="btn btn-sm btn-light me-2" (click)="showLoadDialog = true" title="Load template">
+            <button #loadButton class="btn btn-sm btn-light me-2" (click)="openLoadDialog(loadButton)"
+              title="Load template" aria-label="Load template">
               <i class="bi bi-folder2-open"></i>
             </button>
-            <button class="btn btn-sm btn-light me-2" (click)="showSaveDialog = true" title="Save template">
+            <button #saveButton class="btn btn-sm btn-light me-2" (click)="openSaveDialog(saveButton)"
+              title="Save template" aria-label="Save template">
               <i class="bi bi-save"></i>
             </button>
             <button class="btn btn-sm btn-light" (click)="clearTemplate()" title="Clear">
@@ -28,8 +30,9 @@
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <label class="form-label">Prompt Template</label>
+            <label class="form-label" for="prompt-template-input">Prompt Template</label>
             <textarea
+              id="prompt-template-input"
               class="form-control font-monospace"
               rows="12"
               [(ngModel)]="template"
@@ -39,7 +42,7 @@
 
           <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <label class="form-label mb-0">Variables</label>
+              <div class="form-label mb-0">Variables</div>
               <button class="btn btn-sm btn-outline-primary" (click)="addVariable()">
                 <i class="bi bi-plus-circle me-1"></i> Add Variable
               </button>
@@ -64,12 +67,14 @@
                   <input
                     type="text"
                     class="form-control form-control-sm mb-2"
+                    [attr.aria-label]="variable.name + ' value'"
                     [(ngModel)]="variable.value"
                     (input)="generateOutput()"
                     placeholder="Variable value">
                   <input
                     type="text"
                     class="form-control form-control-sm text-muted"
+                    [attr.aria-label]="variable.name + ' description'"
                     [(ngModel)]="variable.description"
                     placeholder="Description (optional)">
                 </div>
@@ -114,13 +119,14 @@
           <div class="row">
             @for (template of predefinedTemplates; track template.name) {
               <div class="col-md-6 col-lg-3 mb-3">
-                <div class="card h-100 template-card" (click)="loadPredefinedTemplate(template)">
+                <div class="card h-100 template-card">
                   <div class="card-body">
                     <h6 class="card-title">{{ template.name }}</h6>
                     <p class="card-text text-muted small">
                       {{ template.variables.length }} variable(s)
                     </p>
-                    <button class="btn btn-sm btn-outline-primary w-100">
+                    <button type="button" class="btn btn-sm btn-outline-primary w-100"
+                      (click)="loadPredefinedTemplate(template)">
                       Load Template
                     </button>
                   </div>
@@ -136,16 +142,22 @@
 
 <!-- Save Dialog -->
 @if (showSaveDialog) {
-  <div class="modal-overlay" (click)="showSaveDialog = false">
-    <div class="modal-dialog" (click)="$event.stopPropagation()">
+  <div class="modal-overlay">
+    <button type="button" tabindex="-1" class="modal-backdrop-button" (click)="closeDialog()">
+      <span class="visually-hidden">Close save template dialog</span>
+    </button>
+    <div #saveDialog class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="save-template-title"
+      tabindex="-1" (keydown)="trapDialogFocus($event, saveDialog)">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Save Template</h5>
-          <button type="button" class="btn-close" (click)="showSaveDialog = false"></button>
+          <h5 id="save-template-title" class="modal-title">Save Template</h5>
+          <button type="button" class="btn-close" (click)="closeDialog()" aria-label="Close save template dialog"></button>
         </div>
         <div class="modal-body">
-          <label class="form-label">Template Name</label>
+          <label class="form-label" for="saved-template-name">Template Name</label>
           <input
+            #saveNameInput
+            id="saved-template-name"
             type="text"
             class="form-control"
             [(ngModel)]="currentTemplateName"
@@ -153,7 +165,7 @@
             (keyup.enter)="saveTemplate()">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" (click)="showSaveDialog = false">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
             <i class="bi bi-x-lg me-1"></i> Cancel
           </button>
           <button type="button" class="btn btn-primary" (click)="saveTemplate()" [disabled]="!currentTemplateName.trim()">
@@ -167,12 +179,16 @@
 
 <!-- Load Dialog -->
 @if (showLoadDialog) {
-  <div class="modal-overlay" (click)="showLoadDialog = false">
-    <div class="modal-dialog" (click)="$event.stopPropagation()">
+  <div class="modal-overlay">
+    <button type="button" tabindex="-1" class="modal-backdrop-button" (click)="closeDialog()">
+      <span class="visually-hidden">Close load template dialog</span>
+    </button>
+    <div #loadDialog class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="load-template-title"
+      tabindex="-1" (keydown)="trapDialogFocus($event, loadDialog)">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Load Template</h5>
-          <button type="button" class="btn-close" (click)="showLoadDialog = false"></button>
+          <h5 id="load-template-title" class="modal-title">Load Template</h5>
+          <button type="button" class="btn-close" (click)="closeDialog()" aria-label="Close load template dialog"></button>
         </div>
         <div class="modal-body">
           @if (savedTemplates.length === 0) {
@@ -184,10 +200,10 @@
             <div class="list-group">
               @for (template of savedTemplates; track template.name; let i = $index) {
                 <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div class="flex-grow-1" (click)="loadTemplate(template)" style="cursor: pointer;">
+                  <button type="button" class="saved-template-button flex-grow-1" (click)="loadTemplate(template)">
                     <h6 class="mb-1">{{ template.name }}</h6>
                     <small class="text-muted">{{ template.variables.length }} variable(s)</small>
-                  </div>
+                  </button>
                   <button class="btn btn-sm btn-outline-danger ms-2" (click)="deleteTemplate(i)" title="Delete">
                     <i class="bi bi-trash"></i>
                   </button>
@@ -197,7 +213,7 @@
           }
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" (click)="showLoadDialog = false">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
             <i class="bi bi-x-lg me-1"></i> Close
           </button>
         </div>

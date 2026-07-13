@@ -20,20 +20,20 @@
           </button>
         </div>
         <div class="card-body">
-          <label class="form-label small mb-1"><strong>Unix Timestamp</strong></label>
-          <input type="text" class="form-control mb-3" [(ngModel)]="unixInput"
+          <label class="form-label small mb-1" for="unix-timestamp"><strong>Unix Timestamp</strong></label>
+          <input id="unix-timestamp" type="text" class="form-control mb-3" [(ngModel)]="unixInput"
             (ngModelChange)="onUnixInputChange()" placeholder="e.g. 1730217600 or 1730217600000">
 
-          <label class="form-label small mb-1"><strong>Date &amp; Time (local)</strong></label>
-          <input type="datetime-local" class="form-control mb-3" [(ngModel)]="dateTimeInput"
+          <label class="form-label small mb-1" for="local-date-time"><strong>Date &amp; Time (local)</strong></label>
+          <input id="local-date-time" type="datetime-local" class="form-control mb-3" [(ngModel)]="dateTimeInput"
             (ngModelChange)="onDateTimeChange()">
 
-          <label class="form-label small mb-1"><strong>ISO 8601</strong></label>
-          <input type="text" class="form-control mb-3" [(ngModel)]="isoInput"
+          <label class="form-label small mb-1" for="iso-timestamp"><strong>ISO 8601</strong></label>
+          <input id="iso-timestamp" type="text" class="form-control mb-3" [(ngModel)]="isoInput"
             (ngModelChange)="onIsoInputChange()" placeholder="2026-05-27T12:00:00.000Z">
 
-          <label class="form-label small mb-1"><strong>Display timezone</strong></label>
-          <select class="form-select mb-3" [(ngModel)]="selectedTz" (change)="onTzChange()">
+          <label class="form-label small mb-1" for="display-timezone"><strong>Display timezone</strong></label>
+          <select id="display-timezone" class="form-select mb-3" [(ngModel)]="selectedTz" (change)="onTzChange()">
             @for (tz of timezones; track tz) {
               <option [value]="tz">{{ tz }}</option>
             }

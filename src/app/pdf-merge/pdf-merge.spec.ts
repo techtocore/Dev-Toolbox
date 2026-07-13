@@ -26,4 +26,20 @@ describe('PdfMerge', () => {
 
     expect(component.canMerge).toBeFalse();
   });
+
+  it('should reject intake after the 50-file queue limit', async () => {
+    component.files = Array.from({ length: 50 }, (_, index) => ({
+      file: new File(['pdf'], `queued-${index}.pdf`, { type: 'application/pdf' }),
+      name: `queued-${index}.pdf`,
+      sizeLabel: '3 B',
+      pages: 1,
+    }));
+    const incoming = new File(['pdf'], 'extra.pdf', { type: 'application/pdf' });
+    const fileList = { 0: incoming, length: 1, item: () => incoming } as unknown as FileList;
+
+    await component.handleFiles(fileList);
+
+    expect(component.files.length).toBe(50);
+    expect(component.errorMessage).toContain('50-file limit');
+  });
 });

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -9,7 +9,7 @@ import { ToastService } from '../services/toast.service';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-base64.scss',
 })
-export class ImageBase64 implements OnDestroy {
+export class ImageBase64 {
   /** Cap the upload at 15 MB — a data URI inflates ~33% over the raw bytes. */
   private static readonly MAX_BYTES = 15 * 1024 * 1024;
   /** Warn once a data URI passes ~1 MB, where inlining starts to hurt. */
@@ -46,10 +46,6 @@ export class ImageBase64 implements OnDestroy {
     public utilityService: UtilityService,
     private toastService: ToastService
   ) {}
-
-  ngOnDestroy(): void {
-    // Nothing to revoke: previews are inline data URIs, not object URLs.
-  }
 
   // ---- ENCODE: dropzone handlers ----------------------------------------
 

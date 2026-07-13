@@ -10,6 +10,13 @@ import { ToastService } from '../services/toast.service';
   styleUrls: ['./csv-json-converter.scss']
 })
 export class CsvJsonConverter {
+  private static readonly MAX_INPUT_BYTES = 10 * 1024 * 1024;
+  private static readonly CSV_LIMITS = {
+    maxRows: 100_000,
+    maxColumns: 1_000,
+    maxCellLength: 1_000_000
+  };
+
   inputText: string = '';
   outputText: string = '';
   mode: 'csv-to-json' | 'json-to-csv' = 'csv-to-json';
@@ -23,6 +30,7 @@ export class CsvJsonConverter {
 
   // Output options
   jsonFormat: 'array' | 'objects' = 'objects';
+  protectSpreadsheetFormulas = true;
 
   errorMessage: string = '';
 
@@ -47,6 +55,9 @@ export class CsvJsonConverter {
     this.inputBytes = new Blob([this.inputText]).size;
 
     try {
+      if (this.inputBytes > CsvJsonConverter.MAX_INPUT_BYTES) {
+        throw new Error('Input exceeds the 10 MB safety limit');
+      }
       if (this.mode === 'csv-to-json') {
         this.outputText = this.csvToJson();
       } else {
@@ -132,6 +143,11 @@ export class CsvJsonConverter {
   }
 
   private async loadFile(file: File): Promise<void> {
+    if (file.size > CsvJsonConverter.MAX_INPUT_BYTES) {
+      this.errorMessage = `That file is ${this.formatBytes(file.size)} — the limit is 10 MB.`;
+      this.outputText = '';
+      return;
+    }
     const name = file.name.toLowerCase();
     // Auto-detect mode + delimiter from extension.
     if (name.endsWith('.json')) {
@@ -160,7 +176,11 @@ export class CsvJsonConverter {
     }
 
     // Single-pass, quote-aware parse (handles newlines inside quoted fields).
-    const rows = this.utilityService.parseCsv(this.inputText, this.delimiter);
+    const rows = this.utilityService.parseCsv(
+      this.inputText,
+      this.delimiter,
+      CsvJsonConverter.CSV_LIMITS
+    );
     if (rows.length === 0) {
       throw new Error('Empty CSV data');
     }
@@ -213,7 +233,7 @@ export class CsvJsonConverter {
       } else {
         throw new Error('JSON must be an array or object');
       }
-    } catch (e) {
+    } catch {
       throw new Error('Invalid JSON format');
     }
 
@@ -269,20 +289,11 @@ export class CsvJsonConverter {
   }
 
   createCsvLine(values: string[]): string {
-    return values.map(value => {
-      // Quote if the value contains the delimiter, a quote, a line break, or
-      // significant leading/trailing whitespace (so it round-trips intact).
-      if (
-        value.includes(this.delimiter) ||
-        value.includes('"') ||
-        value.includes('\n') ||
-        value.includes('\r') ||
-        /^\s|\s$/.test(value)
-      ) {
-        return `"${value.replace(/"/g, '""')}"`;
-      }
-      return value;
-    }).join(this.delimiter);
+    return this.utilityService.serializeCsvRow(
+      values,
+      this.delimiter,
+      this.protectSpreadsheetFormulas
+    );
   }
 
   swapMode(): void {

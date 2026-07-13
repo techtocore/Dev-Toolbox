@@ -1,4 +1,5 @@
-<div class="sidebar-backdrop d-md-none" [class.is-visible]="drawerOpen" (click)="onBackdropClick()"></div>
+<button type="button" tabindex="-1" class="sidebar-backdrop d-md-none" [class.is-visible]="drawerOpen"
+    (click)="onBackdropClick()" aria-label="Close navigation"></button>
 
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light-custom sidebar collapse">
     <div class="position-sticky pt-3">

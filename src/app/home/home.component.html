@@ -32,11 +32,12 @@
           </div>
 
           @if (showResults && filteredTools.length > 0) {
-            <div class="search-results">
+            <div class="search-results" aria-label="Tool search results">
               @for (tool of filteredTools; track tool) {
-                <div class="search-result-item" (mousedown)="$event.preventDefault()" (click)="selectTool(tool)">
+                <a class="search-result-item" [routerLink]="tool.route"
+                  (mousedown)="$event.preventDefault()" (click)="clearSearch()">
                   <div class="result-icon">
-                    <i [class]="tool.icon || 'bi-tools'"></i>
+                    <i [class]="tool.icon || 'bi-tools'" aria-hidden="true"></i>
                   </div>
                   <div class="result-content">
                     <div class="result-name">{{ tool.name }}</div>
@@ -45,7 +46,7 @@
                       <span class="badge">{{ tool.category }}</span>
                     </div>
                   </div>
-                </div>
+                </a>
               }
             </div>
           }
@@ -69,17 +70,17 @@
         <p class="section-subtitle">A taste of what Dev Toolbox can do — from on-device AI to everyday essentials</p>
         <div class="featured-grid">
           @for (tool of featuredTools; track tool.route) {
-            <div class="featured-card" (click)="selectTool(tool)">
+            <a class="featured-card" [routerLink]="tool.route">
               <div class="featured-icon">
-                <i [class]="tool.icon || 'bi-tools'"></i>
+                <i [class]="tool.icon || 'bi-tools'" aria-hidden="true"></i>
               </div>
               <div class="featured-body">
                 <h3 class="featured-name">{{ tool.name }}</h3>
                 <p class="featured-description">{{ tool.description }}</p>
                 <span class="featured-category">{{ tool.category }}</span>
               </div>
-              <i class="bi bi-arrow-right featured-arrow"></i>
-            </div>
+              <i class="bi bi-arrow-right featured-arrow" aria-hidden="true"></i>
+            </a>
           }
         </div>
       </div>
@@ -92,13 +93,14 @@
         <br>
           <div class="categories-grid">
             @for (category of categories; track category) {
-              <div class="category-card" data-sidebar-trigger (click)="navigateToFirstTool(category)">
+              <button type="button" class="category-card" data-sidebar-trigger
+                (click)="navigateToFirstTool(category)">
                 <div class="category-icon">
-                  <i [class]="getCategoryIcon(category)"></i>
+                  <i [class]="getCategoryIcon(category)" aria-hidden="true"></i>
                 </div>
                 <h3 class="category-name">{{ category }}</h3>
                 <p class="category-count">{{ getToolsCount(category) }} tools</p>
-              </div>
+              </button>
             }
           </div>
         </div>
@@ -113,9 +115,9 @@
               <div class="feature-icon privacy">
                 <i class="bi bi-shield-lock"></i>
               </div>
-              <h3 class="feature-title">100% Private</h3>
-              <p class="feature-description">All processing happens in your browser. Your data never leaves your
-              device.</p>
+              <h3 class="feature-title">Private by Default</h3>
+              <p class="feature-description">Tool inputs stay local and are never included in basic page-usage
+              telemetry.</p>
             </div>
             <div class="feature-card">
               <div class="feature-icon free">

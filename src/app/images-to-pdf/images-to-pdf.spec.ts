@@ -39,4 +39,19 @@ describe('ImagesToPdf', () => {
 
     expect(component.downloadName).toBe('Vacation - 2026.pdf');
   });
+
+  it('should reject intake after the 100-image queue limit', () => {
+    component.images = Array.from({ length: 100 }, (_, index) => ({
+      file: new File(['image'], `queued-${index}.png`, { type: 'image/png' }),
+      name: `queued-${index}.png`,
+      url: `${index}`,
+    }));
+    const incoming = new File(['image'], 'extra.png', { type: 'image/png' });
+    const fileList = { 0: incoming, length: 1, item: () => incoming } as unknown as FileList;
+
+    (component as any).handleFiles(fileList);
+
+    expect(component.images.length).toBe(100);
+    expect(component.errorMessage).toContain('100-image limit');
+  });
 });

@@ -26,6 +26,13 @@ interface ColumnProfile {
   styleUrls: ['./data-profiler.scss']
 })
 export class DataProfiler {
+  private static readonly MAX_INPUT_BYTES = 10 * 1024 * 1024;
+  private static readonly CSV_LIMITS = {
+    maxRows: 100_000,
+    maxColumns: 1_000,
+    maxCellLength: 1_000_000
+  };
+
   inputData: string = '';
   format: 'csv' | 'json' = 'csv';
   delimiter: string = ',';
@@ -98,6 +105,11 @@ export class DataProfiler {
   }
 
   private async loadFile(file: File): Promise<void> {
+    if (file.size > DataProfiler.MAX_INPUT_BYTES) {
+      this.errorMessage = 'That file exceeds the 10 MB safety limit.';
+      this.profiles = [];
+      return;
+    }
     const name = file.name.toLowerCase();
     if (name.endsWith('.json')) {
       this.format = 'json';
@@ -147,14 +159,9 @@ export class DataProfiler {
       p.median?.toFixed(4) ?? '',
       p.mode ?? ''
     ]);
-    const csv = [headers, ...rows].map(r =>
-      r.map(v => {
-        const s = String(v);
-        return s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')
-          ? `"${s.replace(/"/g, '""')}"`
-          : s;
-      }).join(',')
-    ).join('\n');
+    const csv = [headers, ...rows]
+      .map(row => this.utilityService.serializeCsvRow(row))
+      .join('\n');
     this.utilityService.downloadFile(csv, 'text/csv', 'profile.csv');
   }
 
@@ -164,6 +171,9 @@ export class DataProfiler {
     this.totalRows = 0;
 
     try {
+      if (new Blob([this.inputData]).size > DataProfiler.MAX_INPUT_BYTES) {
+        throw new Error('Input exceeds the 10 MB safety limit');
+      }
       let data: any[] = [];
 
       if (this.format === 'csv') {
@@ -186,7 +196,11 @@ export class DataProfiler {
 
   parseCsv(): any[] {
     // Single-pass, quote-aware parse (handles newlines inside quoted fields).
-    const rows = this.utilityService.parseCsv(this.inputData, this.delimiter);
+    const rows = this.utilityService.parseCsv(
+      this.inputData,
+      this.delimiter,
+      DataProfiler.CSV_LIMITS
+    );
     if (rows.length === 0) return [];
 
     let headers: string[];
@@ -216,13 +230,11 @@ export class DataProfiler {
   parseJson(): any[] {
     const parsed = JSON.parse(this.inputData);
 
-    if (Array.isArray(parsed)) {
-      return parsed;
-    } else if (typeof parsed === 'object') {
-      return [parsed];
+    const rows = Array.isArray(parsed) ? parsed : [parsed];
+    if (rows.some(row => row === null || typeof row !== 'object' || Array.isArray(row))) {
+      throw new Error('JSON data must be an object or an array of objects');
     }
-
-    throw new Error('JSON must be an array or object');
+    return rows;
   }
 
   profileData(data: any[]): void {
@@ -346,7 +358,7 @@ export class DataProfiler {
     // isn't mislabeled as a date.
     if (
       !/^\d{4}-\d{1,2}-\d{1,2}([T ]|$)/.test(value) &&
-      !/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}$/.test(value)
+      !/^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/.test(value)
     ) {
       return false;
     }

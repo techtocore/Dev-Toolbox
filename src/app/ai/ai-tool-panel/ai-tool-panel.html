@@ -20,8 +20,9 @@
       <div class="card-body">
         <div class="row g-3 align-items-end">
           <div class="col-md-7">
-            <label class="form-label fw-semibold">Model</label>
+            <label class="form-label fw-semibold" for="ai-model-select">Model</label>
             <select
+              id="ai-model-select"
               class="form-select"
               [(ngModel)]="selectedModelId"
               (ngModelChange)="onModelChange()"
@@ -133,8 +134,9 @@
 
           <!-- System prompt -->
           <div class="mb-3">
-            <label class="form-label fw-semibold mb-1">System prompt</label>
+            <label class="form-label fw-semibold mb-1" for="ai-system-prompt">System prompt</label>
             <textarea
+              id="ai-system-prompt"
               class="form-control form-control-sm"
               rows="3"
               placeholder="Give the model a persona or rules, e.g. “You are a terse senior engineer. Answer in bullet points.”"
@@ -146,11 +148,12 @@
           <div class="row g-3">
             <!-- Temperature -->
             <div class="col-md-6">
-              <label class="form-label d-flex justify-content-between mb-1">
+              <label class="form-label d-flex justify-content-between mb-1" for="ai-temperature">
                 <span class="fw-semibold">Temperature</span>
                 <span class="badge text-bg-light">{{ llm.settings().temperature.toFixed(2) }}</span>
               </label>
               <input
+                id="ai-temperature"
                 type="range"
                 class="form-range"
                 min="0"
@@ -163,11 +166,12 @@
 
             <!-- Top-p -->
             <div class="col-md-6">
-              <label class="form-label d-flex justify-content-between mb-1">
+              <label class="form-label d-flex justify-content-between mb-1" for="ai-top-p">
                 <span class="fw-semibold">Top-p</span>
                 <span class="badge text-bg-light">{{ llm.settings().topP.toFixed(2) }}</span>
               </label>
               <input
+                id="ai-top-p"
                 type="range"
                 class="form-range"
                 min="0.1"
@@ -180,11 +184,12 @@
 
             <!-- Max tokens -->
             <div class="col-md-6">
-              <label class="form-label d-flex justify-content-between mb-1">
+              <label class="form-label d-flex justify-content-between mb-1" for="ai-max-tokens">
                 <span class="fw-semibold">Max response tokens</span>
                 <span class="badge text-bg-light">{{ llm.settings().maxTokens }}</span>
               </label>
               <input
+                id="ai-max-tokens"
                 type="range"
                 class="form-range"
                 min="128"

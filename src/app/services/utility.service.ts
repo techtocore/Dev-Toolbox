@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { ToastService } from './toast.service';
 
+export interface CsvParseLimits {
+  maxRows?: number;
+  maxColumns?: number;
+  maxCellLength?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,15 +32,24 @@ export class UtilityService {
    * preserved verbatim so significant leading/trailing spaces survive. Fully
    * empty rows (blank lines) are dropped, matching the previous behaviour.
    */
-  parseCsv(text: string, delimiter = ','): string[][] {
+  parseCsv(text: string, delimiter = ',', limits: CsvParseLimits = {}): string[][] {
     const rows: string[][] = [];
     let row: string[] = [];
     let field = '';
     let inQuotes = false;
     let quoted = false; // the current field contained a quoted section
 
+    const appendField = (value: string) => {
+      field += value;
+      if (limits.maxCellLength && field.length > limits.maxCellLength) {
+        throw new Error(`CSV cell exceeds the ${limits.maxCellLength.toLocaleString()} character limit`);
+      }
+    };
     const pushField = () => {
       row.push(quoted ? field : field.trim());
+      if (limits.maxColumns && row.length > limits.maxColumns) {
+        throw new Error(`CSV row exceeds the ${limits.maxColumns.toLocaleString()} column limit`);
+      }
       field = '';
       quoted = false;
     };
@@ -42,6 +57,9 @@ export class UtilityService {
       pushField();
       // Drop a fully empty row (a blank line), but keep `,,` (real empty fields).
       if (!(row.length === 1 && row[0] === '')) {
+        if (limits.maxRows && rows.length >= limits.maxRows) {
+          throw new Error(`CSV exceeds the ${limits.maxRows.toLocaleString()} row limit`);
+        }
         rows.push(row);
       }
       row = [];
@@ -52,10 +70,10 @@ export class UtilityService {
 
       if (inQuotes) {
         if (char === '"') {
-          if (text[i + 1] === '"') { field += '"'; i++; }
+          if (text[i + 1] === '"') { appendField('"'); i++; }
           else { inQuotes = false; }
         } else {
-          field += char;
+          appendField(char);
         }
         continue;
       }
@@ -71,7 +89,7 @@ export class UtilityService {
       } else if (char === '\n') {
         pushRow();
       } else {
-        field += char;
+        appendField(char);
       }
     }
 
@@ -80,6 +98,38 @@ export class UtilityService {
       pushRow();
     }
     return rows;
+  }
+
+  serializeCsvRow(
+    values: readonly unknown[],
+    delimiter = ',',
+    protectSpreadsheetFormulas = true
+  ): string {
+    return values
+      .map(value => this.serializeCsvCell(value, delimiter, protectSpreadsheetFormulas))
+      .join(delimiter);
+  }
+
+  serializeCsvCell(
+    value: unknown,
+    delimiter = ',',
+    protectSpreadsheetFormulas = true
+  ): string {
+    let text = value == null ? '' : String(value);
+    if (protectSpreadsheetFormulas && /^\s*[=+\-@]/.test(text)) {
+      text = `'${text}`;
+    }
+
+    if (
+      text.includes(delimiter) ||
+      text.includes('"') ||
+      text.includes('\n') ||
+      text.includes('\r') ||
+      /^\s|\s$/.test(text)
+    ) {
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+    return text;
   }
 
   downloadFile(data: string, contentType: string, fileName: string): void {

@@ -277,7 +277,7 @@
                     [(ngModel)]="batchRequests"
                     min="1"
                     step="100">
-                  @if (batchRequests == null || batchRequests < 1) {
+                  @if (batchRequests === null || batchRequests < 1) {
                     <div class="text-danger small mt-1">Enter 1 or more requests.</div>
                   }
                 </div>
@@ -318,7 +318,7 @@
           <!-- Context Progress Bar -->
           @if (totalTokens > 0) {
             <div class="mt-4">
-              <label class="form-label">Context Window Usage</label>
+              <div class="form-label">Context Window Usage</div>
               <div class="progress" style="height: 25px;">
                 <div
                   class="progress-bar"

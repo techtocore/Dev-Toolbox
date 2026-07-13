@@ -77,6 +77,7 @@
         <div class="card-body">
           @if (mode === 'text') {
             <textarea class="form-control font-monospace" rows="12"
+              aria-label="Plain text"
               [(ngModel)]="decoded" (ngModelChange)="encode()"
               placeholder="Type or paste plain text…"></textarea>
           } @else {
@@ -126,6 +127,7 @@
         </div>
         <div class="card-body">
           <textarea class="form-control font-monospace" rows="12"
+            aria-label="Base64 text"
             [(ngModel)]="encoded" (ngModelChange)="decode()"
             [placeholder]="mode === 'file' ? 'Encoded output appears here…' : 'Paste Base64 to decode…'"></textarea>
         </div>

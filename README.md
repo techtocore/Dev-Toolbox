@@ -1,9 +1,9 @@
 # Dev Toolbox
 
-**A privacy-first collection of developer utilities that run 100% in your browser.** Every tool — from JSON formatting and hashing to PDF editing, image tools, device sensors, and an on-device AI — runs client-side. The files, text, and secrets you work with **never leave your device**. No backend, no accounts, no uploads.
+**A privacy-first collection of developer utilities that run in your browser.** Tool inputs — from JSON and secrets to PDFs and images — are processed locally with no backend, accounts, uploads, or ads. The official hosted app collects basic page-usage telemetry; it never includes tool inputs.
 
 🔗 **Live app:** https://techtocore.github.io/Dev-Toolbox/
-📲 **Installable:** it's a PWA — install it to your home screen or desktop and use every tool **fully offline**.
+📲 **Installable:** it's a PWA — install it to your home screen or desktop. Local tools work offline after the app is cached; network-dependent model downloads and public-IP lookup are clearly opt-in.
 
 ---
 
@@ -72,9 +72,9 @@
 
 ## 🔒 Privacy
 
-Every tool processes your data **entirely in the browser** — files, text, keys, and images are never uploaded to a server. The on-device AI runs locally over WebGPU; even your prompts stay on your machine.
+Tool inputs are processed **entirely in the browser** — files, text, keys, images, and AI prompts are never uploaded to an application server. The official GitHub Pages deployment uses Google Analytics for basic page-view telemetry with Google Signals and ad-personalization signals disabled. Local and self-hosted copies do not load it.
 
-The hosted version uses Google Analytics for anonymous, aggregate usage statistics (which pages are visited) to help prioritise tools. It never sees the content you process. To avoid even that, block analytics in your browser or self-host the app — every tool works identically.
+Two features make explicit network requests: Local AI downloads model weights from the model host before inference runs on-device, and IP & Browser Info contacts a public IP service only after consent. Those tools explain the request before it happens; the rest of the toolbox works locally and can be used offline once the PWA assets are cached.
 
 ---
 
@@ -112,7 +112,9 @@ Artifacts are emitted to `dist/dev-toolbox/`. Production builds include the serv
 
 ```bash
 npm run lint     # ESLint (flat config)
-npm test         # unit tests (Karma + Jasmine, headless Chrome)
+npm run typecheck # application and test TypeScript checks
+npm run test:ci  # unit tests (Karma + Jasmine, headless Chrome)
+npm run check    # lint + typecheck + tests + production audit + build
 ```
 
 > **Testing the PWA locally:** service workers require a production build served over HTTP(S), not `ng serve`. Build, then serve `dist/dev-toolbox/browser/` with any static server (e.g. `npx http-server dist/dev-toolbox/browser`).

@@ -1,6 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
+import { RegexEvaluationRequest } from './regex-engine';
+import { RegexWorkerResponse } from './regex-engine.worker';
 
 type Mode = 'test' | 'replace';
 
@@ -22,7 +24,15 @@ interface PatternRecipe {
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './regex-tester.scss',
 })
-export class RegexTester implements OnInit {
+export class RegexTester implements OnInit, OnDestroy {
+  private static readonly MAX_PATTERN_LENGTH = 10_000;
+  private static readonly MAX_TEXT_LENGTH = 1_000_000;
+  private static readonly MAX_REPLACEMENT_LENGTH = 10_000;
+  private static readonly MAX_MATCHES = 10_000;
+  private static readonly MAX_OUTPUT_LENGTH = 10 * 1024 * 1024;
+  private static readonly WORKER_TIMEOUT_MS = 1_000;
+  private static readonly INPUT_DEBOUNCE_MS = 120;
+
   mode: Mode = 'test';
   regexPattern = '';
   testString = '';
@@ -44,8 +54,14 @@ export class RegexTester implements OnInit {
   errorMessage = '';
   highlightedText = '';
   isMobile = false;
+  isRunning = false;
 
   cheatsheetOpen = false;
+
+  private worker?: Worker;
+  private runTimer?: ReturnType<typeof setTimeout>;
+  private workerTimeout?: ReturnType<typeof setTimeout>;
+  private runSequence = 0;
 
   // Quick-pick library
   recipes: PatternRecipe[] = [
@@ -136,6 +152,10 @@ export class RegexTester implements OnInit {
     this.isMobile = this.utilityService.getIsMobile();
   }
 
+  ngOnDestroy(): void {
+    this.cancelPendingRun();
+  }
+
   /**
    * Apply an AI-generated pattern: tolerate the model wrapping it in fences,
    * slashes, or quotes, set it (with any embedded flags), and run.
@@ -191,6 +211,9 @@ export class RegexTester implements OnInit {
   }
 
   run(): void {
+    this.cancelPendingRun();
+    const sequence = ++this.runSequence;
+
     if (!this.regexPattern || !this.testString) {
       this.isValid = true;
       this.errorMessage = '';
@@ -198,9 +221,21 @@ export class RegexTester implements OnInit {
       return;
     }
 
-    let regex: RegExp;
+    if (this.regexPattern.length > RegexTester.MAX_PATTERN_LENGTH) {
+      this.setEvaluationError('Pattern exceeds the 10,000 character limit.');
+      return;
+    }
+    if (this.testString.length > RegexTester.MAX_TEXT_LENGTH) {
+      this.setEvaluationError('Test string exceeds the 1,000,000 character limit.');
+      return;
+    }
+    if (this.replacement.length > RegexTester.MAX_REPLACEMENT_LENGTH) {
+      this.setEvaluationError('Replacement exceeds the 10,000 character limit.');
+      return;
+    }
+
     try {
-      regex = new RegExp(this.regexPattern, this.getFlagString());
+      new RegExp(this.regexPattern, this.getFlagString());
       this.isValid = true;
       this.errorMessage = '';
     } catch (error: any) {
@@ -210,55 +245,102 @@ export class RegexTester implements OnInit {
       return;
     }
 
-    const positions = this.findAll(regex);
-
-    this.matches = positions.map(p => this.testString.substring(p.index, p.index + p.length));
-    this.matchCount = positions.length;
-    this.buildHighlightedHtml(positions);
-
-    if (this.mode === 'replace') {
-      try {
-        // Use a fresh regex with `g` so .replace replaces everywhere when "Global" is set.
-        const replaceRegex = new RegExp(this.regexPattern, this.getFlagString());
-        this.replaceOutput = this.testString.replace(replaceRegex, this.replacement);
-      } catch (e: any) {
-        this.replaceOutput = '';
-        this.errorMessage = e?.message || 'Replacement failed';
-        this.isValid = false;
-      }
-    }
+    this.isRunning = true;
+    this.runTimer = setTimeout(
+      () => this.startWorker(sequence),
+      RegexTester.INPUT_DEBOUNCE_MS
+    );
   }
 
-  private findAll(regex: RegExp): { index: number; length: number }[] {
-    const MAX = 10000;
-    const out: { index: number; length: number }[] = [];
-    const r = new RegExp(regex.source, this.getFlagString() + (this.flags.global ? '' : 'g'));
-    let m: RegExpExecArray | null;
-    let iterations = 0;
-
-    // Wall-clock bound: a pathological pattern (e.g. (a+)+ on a long string) can
-    // make a single exec() backtrack catastrophically. JS regex matching cannot be
-    // interrupted mid-call, but we can stop iterating between matches if the overall
-    // run gets too slow, so the tab never hangs indefinitely. (A terminable Web
-    // Worker is the robust long-term follow-up.)
-    const start = Date.now();
-
-    while ((m = r.exec(this.testString)) !== null) {
-      out.push({ index: m.index, length: m[0].length });
-      if (!this.flags.global) break;
-      if (m[0].length === 0) r.lastIndex++;
-      if (Date.now() - start > 1000) {
-        this.errorMessage = 'Pattern took too long — refine it.';
-        this.isValid = false;
-        break;
-      }
-      if (++iterations >= MAX) {
-        this.errorMessage = `Too many matches (>${MAX}). Refine your pattern.`;
-        this.isValid = false;
-        break;
-      }
+  private startWorker(sequence: number): void {
+    this.runTimer = undefined;
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('./regex-engine.worker', import.meta.url), { type: 'module' });
+    } catch {
+      this.setEvaluationError('Web Workers are unavailable, so regex evaluation cannot run safely.');
+      return;
     }
-    return out;
+    this.worker = worker;
+
+    this.workerTimeout = setTimeout(() => {
+      if (sequence !== this.runSequence || this.worker !== worker) return;
+      this.workerTimeout = undefined;
+      worker.terminate();
+      if (this.worker === worker) this.worker = undefined;
+      this.setEvaluationError('Pattern took too long and was stopped after 1 second.');
+    }, RegexTester.WORKER_TIMEOUT_MS);
+
+    worker.onmessage = ({ data }: MessageEvent<RegexWorkerResponse>) => {
+      if (sequence !== this.runSequence || this.worker !== worker) {
+        worker.terminate();
+        return;
+      }
+      if (this.workerTimeout) clearTimeout(this.workerTimeout);
+      this.workerTimeout = undefined;
+      worker.terminate();
+      if (this.worker === worker) this.worker = undefined;
+
+      if (data.error || !data.result) {
+        this.setEvaluationError(data.error || 'Regex evaluation failed');
+        return;
+      }
+
+      const positions = data.result.positions;
+      this.matches = positions.map(position =>
+        this.testString.substring(position.index, position.index + position.length)
+      );
+      this.matchCount = positions.length;
+      this.buildHighlightedHtml(positions);
+      this.replaceOutput = data.result.replaceOutput;
+      this.isValid = true;
+      this.errorMessage = '';
+      this.isRunning = false;
+    };
+
+    worker.onerror = () => {
+      if (sequence !== this.runSequence || this.worker !== worker) {
+        worker.terminate();
+        return;
+      }
+      if (this.workerTimeout) clearTimeout(this.workerTimeout);
+      this.workerTimeout = undefined;
+      worker.terminate();
+      if (this.worker === worker) this.worker = undefined;
+      this.setEvaluationError('Regex worker failed. Try a simpler pattern.');
+    };
+
+    const request: RegexEvaluationRequest = {
+      pattern: this.regexPattern,
+      flags: this.getFlagString(),
+      text: this.testString,
+      replacement: this.replacement,
+      replace: this.mode === 'replace',
+      maxMatches: RegexTester.MAX_MATCHES,
+      maxOutputLength: RegexTester.MAX_OUTPUT_LENGTH
+    };
+    worker.postMessage(request);
+  }
+
+  private cancelPendingRun(): void {
+    if (this.runTimer) {
+      clearTimeout(this.runTimer);
+      this.runTimer = undefined;
+    }
+    if (this.workerTimeout) {
+      clearTimeout(this.workerTimeout);
+      this.workerTimeout = undefined;
+    }
+    this.worker?.terminate();
+    this.worker = undefined;
+    this.isRunning = false;
+  }
+
+  private setEvaluationError(message: string): void {
+    this.isValid = false;
+    this.errorMessage = message;
+    this.isRunning = false;
+    this.clearResults();
   }
 
   private buildHighlightedHtml(positions: { index: number; length: number }[]): void {
@@ -333,6 +415,8 @@ Total: $1,249.99 USD. Status: pending → shipped.`;
   }
 
   clear(): void {
+    this.cancelPendingRun();
+    this.runSequence++;
     this.regexPattern = '';
     this.testString = '';
     this.replacement = '';

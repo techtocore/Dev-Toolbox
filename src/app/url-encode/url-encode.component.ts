@@ -126,7 +126,7 @@ export class UrlEncodeComponent implements OnInit {
             .join('\n');
           break;
       }
-    } catch (e: any) {
+    } catch {
       this.errorMessage = 'Invalid encoded input — check for stray percent signs or non-hex pairs.';
       this.decoded = '';
     }

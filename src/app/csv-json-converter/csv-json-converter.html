@@ -19,8 +19,8 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Conversion Mode</label>
-              <div class="btn-group w-100" role="group">
+              <div id="conversion-mode-label" class="form-label">Conversion Mode</div>
+              <div class="btn-group w-100" role="group" aria-labelledby="conversion-mode-label">
                 <input
                   type="radio"
                   class="btn-check"
@@ -49,7 +49,7 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label">Quick Actions</label>
+              <div class="form-label">Quick Actions</div>
               <div class="d-flex gap-2">
                 <button class="btn btn-outline-secondary" (click)="swapMode()">
                   <i class="bi bi-arrow-left-right me-1"></i> Swap
@@ -66,8 +66,8 @@
 
           <div class="row">
             <div class="col-md-3">
-              <label class="form-label">Delimiter</label>
-              <select class="form-select" [(ngModel)]="delimiter" (ngModelChange)="onSettingsChange()">
+              <label class="form-label" for="csv-delimiter">Delimiter</label>
+              <select id="csv-delimiter" class="form-select" [(ngModel)]="delimiter" (ngModelChange)="onSettingsChange()">
                 <option value=",">Comma (,)</option>
                 <option value=";">Semicolon (;)</option>
                 <option value="|">Pipe (|)</option>
@@ -76,7 +76,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label">Options</label>
+              <div class="form-label">Options</div>
               <div class="form-check">
                 <input
                   class="form-check-input"
@@ -92,15 +92,15 @@
 
             @if (mode === 'csv-to-json') {
               <div class="col-md-3">
-                <label class="form-label">JSON Format</label>
-                <select class="form-select" [(ngModel)]="jsonFormat" (ngModelChange)="onSettingsChange()">
+                <label class="form-label" for="json-format">JSON Format</label>
+                <select id="json-format" class="form-select" [(ngModel)]="jsonFormat" (ngModelChange)="onSettingsChange()">
                   <option value="objects">Objects</option>
                   <option value="array">Arrays</option>
                 </select>
               </div>
 
               <div class="col-md-3">
-                <label class="form-label">JSON Style</label>
+                <div class="form-label">JSON Style</div>
                 <div class="form-check">
                   <input
                     class="form-check-input"
@@ -112,6 +112,18 @@
                     Pretty Print
                   </label>
                 </div>
+              </div>
+            } @else {
+              <div class="col-md-6">
+                <div class="form-label">Spreadsheet Safety</div>
+                <div class="form-check">
+                  <input id="protectSpreadsheetFormulas" class="form-check-input" type="checkbox"
+                    [(ngModel)]="protectSpreadsheetFormulas" (ngModelChange)="onSettingsChange()">
+                  <label class="form-check-label" for="protectSpreadsheetFormulas">
+                    Protect cells that look like formulas
+                  </label>
+                </div>
+                <div class="form-text">Prefixes risky values with an apostrophe before CSV export.</div>
               </div>
             }
           </div>
@@ -152,6 +164,7 @@
           <textarea
             class="form-control font-monospace mb-3"
             rows="13"
+            [attr.aria-label]="mode === 'csv-to-json' ? 'CSV input' : 'JSON input'"
             [(ngModel)]="inputText"
             [placeholder]="mode === 'csv-to-json' ? 'Paste CSV data here...' : 'Paste JSON data here...'"></textarea>
 

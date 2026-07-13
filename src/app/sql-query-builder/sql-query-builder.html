@@ -69,8 +69,8 @@
         <div class="card-body">
           <!-- Query Type -->
           <div class="mb-3">
-            <label class="form-label">Query Type</label>
-            <div class="btn-group w-100" role="group">
+            <div id="sql-query-type-label" class="form-label">Query Type</div>
+            <div class="btn-group w-100" role="group" aria-labelledby="sql-query-type-label">
               <input type="radio" class="btn-check" name="queryType" id="type-select" [(ngModel)]="queryType" value="SELECT" checked>
               <label class="btn btn-outline-primary" for="type-select">SELECT</label>
 
@@ -87,21 +87,21 @@
 
           <!-- Table Name -->
           <div class="mb-3">
-            <label class="form-label">Table Name</label>
-            <input type="text" class="form-control" [(ngModel)]="tableName" placeholder="users">
+            <label class="form-label" for="sql-table-name">Table Name</label>
+            <input id="sql-table-name" type="text" class="form-control" [(ngModel)]="tableName" placeholder="users">
           </div>
 
           <!-- SELECT Options -->
           @if (queryType === 'SELECT') {
             <div class="mb-3">
-              <label class="form-label">Columns (comma-separated or *)</label>
-              <input type="text" class="form-control" [(ngModel)]="selectedColumns" placeholder="id, name, email">
+              <label class="form-label" for="sql-select-columns">Columns (comma-separated or *)</label>
+              <input id="sql-select-columns" type="text" class="form-control" [(ngModel)]="selectedColumns" placeholder="id, name, email">
             </div>
 
             <!-- JOINs -->
             <div class="mb-3">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label mb-0">JOINs</label>
+                <div class="form-label mb-0">JOINs</div>
                 <button class="btn btn-sm btn-outline-primary" (click)="addJoin()">
                   <i class="bi bi-plus-circle"></i> Add JOIN
                 </button>
@@ -112,7 +112,7 @@
                   <div class="card-body p-2">
                     <div class="row g-2">
                       <div class="col-md-3">
-                        <select class="form-select form-select-sm" [(ngModel)]="join.type">
+                        <select class="form-select form-select-sm" [(ngModel)]="join.type" [attr.aria-label]="'JOIN ' + (i + 1) + ' type'">
                           <option value="INNER">INNER</option>
                           <option value="LEFT">LEFT</option>
                           <option value="RIGHT">RIGHT</option>
@@ -120,10 +120,10 @@
                         </select>
                       </div>
                       <div class="col-md-4">
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="join.table" placeholder="Table name">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="join.table" placeholder="Table name" [attr.aria-label]="'JOIN ' + (i + 1) + ' table name'">
                       </div>
                       <div class="col-md-4">
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="join.on" placeholder="table1.id = table2.id">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="join.on" placeholder="table1.id = table2.id" [attr.aria-label]="'JOIN ' + (i + 1) + ' condition'">
                       </div>
                       <div class="col-md-1">
                         <button class="btn btn-sm btn-outline-danger w-100" (click)="removeJoin(i)" aria-label="Remove join">
@@ -146,25 +146,25 @@
 
             <!-- GROUP BY -->
             <div class="mb-3">
-              <label class="form-label">GROUP BY</label>
-              <input type="text" class="form-control" [(ngModel)]="groupBy" placeholder="category">
+              <label class="form-label" for="sql-group-by">GROUP BY</label>
+              <input id="sql-group-by" type="text" class="form-control" [(ngModel)]="groupBy" placeholder="category">
             </div>
 
             <!-- HAVING -->
             <div class="mb-3">
-              <label class="form-label">HAVING <small class="text-muted">(filter on aggregates)</small></label>
-              <input type="text" class="form-control" [(ngModel)]="having" placeholder="COUNT(*) > 1">
+              <label class="form-label" for="sql-having">HAVING <small class="text-muted">(filter on aggregates)</small></label>
+              <input id="sql-having" type="text" class="form-control" [(ngModel)]="having" placeholder="COUNT(*) > 1">
             </div>
 
             <!-- ORDER BY -->
             <div class="row mb-3">
               <div class="col-md-8">
-                <label class="form-label">ORDER BY</label>
-                <input type="text" class="form-control" [(ngModel)]="orderBy" placeholder="name">
+                <label class="form-label" for="sql-order-by">ORDER BY</label>
+                <input id="sql-order-by" type="text" class="form-control" [(ngModel)]="orderBy" placeholder="name">
               </div>
               <div class="col-md-4">
-                <label class="form-label">Direction</label>
-                <select class="form-select" [(ngModel)]="orderDirection">
+                <label class="form-label" for="sql-order-direction">Direction</label>
+                <select id="sql-order-direction" class="form-select" [(ngModel)]="orderDirection">
                   <option value="ASC">ASC</option>
                   <option value="DESC">DESC</option>
                 </select>
@@ -174,12 +174,12 @@
             <!-- LIMIT + OFFSET -->
             <div class="row mb-3">
               <div class="col-md-6">
-                <label class="form-label">LIMIT</label>
-                <input type="number" min="0" step="1" class="form-control" [(ngModel)]="limit" placeholder="10">
+                <label class="form-label" for="sql-limit">LIMIT</label>
+                <input id="sql-limit" type="number" min="0" step="1" class="form-control" [(ngModel)]="limit" placeholder="10">
               </div>
               <div class="col-md-6">
-                <label class="form-label">OFFSET <small class="text-muted">(needs LIMIT)</small></label>
-                <input type="number" min="0" step="1" class="form-control" [(ngModel)]="offset" placeholder="0">
+                <label class="form-label" for="sql-offset">OFFSET <small class="text-muted">(needs LIMIT)</small></label>
+                <input id="sql-offset" type="number" min="0" step="1" class="form-control" [(ngModel)]="offset" placeholder="0">
               </div>
             </div>
           }
@@ -187,21 +187,21 @@
           <!-- INSERT Options -->
           @if (queryType === 'INSERT') {
             <div class="mb-3">
-              <label class="form-label">Columns (comma-separated)</label>
-              <input type="text" class="form-control" [(ngModel)]="insertColumns" placeholder="name, email, age">
+              <label class="form-label" for="sql-insert-columns">Columns (comma-separated)</label>
+              <input id="sql-insert-columns" type="text" class="form-control" [(ngModel)]="insertColumns" placeholder="name, email, age">
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Values (comma-separated)</label>
-              <input type="text" class="form-control" [(ngModel)]="insertValues" placeholder="'John Doe', 'john@example.com', 30">
+              <label class="form-label" for="sql-insert-values">Values (comma-separated)</label>
+              <input id="sql-insert-values" type="text" class="form-control" [(ngModel)]="insertValues" placeholder="'John Doe', 'john@example.com', 30">
             </div>
           }
 
           <!-- UPDATE Options -->
           @if (queryType === 'UPDATE') {
             <div class="mb-3">
-              <label class="form-label">SET (field = value, ...)</label>
-              <textarea class="form-control" rows="3" [(ngModel)]="updateSet" placeholder="name = 'John Doe', age = 30"></textarea>
+              <label class="form-label" for="sql-update-set">SET (field = value, ...)</label>
+              <textarea id="sql-update-set" class="form-control" rows="3" [(ngModel)]="updateSet" placeholder="name = 'John Doe', age = 30"></textarea>
             </div>
           }
 
@@ -209,7 +209,7 @@
           @if (queryType === 'SELECT' || queryType === 'UPDATE' || queryType === 'DELETE') {
             <div class="mb-3">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label mb-0">WHERE Conditions</label>
+                <div class="form-label mb-0">WHERE Conditions</div>
                 <button class="btn btn-sm btn-outline-primary" (click)="addCondition()">
                   <i class="bi bi-plus-circle"></i> Add Condition
                 </button>
@@ -221,17 +221,17 @@
                     <div class="row g-2 align-items-center">
                       @if (i > 0) {
                         <div class="col-md-2">
-                          <select class="form-select form-select-sm" [(ngModel)]="condition.logic">
+                          <select class="form-select form-select-sm" [(ngModel)]="condition.logic" [attr.aria-label]="'WHERE condition ' + (i + 1) + ' logic'">
                             <option value="AND">AND</option>
                             <option value="OR">OR</option>
                           </select>
                         </div>
                       }
                       <div [class]="i > 0 ? 'col-md-3' : 'col-md-4'">
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="condition.field" placeholder="Field name">
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="condition.field" placeholder="Field name" [attr.aria-label]="'WHERE condition ' + (i + 1) + ' field'">
                       </div>
                       <div [class]="i > 0 ? 'col-md-3' : 'col-md-4'">
-                        <select class="form-select form-select-sm" [(ngModel)]="condition.operator">
+                        <select class="form-select form-select-sm" [(ngModel)]="condition.operator" [attr.aria-label]="'WHERE condition ' + (i + 1) + ' operator'">
                           @for (op of operators; track op.value) {
                             <option [value]="op.value">{{ op.label }}</option>
                           }
@@ -242,6 +242,7 @@
                           type="text"
                           class="form-control form-control-sm"
                           [(ngModel)]="condition.value"
+                          [attr.aria-label]="'WHERE condition ' + (i + 1) + ' value'"
                           [placeholder]="condition.operator === 'LIKE' ? '%term% (add your own wildcards)' : 'Value'"
                           [disabled]="condition.operator === 'IS NULL' || condition.operator === 'IS NOT NULL'">
                       </div>

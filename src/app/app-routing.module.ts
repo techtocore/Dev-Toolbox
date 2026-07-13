@@ -43,7 +43,7 @@ import { BaseConverter } from './base-converter/base-converter';
 import { CronHelper } from './cron-helper/cron-helper';
 import { JsonToTypescript } from './json-to-typescript/json-to-typescript';
 
-const routes: Routes = [
+export const APP_ROUTES: Routes = [
   { path: '', component: HomeComponent },
   { path: 'base64', component: Base64Component },
   { path: 'urlEncode', component: UrlEncodeComponent },
@@ -96,7 +96,10 @@ const routes: Routes = [
   },
 ];
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(APP_ROUTES, {
+    anchorScrolling: 'enabled',
+    scrollPositionRestoration: 'enabled'
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

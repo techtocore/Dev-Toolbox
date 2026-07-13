@@ -28,14 +28,14 @@ export class PromptOptimizer {
   // Heuristic patterns for prompt-engineering best practices.
   private patterns = {
     role:           /(?:^|\n)\s*(?:you are|act as|role:|persona:|as an?\s+(?:expert|experienced|senior))\b/i,
-    task:           /\b(?:task|instruction|goal|objective|please)\s*[:\-]/i,
-    context:        /\b(?:context|background|given that|here(?:'s| is)|reference)\s*[:\-]/i,
+    task:           /\b(?:task|instruction|goal|objective|please)\s*[:-]/i,
+    context:        /\b(?:context|background|given that|here(?:'s| is)|reference)\s*[:-]/i,
     // Directive phrases ("respond with", "output format", "format as/your/the",
     // "return a/the/...") match without a delimiter since they can't occur
     // incidentally; bare verbs ("output", "format", "return") require a
     // delimiter so prose like "the output was wrong" doesn't inflate the score.
-    format:         /\b(?:respond with|reply with|output\s+format|format\s+(?:as|your|the)|return\s+(?:a|the|your|in|as)|(?:output|format|return)\s*[:\-])/i,
-    examples:       /\b(?:example|for instance|e\.g\.|sample(?: input| output)?)\s*[:\-]?/i,
+    format:         /\b(?:respond with|reply with|output\s+format|format\s+(?:as|your|the)|return\s+(?:a|the|your|in|as)|(?:output|format|return)\s*[:-])/i,
+    examples:       /\b(?:example|for instance|e\.g\.|sample(?: input| output)?)\s*[:-]?/i,
     fewShot:        /(?:input\s*:[\s\S]+?output\s*:|###[\s\S]+###|<example>[\s\S]+<\/example>)/i,
     constraints:    /\b(?:do not|don't|avoid|never|must not|should not|only|always|exclusively)\b/i,
     xmlTags:        /<\s*([a-z][a-z0-9_-]*)\s*>[\s\S]*<\s*\/\s*\1\s*>/i,

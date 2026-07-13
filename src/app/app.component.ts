@@ -1,9 +1,11 @@
-import { Component, OnInit, HostListener, ChangeDetectionStrategy } from '@angular/core';
-import { UtilityService } from './services/utility.service';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Title } from '@angular/platform-browser';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { CommandPaletteService } from './services/command-palette.service';
+import { ToolsService } from './services/tools.service';
+import { UtilityService } from './services/utility.service';
 
-// Matches Bootstrap's md breakpoint (where the layout stacks to col-sm-12),
-// keeping UtilityService.isMobile in sync with the sidebar/home thresholds.
 const MOBILE_BREAKPOINT = 768;
 
 @Component({
@@ -13,27 +15,49 @@ const MOBILE_BREAKPOINT = 768;
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  @ViewChild('mainContent') mainContent?: ElementRef<HTMLElement>;
+
   title = 'dev-toolbox';
-  isMobile = false;
+  routeAnnouncement = '';
+
+  private navigationSubscription?: Subscription;
 
   constructor(
-    public utilityService: UtilityService,
-    public paletteService: CommandPaletteService
+    public paletteService: CommandPaletteService,
+    private router: Router,
+    private titleService: Title,
+    private toolsService: ToolsService,
+    private utilityService: UtilityService
   ) { }
 
   ngOnInit(): void {
-    this.checkMobileView();
+    this.updateMobileState();
+    this.navigationSubscription = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => this.handleNavigation(event.urlAfterRedirects));
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event?: Event): void {
-    this.checkMobileView();
+  ngOnDestroy(): void {
+    this.navigationSubscription?.unsubscribe();
   }
 
-  private checkMobileView(): void {
-    const isMobileView = window.innerWidth < MOBILE_BREAKPOINT;
-    this.utilityService.setIsMobile(isMobileView);
-    this.isMobile = isMobileView;
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateMobileState();
+  }
+
+  private handleNavigation(url: string): void {
+    const path = url.split(/[?#]/, 1)[0];
+    const tool = this.toolsService.getAllTools().find(candidate => candidate.route === path);
+    const pageName = path === '/' ? 'Dev Toolbox' : tool?.name ?? 'Page not found';
+
+    this.titleService.setTitle(tool ? `${tool.name} | Dev Toolbox` : pageName);
+    this.routeAnnouncement = `${pageName} page loaded`;
+    setTimeout(() => this.mainContent?.nativeElement.focus({ preventScroll: true }));
+  }
+
+  private updateMobileState(): void {
+    this.utilityService.setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
   }
 }

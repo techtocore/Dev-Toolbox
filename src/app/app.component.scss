@@ -9,6 +9,23 @@ footer {
   z-index: 101;
 }
 
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1200;
+  padding: 8px 12px;
+  color: #fff;
+  background: #017cad;
+  border-radius: 4px;
+  transform: translateY(-150%);
+  transition: transform 0.15s ease;
+
+  &:focus {
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   footer {
     font-size: 0.85rem;
@@ -95,6 +112,11 @@ footer {
     line-height: 1;
   }
 
+  .cmdk-shortcut {
+    display: inline-flex;
+    gap: 3px;
+  }
+
   kbd {
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.16);
@@ -104,5 +126,23 @@ footer {
     color: #e2e8f0;
     font-family: inherit;
     line-height: 1;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .cmdk-hint {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+
+    .cmdk-label,
+    .cmdk-shortcut {
+      display: none;
+    }
+
+    i {
+      font-size: 1rem;
+    }
   }
 }

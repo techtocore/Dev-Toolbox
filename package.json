@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
+    "lint": "ng lint",
+    "check": "npm run lint && npm run typecheck && npm run test:ci && npm audit --omit=dev && npm run build"
   },
   "private": true,
   "engines": {

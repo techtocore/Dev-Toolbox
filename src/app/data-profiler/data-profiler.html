@@ -17,8 +17,8 @@
         <div class="card-body">
           <div class="row mb-3">
             <div class="col-md-3">
-              <label class="form-label">Format</label>
-              <select class="form-select" [(ngModel)]="format">
+              <label class="form-label" for="profiler-format">Format</label>
+              <select id="profiler-format" class="form-select" [(ngModel)]="format">
                 <option value="csv">CSV</option>
                 <option value="json">JSON</option>
               </select>
@@ -26,8 +26,8 @@
 
             @if (format === 'csv') {
               <div class="col-md-3">
-                <label class="form-label">Delimiter</label>
-                <select class="form-select" [(ngModel)]="delimiter">
+                <label class="form-label" for="profiler-delimiter">Delimiter</label>
+                <select id="profiler-delimiter" class="form-select" [(ngModel)]="delimiter">
                   <option value=",">Comma (,)</option>
                   <option value=";">Semicolon (;)</option>
                   <option value="|">Pipe (|)</option>
@@ -36,7 +36,7 @@
               </div>
 
               <div class="col-md-3">
-                <label class="form-label">Options</label>
+                <div class="form-label">Options</div>
                 <div class="form-check">
                   <input
                     class="form-check-input"
@@ -51,7 +51,7 @@
             }
 
             <div class="col-md-3">
-              <label class="form-label">Quick Actions</label>
+              <div class="form-label">Quick Actions</div>
               <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-outline-info btn-sm" (click)="loadSampleData()">
                   <i class="bi bi-file-earmark-text me-1"></i>Sample
@@ -76,8 +76,9 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Data @if (format === 'csv') { (CSV) } @else { (JSON) }</label>
+            <label class="form-label" for="profiler-data">Data @if (format === 'csv') { (CSV) } @else { (JSON) }</label>
             <textarea
+              id="profiler-data"
               class="form-control font-monospace"
               rows="8"
               [(ngModel)]="inputData"

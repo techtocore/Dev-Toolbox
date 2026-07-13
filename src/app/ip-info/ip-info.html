@@ -182,7 +182,7 @@
                 <div class="info-row">
                   <span class="info-label">Coordinates</span>
                   <span class="info-value">
-                    @if (network.latitude != null && network.longitude != null) {
+                    @if (network.latitude !== null && network.longitude !== null) {
                       {{ network.latitude }}, {{ network.longitude }}
                       <a [href]="mapsUrl" target="_blank" rel="noopener" class="ms-2">
                         <i class="bi bi-map"></i> View map

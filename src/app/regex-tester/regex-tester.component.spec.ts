@@ -26,4 +26,14 @@ describe('RegexTester', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('rejects oversized test input before starting a worker', () => {
+    component.regexPattern = '.';
+    component.testString = 'a'.repeat(1_000_001);
+
+    component.run();
+
+    expect(component.isRunning).toBeFalse();
+    expect(component.errorMessage).toContain('1,000,000 character limit');
+  });
 });

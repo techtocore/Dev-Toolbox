@@ -26,6 +26,8 @@ export class PdfMerge implements OnDestroy {
 
   /** Reject absurdly large files early so we don't lock the browser. */
   private readonly maxBytes = 150 * 1024 * 1024; // 150 MB per file
+  private readonly maxTotalBytes = 300 * 1024 * 1024;
+  private readonly maxFiles = 50;
 
   constructor(
     public utilityService: UtilityService,
@@ -81,6 +83,7 @@ export class PdfMerge implements OnDestroy {
     // reports all of them, not just the last one.
     const problems: string[] = [];
     let added = 0;
+    let queuedBytes = this.files.reduce((sum, entry) => sum + entry.file.size, 0);
 
     try {
       const { PDFDocument } = await import('pdf-lib');
@@ -99,6 +102,14 @@ export class PdfMerge implements OnDestroy {
         }
         if (file.size > this.maxBytes) {
           problems.push(`"${file.name}" — larger than 150 MB`);
+          continue;
+        }
+        if (this.files.length >= this.maxFiles) {
+          problems.push(`"${file.name}" — the 50-file limit is reached`);
+          continue;
+        }
+        if (queuedBytes + file.size > this.maxTotalBytes) {
+          problems.push(`"${file.name}" — would exceed the 300 MB total limit`);
           continue;
         }
         if (this.files.some(entry => this.fileKey(entry.file) === this.fileKey(file))) {
@@ -120,6 +131,7 @@ export class PdfMerge implements OnDestroy {
             sizeLabel: this.formatSize(file.size),
             pages: doc.getPageCount()
           });
+          queuedBytes += file.size;
           added++;
         } catch {
           problems.push(`"${file.name}" — could not be read (corrupt or invalid)`);

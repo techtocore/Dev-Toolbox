@@ -222,7 +222,7 @@ export class JsonSchemaGenerator {
       .filter(v => v.length > 0);
   }
 
-  onTypeChange(field: SchemaField, index: number): void {
+  onTypeChange(field: SchemaField): void {
     if (field.type === 'enum') {
       field.enum = field.enum ?? [];
     } else {
@@ -430,7 +430,9 @@ export class JsonSchemaGenerator {
   private toGeminiSchema(schema: any): any {
     if (!schema || typeof schema !== 'object') return schema;
     // Strip JSON-Schema-isms Gemini doesn't accept on the root.
-    const { $schema, title, ...rest } = schema;
+    const rest = { ...schema };
+    delete rest.$schema;
+    delete rest.title;
     if (rest.properties) {
       const props: any = {};
       for (const key of Object.keys(rest.properties)) {

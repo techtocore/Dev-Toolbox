@@ -1,11 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
 import { ToolsService, Tool } from '../services/tools.service';
 import { environment } from '../../environments/environment';
-
-// Constant for mobile breakpoint (matches Bootstrap's md breakpoint)
-const MOBILE_BREAKPOINT = 768;
-const SIDEBAR_ANIMATION_DELAY = 350;
 
 @Component({
   selector: 'app-home',
@@ -23,10 +18,7 @@ export class HomeComponent implements OnInit {
   totalTools = 0;
   appVersion = environment.version;
 
-  constructor(
-    private toolsService: ToolsService,
-    private router: Router
-  ) { }
+  constructor(private toolsService: ToolsService) { }
 
   ngOnInit(): void {
     this.filteredTools = this.toolsService.getAllTools();
@@ -52,12 +44,6 @@ export class HomeComponent implements OnInit {
     setTimeout(() => {
       this.showResults = false;
     }, 200);
-  }
-
-  selectTool(tool: Tool): void {
-    this.router.navigate([tool.route]);
-    this.searchQuery = '';
-    this.showResults = false;
   }
 
   clearSearch(): void {

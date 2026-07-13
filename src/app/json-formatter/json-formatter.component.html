@@ -15,8 +15,8 @@
         <div class="card-body">
           <div class="row g-3 align-items-end">
             <div class="col-md-4">
-              <label class="form-label small mb-1">Mode</label>
-              <div class="btn-group w-100" role="group">
+              <div id="json-mode-label" class="form-label small mb-1">Mode</div>
+              <div class="btn-group w-100" role="group" aria-labelledby="json-mode-label">
                 <input type="radio" class="btn-check" name="mode" id="mode-format"
                   [checked]="mode === 'format'" (change)="setMode('format')">
                 <label class="btn btn-outline-primary" for="mode-format">
@@ -38,8 +38,8 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label small mb-1">Indent</label>
-              <select class="form-select" [(ngModel)]="indentSize" (change)="process()" [disabled]="mode === 'minify'">
+              <label class="form-label small mb-1" for="json-indent">Indent</label>
+              <select id="json-indent" class="form-select" [(ngModel)]="indentSize" (change)="process()" [disabled]="mode === 'minify'">
                 <option [ngValue]="2">2 spaces</option>
                 <option [ngValue]="4">4 spaces</option>
                 <option [ngValue]="8">8 spaces</option>
@@ -48,7 +48,7 @@
             </div>
 
             <div class="col-md-5">
-              <label class="form-label small mb-1 d-block">Actions</label>
+              <div class="form-label small mb-1 d-block">Actions</div>
               <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-primary" (click)="process()">
                   <i class="bi bi-play-fill me-1"></i>Process

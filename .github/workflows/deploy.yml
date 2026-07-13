@@ -33,6 +33,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
       - name: Build Angular app
         run: npm run build -- --base-href /Dev-Toolbox/
 

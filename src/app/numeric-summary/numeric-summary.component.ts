@@ -9,6 +9,7 @@ import { UtilityService } from '../services/utility.service'
   standalone: false
 })
 export class NumericSummaryComponent implements OnInit {
+  private static readonly MAX_INPUT_BYTES = 10 * 1024 * 1024;
 
   inputTxt: string = '';
   isMobile: boolean = false;
@@ -74,7 +75,7 @@ export class NumericSummaryComponent implements OnInit {
       }
     });
 
-    for (let k in frequency) {
+    for (const k in frequency) {
       if (frequency[k] === maxFreq) {
         modes.push(Number(k));
       }
@@ -117,6 +118,9 @@ export class NumericSummaryComponent implements OnInit {
     try {
       if (!this.inputTxt || !this.inputTxt.trim()) {
         throw new Error('Please enter numeric data');
+      }
+      if (new Blob([this.inputTxt]).size > NumericSummaryComponent.MAX_INPUT_BYTES) {
+        throw new Error('Input exceeds the 10 MB safety limit');
       }
 
       // Parse input — treat any run of commas and/or whitespace (spaces, tabs,
@@ -220,6 +224,12 @@ export class NumericSummaryComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+    if (file.size > NumericSummaryComponent.MAX_INPUT_BYTES) {
+      this.errorMessage = 'That file exceeds the 10 MB safety limit.';
+      this.hasResults = false;
+      input.value = '';
+      return;
+    }
     this.inputTxt = await file.text();
     input.value = '';
     this.process();
@@ -229,6 +239,11 @@ export class NumericSummaryComponent implements OnInit {
     event.preventDefault();
     const file = event.dataTransfer?.files?.[0];
     if (!file) return;
+    if (file.size > NumericSummaryComponent.MAX_INPUT_BYTES) {
+      this.errorMessage = 'That file exceeds the 10 MB safety limit.';
+      this.hasResults = false;
+      return;
+    }
     this.inputTxt = await file.text();
     this.process();
   }

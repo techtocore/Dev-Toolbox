@@ -12,6 +12,8 @@ interface ImageItem {
 }
 
 const MAX_FILE_BYTES = 40 * 1024 * 1024; // 40 MB per image
+const MAX_TOTAL_BYTES = 200 * 1024 * 1024;
+const MAX_FILES = 100;
 const ACCEPTED_TYPES = new Set([
   'image/png',
   'image/jpeg',
@@ -74,6 +76,7 @@ export class ImagesToPdf implements OnDestroy {
   private handleFiles(files: FileList): void {
     this.errorMessage = '';
     const rejected: string[] = [];
+    let queuedBytes = this.images.reduce((sum, item) => sum + item.file.size, 0);
 
     for (const file of Array.from(files)) {
       if (!ACCEPTED_TYPES.has(file.type)) {
@@ -82,6 +85,14 @@ export class ImagesToPdf implements OnDestroy {
       }
       if (file.size > MAX_FILE_BYTES) {
         rejected.push(`${file.name} (over 40 MB)`);
+        continue;
+      }
+      if (this.images.length >= MAX_FILES) {
+        rejected.push(`${file.name} (100-image limit reached)`);
+        continue;
+      }
+      if (queuedBytes + file.size > MAX_TOTAL_BYTES) {
+        rejected.push(`${file.name} (would exceed 200 MB total)`);
         continue;
       }
       if (this.images.some(item => this.fileKey(item.file) === this.fileKey(file))) {
@@ -93,6 +104,7 @@ export class ImagesToPdf implements OnDestroy {
         name: file.name,
         url: URL.createObjectURL(file),
       });
+      queuedBytes += file.size;
     }
 
     if (rejected.length) {

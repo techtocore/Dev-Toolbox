@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface PromptVariable {
@@ -21,6 +21,9 @@ interface SavedPromptTemplate {
   styleUrls: ['./prompt-template.scss']
 })
 export class PromptTemplate {
+  @ViewChild('saveNameInput') saveNameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('loadDialog') loadDialog?: ElementRef<HTMLElement>;
+
   template: string = `You are a {{role}}.
 
 <task>
@@ -47,6 +50,7 @@ export class PromptTemplate {
   currentTemplateName: string = '';
   showSaveDialog: boolean = false;
   showLoadDialog: boolean = false;
+  private dialogOpener: HTMLElement | null = null;
 
   // Predefined templates — modern patterns: XML structure, explicit output schema,
   // grounding instructions, and clear isolation of untrusted input.
@@ -226,6 +230,59 @@ Translate the text from {{source_lang}} to {{target_lang}}, preserving {{preserv
     this.generateOutput();
   }
 
+  @HostListener('window:keydown.escape')
+  onEscape(): void {
+    if (this.showSaveDialog || this.showLoadDialog) {
+      this.closeDialog();
+    }
+  }
+
+  openSaveDialog(opener: HTMLElement): void {
+    this.dialogOpener = opener;
+    this.showSaveDialog = true;
+    setTimeout(() => this.saveNameInput?.nativeElement.focus());
+  }
+
+  openLoadDialog(opener: HTMLElement): void {
+    this.dialogOpener = opener;
+    this.showLoadDialog = true;
+    setTimeout(() => this.loadDialog?.nativeElement.focus());
+  }
+
+  closeDialog(restoreFocus = true): void {
+    this.showSaveDialog = false;
+    this.showLoadDialog = false;
+    const opener = this.dialogOpener;
+    this.dialogOpener = null;
+    if (restoreFocus) {
+      setTimeout(() => opener?.focus());
+    }
+  }
+
+  trapDialogFocus(event: KeyboardEvent, dialog: HTMLElement): void {
+    if (event.key !== 'Tab') {
+      return;
+    }
+    const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+    if (focusable.length === 0) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   generateOutput(): void {
     // Single pass over the original template: each placeholder is substituted
     // exactly once (order-independent), substituted values are never re-scanned,
@@ -310,15 +367,18 @@ Translate the text from {{source_lang}} to {{target_lang}}, preserving {{preserv
     }
 
     this.saveTemplatesToStorage();
-    this.showSaveDialog = false;
+    this.closeDialog();
     this.currentTemplateName = '';
   }
 
   loadTemplate(template: SavedPromptTemplate): void {
+    const dialogOpen = this.showLoadDialog || this.showSaveDialog;
     this.template = template.template;
     this.variables = JSON.parse(JSON.stringify(template.variables)); // Deep copy
     this.generateOutput();
-    this.showLoadDialog = false;
+    if (dialogOpen) {
+      this.closeDialog();
+    }
   }
 
   loadPredefinedTemplate(template: SavedPromptTemplate): void {

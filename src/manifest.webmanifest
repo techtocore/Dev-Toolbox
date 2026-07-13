@@ -1,7 +1,7 @@
 {
   "name": "Dev Toolbox — private, in-browser developer utilities",
   "short_name": "Dev Toolbox",
-  "description": "A privacy-first collection of developer utilities — JSON, Base64, JWT, hashing, regex, diff, PDF & image tools, QR codes, device sensors, and an on-device AI. Everything runs in your browser; nothing leaves your device.",
+  "description": "A privacy-first collection of developer utilities with local file and text processing, no uploads, and an optional on-device AI.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

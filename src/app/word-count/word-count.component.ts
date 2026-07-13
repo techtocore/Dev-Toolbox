@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 
 interface Stat {
@@ -15,7 +15,7 @@ interface Stat {
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
-export class WordCountComponent implements OnInit {
+export class WordCountComponent {
   inputTxt: string = '';
 
   // Counts
@@ -32,8 +32,6 @@ export class WordCountComponent implements OnInit {
   speakingTimeSec = 0;
 
   constructor(public utilityService: UtilityService) {}
-
-  ngOnInit(): void {}
 
   setCounts(): void {
     const txt = this.inputTxt || '';
