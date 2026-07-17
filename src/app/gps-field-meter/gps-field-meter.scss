@@ -1,0 +1,651 @@
+:host {
+  --gps-green: #20b486;
+  --gps-green-dark: #0f6e59;
+  --gps-gold: #f0b84a;
+  --gps-coral: #e65a4f;
+  --gps-ink: #13211e;
+  --gps-paper: #f5f7f3;
+  display: block;
+}
+
+.gps-meter {
+  max-width: 1200px;
+}
+
+.gps-state,
+.locating-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  color: #202725;
+  background: #fff;
+  border: 1px solid #d8dfdc;
+  border-left: 4px solid #6c757d;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(13, 25, 21, 0.12);
+}
+
+.gps-state > i {
+  flex: 0 0 auto;
+  color: #52605b;
+  font-size: 1.7rem;
+}
+
+.gps-state h5,
+.gps-state p {
+  margin-bottom: 0.5rem;
+}
+
+.state-content {
+  min-width: 0;
+  width: 100%;
+}
+
+.state-warning { border-left-color: var(--gps-gold); }
+.state-danger { border-left-color: var(--gps-coral); }
+
+.url-share .form-control[readonly] {
+  min-width: 0;
+  background: #f1f4f2;
+}
+
+.gps-launch {
+  display: grid;
+  grid-template-columns: minmax(330px, 1.12fr) minmax(280px, 0.88fr);
+  min-height: 390px;
+  overflow: hidden;
+  color: #f5faf7;
+  background: var(--gps-ink);
+  border: 1px solid #344a43;
+  border-radius: 8px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.24);
+}
+
+.launch-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1.75rem, 5vw, 4rem);
+}
+
+.eyebrow {
+  color: #687670;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.launch-copy .eyebrow {
+  color: #72d7b8;
+}
+
+.launch-copy h3 {
+  margin: 0.35rem 0 0.75rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.2rem, 5vw, 3.7rem);
+  line-height: 1;
+}
+
+.launch-copy > p {
+  max-width: 560px;
+  margin-bottom: 1.25rem;
+  color: #bdcbc5;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.accuracy-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: min(100%, 430px);
+  margin-bottom: 1.35rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.accuracy-toggle > span:first-child {
+  display: grid;
+}
+
+.accuracy-toggle small {
+  color: #aabbb4;
+}
+
+.accuracy-toggle .form-check-input {
+  width: 2.6rem;
+  height: 1.35rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.accuracy-toggle .form-check-input:checked {
+  background-color: var(--gps-green);
+  border-color: var(--gps-green);
+}
+
+.launch-radar {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    #1b2d28;
+  background-size: 28px 28px;
+}
+
+.radar-ring,
+.radar-line,
+.launch-radar > i {
+  position: absolute;
+}
+
+.radar-ring {
+  top: 50%;
+  left: 50%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(114, 215, 184, 0.28);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring-a { width: 28%; }
+.ring-b { width: 56%; }
+.ring-c { width: 84%; }
+
+.radar-line.line-horizontal {
+  top: 50%;
+  right: 8%;
+  left: 8%;
+  border-top: 1px solid rgba(114, 215, 184, 0.22);
+}
+
+.radar-line.line-vertical {
+  top: 8%;
+  bottom: 8%;
+  left: 50%;
+  border-left: 1px solid rgba(114, 215, 184, 0.22);
+}
+
+.launch-radar > i {
+  top: 50%;
+  left: 50%;
+  color: var(--gps-gold);
+  font-size: 3rem;
+  filter: drop-shadow(0 0 12px rgba(240, 184, 74, 0.48));
+  transform: translate(-50%, -90%);
+}
+
+.locating-panel {
+  align-items: center;
+  min-height: 140px;
+  border-left-color: var(--gps-green);
+}
+
+.locating-panel div:nth-child(2) {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.locating-panel p {
+  margin: 0;
+  color: #69736f;
+}
+
+.satellite-scan {
+  position: relative;
+  display: grid;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  color: var(--gps-green-dark);
+  background: #e7f6f0;
+  border-radius: 50%;
+}
+
+.satellite-scan i {
+  font-size: 1.45rem;
+}
+
+.satellite-scan span {
+  position: absolute;
+  inset: -5px;
+  border: 2px solid transparent;
+  border-top-color: var(--gps-green);
+  border-radius: 50%;
+  animation: satellite-spin 1.1s linear infinite;
+}
+
+@keyframes satellite-spin {
+  to { transform: rotate(360deg); }
+}
+
+.signal-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+  color: #46350d;
+  background: #fff4d6;
+  border: 1px solid #f2d68c;
+  border-radius: 6px;
+}
+
+.signal-warning span {
+  flex: 1;
+}
+
+.gps-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  color: #222927;
+  background: var(--gps-paper);
+  border: 1px solid #d8dfdc;
+  border-radius: 8px;
+}
+
+.live-status {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.live-status > span:last-child {
+  color: #737d79;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  background: var(--gps-green);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(32, 180, 134, 0.15);
+}
+
+.status-dot.is-paused {
+  background: #87908d;
+  box-shadow: none;
+}
+
+.toolbar-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.position-board {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(210px, 1fr) auto auto;
+  min-height: 560px;
+  overflow: hidden;
+  color: #f1f8f5;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    var(--gps-ink);
+  background-size: 24px 24px;
+  border: 1px solid #354a43;
+  border-radius: 8px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+}
+
+.position-board.is-paused::after {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgba(19, 33, 30, 0.44);
+  content: 'PAUSED';
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.board-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  color: #9db0a9;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fix-visual {
+  position: relative;
+  align-self: center;
+  justify-self: center;
+  width: min(270px, 72vw);
+  aspect-ratio: 1;
+  border: 1px solid rgba(117, 214, 184, 0.18);
+  border-radius: 50%;
+}
+
+.fix-axis,
+.accuracy-disc,
+.fix-point {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.fix-axis.horizontal {
+  width: 112%;
+  border-top: 1px solid rgba(117, 214, 184, 0.26);
+}
+
+.fix-axis.vertical {
+  height: 112%;
+  border-left: 1px solid rgba(117, 214, 184, 0.26);
+}
+
+.accuracy-disc {
+  background: rgba(32, 180, 134, 0.13);
+  border: 1px solid rgba(83, 222, 177, 0.58);
+  border-radius: 50%;
+  box-shadow: inset 0 0 28px rgba(32, 180, 134, 0.1);
+  transition: width 300ms ease, height 300ms ease;
+}
+
+.fix-point {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: #2c2410;
+  background: var(--gps-gold);
+  border: 4px solid #fff9e8;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px rgba(240, 184, 74, 0.14), 0 3px 12px rgba(0, 0, 0, 0.4);
+  font-size: 1.15rem;
+}
+
+.coordinate-block {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 1rem 1rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.coordinate-block > div {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.coordinate-block span {
+  color: #8ea19a;
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.coordinate-block strong {
+  overflow-wrap: anywhere;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: clamp(0.92rem, 2.4vw, 1.08rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.board-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+
+.accuracy-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #95a69f;
+  font-size: 0.76rem;
+}
+
+.accuracy-badge i {
+  color: var(--gps-green);
+  font-size: 1.1rem;
+}
+
+.accuracy-badge strong {
+  display: block;
+  color: #eef6f3;
+}
+
+.accuracy-badge.accuracy-fair i { color: var(--gps-gold); }
+.accuracy-badge.accuracy-low i { color: var(--gps-coral); }
+
+.gps-telemetry {
+  height: 100%;
+  min-height: 560px;
+  padding: 1.35rem;
+  color: #202725;
+  background: var(--gps-paper);
+  border: 1px solid #d8dfdc;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(9, 18, 15, 0.13);
+}
+
+.telemetry-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.telemetry-heading h5 {
+  margin: 0.2rem 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.35rem;
+}
+
+.heading-arrow {
+  color: var(--gps-coral);
+  font-size: 1.65rem;
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.primary-reading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  color: #f4faf7;
+  background: var(--gps-green-dark);
+  border-radius: 6px;
+}
+
+.primary-reading > span {
+  color: #b9ddd1;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.primary-reading div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.primary-reading strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.primary-reading small {
+  color: #b9ddd1;
+}
+
+.telemetry-list {
+  display: grid;
+}
+
+.telemetry-list > div {
+  display: grid;
+  grid-template-columns: minmax(105px, 1fr) auto;
+  gap: 0.1rem 0.75rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #dce2df;
+}
+
+.telemetry-list > div:last-child {
+  border-bottom: 0;
+}
+
+.telemetry-list span {
+  color: #5f6965;
+}
+
+.telemetry-list span i {
+  width: 1.25rem;
+  margin-right: 0.35rem;
+  color: var(--gps-green-dark);
+}
+
+.telemetry-list strong {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.telemetry-list small {
+  grid-column: 2;
+  color: #818b87;
+  text-align: right;
+}
+
+@media (max-width: 767.98px) {
+  .gps-launch {
+    grid-template-columns: 1fr;
+  }
+
+  .launch-radar {
+    grid-row: 1;
+    min-height: 190px;
+  }
+
+  .launch-copy {
+    padding: 1.5rem;
+  }
+
+  .gps-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toolbar-controls {
+    width: 100%;
+  }
+
+  .toolbar-controls .btn-group {
+    flex: 1;
+  }
+
+  .toolbar-controls .btn-group .btn {
+    min-height: 42px;
+  }
+
+  .toolbar-controls > .btn {
+    min-width: 42px;
+    min-height: 42px;
+  }
+
+  .position-board,
+  .gps-telemetry {
+    min-height: 520px;
+  }
+
+  .board-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .board-footer .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 460px) {
+  .gps-state,
+  .locating-panel {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .locating-panel .btn {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
+  .url-share {
+    flex-wrap: wrap;
+  }
+
+  .url-share .form-control,
+  .url-share .btn {
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  .live-status {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .coordinate-block {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-reading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .telemetry-list > div {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .satellite-scan span {
+    animation: none;
+  }
+
+  .accuracy-disc,
+  .heading-arrow {
+    transition: none;
+  }
+}

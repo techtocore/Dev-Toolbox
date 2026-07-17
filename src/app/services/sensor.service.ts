@@ -4,11 +4,11 @@ export type SensorPermission = 'granted' | 'denied' | 'unsupported' | 'error';
 
 /**
  * SensorService — small shared helper for the on-device motion sensors used by
- * the Bubble Level and Compass tools.
+ * the Bubble Level, Compass, and Motion Lab tools.
  *
  * It owns the three concerns those tools would otherwise duplicate:
  *  - feature-detection of the orientation / motion APIs,
- *  - the iOS 13+ permission prompt (`DeviceOrientationEvent.requestPermission`),
+ *  - the iOS 13+ orientation and motion permission prompts,
  *  - a `secureContext` flag (the sensor APIs are gated to HTTPS / localhost).
  *
  * It deliberately does NOT own the event loop. Each tool subscribes to
@@ -39,6 +39,13 @@ export class SensorService {
     return !!ctor && typeof ctor.requestPermission === 'function';
   }
 
+  /** True on iOS 13+, where motion access must be granted from a user gesture. */
+  get motionNeedsPermission(): boolean {
+    const ctor = (window as unknown as { DeviceMotionEvent?: { requestPermission?: unknown } })
+      .DeviceMotionEvent;
+    return !!ctor && typeof ctor.requestPermission === 'function';
+  }
+
   /**
    * Request orientation access.
    *
@@ -59,6 +66,25 @@ export class SensorService {
         return result === 'granted' ? 'granted' : 'denied';
       } catch {
         // Rejected when not triggered by a user gesture, or dismissed by the user.
+        return 'error';
+      }
+    }
+    return 'granted';
+  }
+
+  /** Request accelerometer and rotation-rate access where the browser requires it. */
+  async requestMotion(): Promise<SensorPermission> {
+    if (!this.hasMotion) return 'unsupported';
+
+    const ctor = (window as unknown as {
+      DeviceMotionEvent?: { requestPermission?: () => Promise<string> };
+    }).DeviceMotionEvent;
+
+    if (ctor && typeof ctor.requestPermission === 'function') {
+      try {
+        const result = await ctor.requestPermission();
+        return result === 'granted' ? 'granted' : 'denied';
+      } catch {
         return 'error';
       }
     }

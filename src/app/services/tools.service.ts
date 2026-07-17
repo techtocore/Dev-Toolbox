@@ -338,6 +338,22 @@ export class ToolsService {
       icon: 'bi-soundwave',
       keywords: ['sound', 'noise', 'decibel', 'db', 'spl', 'loudness', 'microphone', 'mic', 'meter', 'audio', 'volume', 'sensor']
     },
+    {
+      name: 'Motion Lab',
+      description: 'Explore live acceleration, gravity, rotation, motion peaks, and shake events from your device',
+      route: '/motionLab',
+      category: 'Device & Sensors',
+      icon: 'bi-activity',
+      keywords: ['motion', 'accelerometer', 'gyroscope', 'acceleration', 'gravity', 'rotation', 'shake', 'sensor', 'axes', 'g force']
+    },
+    {
+      name: 'GPS Field Meter',
+      description: 'Inspect live coordinates, accuracy, altitude, speed, heading, and filtered track distance',
+      route: '/gpsFieldMeter',
+      category: 'Device & Sensors',
+      icon: 'bi-crosshair2',
+      keywords: ['gps', 'location', 'coordinates', 'latitude', 'longitude', 'altitude', 'speed', 'heading', 'accuracy', 'geolocation', 'sensor']
+    },
 
     // ── PDF Tools ───────────────────────────────────────────────────────────
     // 100% in-browser PDF editing via pdf-lib — files never leave the device.

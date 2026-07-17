@@ -1,0 +1,259 @@
+<div class="container-fluid py-4 motion-lab">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">Motion Lab</h2>
+      <p class="text-muted mb-4">
+        Explore live acceleration, gravity, and rotation from your device. Sensor readings stay
+        in this browser and are discarded as soon as you leave the page.
+      </p>
+    </div>
+  </div>
+
+  @if (status === 'insecure') {
+    <div class="state-panel state-warning" role="alert">
+      <i class="bi bi-shield-exclamation state-icon" aria-hidden="true"></i>
+      <div>
+        <h5>Secure connection required</h5>
+        <p>Motion sensors are available only over <code>https://</code> or on <code>localhost</code>.</p>
+      </div>
+    </div>
+  }
+
+  @if (status === 'unsupported') {
+    <div class="state-panel" role="status">
+      <i class="bi bi-phone state-icon" aria-hidden="true"></i>
+      <div class="state-copy">
+        <h5>No motion readings detected</h5>
+        <p>
+          This browser did not report an accelerometer or gyroscope. Open Motion Lab on a phone
+          or tablet, or re-arm the sensor if it was slow to wake.
+        </p>
+        <div class="input-group url-share mb-3">
+          <input type="text" class="form-control font-monospace" [value]="pageUrl" readonly
+            aria-label="Page link">
+          <button class="btn btn-outline-primary" (click)="copyUrl()" title="Copy page link">
+            <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy link
+          </button>
+        </div>
+        <button class="btn btn-outline-secondary" (click)="retry()">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (status === 'denied') {
+    <div class="state-panel state-danger" role="alert">
+      <i class="bi bi-shield-x state-icon" aria-hidden="true"></i>
+      <div>
+        <h5>Motion access blocked</h5>
+        <p>
+          Allow Motion &amp; Orientation Access in your browser or site settings, then try again.
+          On iOS this setting is under Safari in the Settings app.
+        </p>
+        <button class="btn btn-primary" (click)="retry()">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (status === 'error') {
+    <div class="state-panel state-danger" role="alert">
+      <i class="bi bi-exclamation-octagon state-icon" aria-hidden="true"></i>
+      <div>
+        <h5>Motion sensor could not start</h5>
+        <p>{{ errorDetail }}</p>
+        <button class="btn btn-primary" (click)="retry()">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (status === 'idle') {
+    <section class="launch-panel">
+      <div class="launch-mark" aria-hidden="true">
+        <i class="bi bi-activity"></i>
+      </div>
+      <div class="launch-copy">
+        <span class="eyebrow">Accelerometer + gyroscope</span>
+        <h3>Put your device in motion</h3>
+        <p>
+          Set the phone on a table to see its resting gravity vector, rotate it to inspect angular
+          velocity, or pick it up to capture movement and shakes.
+        </p>
+        <button class="btn btn-primary btn-lg" (click)="start()">
+          <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Start sensing
+        </button>
+        @if (permissionRequired) {
+          <span class="permission-note">
+            <i class="bi bi-hand-index-thumb" aria-hidden="true"></i>
+            Your browser will ask for motion access.
+          </span>
+        }
+      </div>
+    </section>
+  }
+
+  @if (status === 'waiting') {
+    <div class="waiting-panel" role="status">
+      <span class="sensor-pulse" aria-hidden="true"></span>
+      <div>
+        <strong>Listening for the first reading</strong>
+        <span>Move or rotate the device gently.</span>
+      </div>
+    </div>
+  }
+
+  @if (status === 'active' || status === 'paused') {
+    <div class="visually-hidden" aria-live="polite" aria-atomic="true">{{ announcement }}</div>
+
+    <div class="instrument-toolbar">
+      <div>
+        <span class="status-dot" [class.is-paused]="status === 'paused'"></span>
+        <strong>{{ status === 'active' ? 'Live sensor feed' : 'Sampling paused' }}</strong>
+        @if (status === 'active') {
+          <span class="sample-rate">{{ sampleRate.toFixed(0) }} Hz</span>
+        }
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn btn-sm btn-outline-secondary" (click)="reset()" title="Reset statistics">
+          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+          <span>Reset</span>
+        </button>
+        @if (status === 'active') {
+          <button class="btn btn-sm btn-outline-secondary" (click)="pause()">
+            <i class="bi bi-pause-fill" aria-hidden="true"></i>
+            <span>Pause</span>
+          </button>
+        } @else {
+          <button class="btn btn-sm btn-primary" (click)="start()">
+            <i class="bi bi-play-fill" aria-hidden="true"></i>
+            <span>Resume</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+      <div class="col-xl-7">
+        <section class="motion-stage" [class.is-paused]="status === 'paused'">
+          <div class="stage-header">
+            <span>Acceleration vector</span>
+            <span class="activity-pill" [class]="activityClass">{{ activityLabel }}</span>
+          </div>
+
+          <div class="reticle" aria-hidden="true">
+            <span class="reticle-ring ring-one"></span>
+            <span class="reticle-ring ring-two"></span>
+            <span class="reticle-axis axis-horizontal"></span>
+            <span class="reticle-axis axis-vertical"></span>
+            <span class="vector-marker" [style.left.%]="markerX" [style.top.%]="markerY"></span>
+            <span class="axis-letter axis-x">X</span>
+            <span class="axis-letter axis-y">Y</span>
+          </div>
+
+          <div class="magnitude-readout">
+            <span class="magnitude-value">{{ motionMagnitude.toFixed(2) }}</span>
+            <span class="magnitude-unit">m/s&sup2;</span>
+          </div>
+
+          <div class="trace-wrap">
+            <div class="trace-label">
+              <span>Motion magnitude</span>
+              <span>last {{ tracePoints ? '5-8 sec' : 'few seconds' }}</span>
+            </div>
+            <svg class="motion-trace" viewBox="0 0 300 100" preserveAspectRatio="none"
+              role="img" aria-label="Recent acceleration magnitude graph">
+              <line x1="0" y1="92" x2="300" y2="92"></line>
+              <line x1="0" y1="53" x2="300" y2="53"></line>
+              <polyline [attr.points]="tracePoints"></polyline>
+            </svg>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-5">
+        <section class="telemetry-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">Linear acceleration</span>
+              <h5>Three-axis readout</h5>
+            </div>
+            <span class="unit-chip">m/s&sup2;</span>
+          </div>
+
+          @for (axis of ['x', 'y', 'z']; track axis) {
+            <div class="axis-reading" [class]="'axis-' + axis">
+              <span class="axis-name">{{ axis.toUpperCase() }}</span>
+              <div class="axis-track" aria-hidden="true">
+                <span class="axis-midpoint"></span>
+                <span class="axis-marker" [style.left.%]="axisPosition(
+                  axis === 'x' ? acceleration.x : axis === 'y' ? acceleration.y : acceleration.z
+                )"></span>
+              </div>
+              <strong>{{ (axis === 'x' ? acceleration.x : axis === 'y' ? acceleration.y : acceleration.z).toFixed(2) }}</strong>
+            </div>
+          }
+
+          @if (!hasAcceleration) {
+            <div class="capability-note">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              This browser reports gravity or rotation, but not acceleration without gravity.
+            </div>
+          }
+
+          <div class="rotation-heading">
+            <span>Rotation rate</span>
+            <span>&deg;/s</span>
+          </div>
+          <div class="rotation-grid">
+            <div><span>&alpha;</span><strong>{{ rotation.alpha.toFixed(1) }}</strong></div>
+            <div><span>&beta;</span><strong>{{ rotation.beta.toFixed(1) }}</strong></div>
+            <div><span>&gamma;</span><strong>{{ rotation.gamma.toFixed(1) }}</strong></div>
+          </div>
+          @if (!hasRotation) {
+            <p class="partial-note mb-0">Angular velocity is not exposed by this device.</p>
+          }
+
+          <div class="gravity-section">
+            <div class="gravity-heading">
+              <span>Gravity vector</span>
+              <span>device frame &middot; m/s&sup2;</span>
+            </div>
+            @if (hasGravity) {
+              <div class="gravity-grid">
+                <div><span>X</span><strong>{{ gravity.x.toFixed(2) }}</strong></div>
+                <div><span>Y</span><strong>{{ gravity.y.toFixed(2) }}</strong></div>
+                <div><span>Z</span><strong>{{ gravity.z.toFixed(2) }}</strong></div>
+                <div class="gravity-result"><span>Total</span><strong>{{ gravityG.toFixed(2) }} g</strong></div>
+              </div>
+            } @else {
+              <p class="partial-note mb-0">The gravity-inclusive vector is not exposed by this device.</p>
+            }
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="metric-strip">
+      <div>
+        <span>Peak motion</span>
+        <strong>{{ peakMotion.toFixed(2) }} <small>m/s&sup2;</small></strong>
+      </div>
+      <div>
+        <span>Gravity load</span>
+        <strong>{{ hasGravity ? gravityG.toFixed(2) : '--' }} <small>g</small></strong>
+      </div>
+      <div>
+        <span>Rotation total</span>
+        <strong>{{ hasRotation ? rotationMagnitude.toFixed(1) : '--' }} <small>&deg;/s</small></strong>
+      </div>
+      <div>
+        <span>Shakes</span>
+        <strong>{{ shakeCount }}</strong>
+      </div>
+    </div>
+  }
+</div>

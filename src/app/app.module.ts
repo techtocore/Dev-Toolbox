@@ -36,6 +36,8 @@ import { IpInfo } from './ip-info/ip-info';
 import { BubbleLevel } from './bubble-level/bubble-level';
 import { Compass } from './compass/compass';
 import { SoundMeter } from './sound-meter/sound-meter';
+import { MotionLab } from './motion-lab/motion-lab';
+import { GpsFieldMeter } from './gps-field-meter/gps-field-meter';
 import { PdfMerge } from './pdf-merge/pdf-merge';
 import { PdfSplit } from './pdf-split/pdf-split';
 import { PdfOrganize } from './pdf-organize/pdf-organize';
@@ -87,6 +89,8 @@ import { AiAssist } from './ai/ai-assist/ai-assist';
     BubbleLevel,
     Compass,
     SoundMeter,
+    MotionLab,
+    GpsFieldMeter,
     PdfMerge,
     PdfSplit,
     PdfOrganize,

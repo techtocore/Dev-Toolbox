@@ -1,0 +1,245 @@
+<div class="container-fluid py-4 gps-meter">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">GPS Field Meter</h2>
+      <p class="text-muted mb-4">
+        Inspect the live position fix from your device: coordinates, accuracy, altitude, speed,
+        and heading. Location data stays on this page and is never uploaded.
+      </p>
+    </div>
+  </div>
+
+  @if (status === 'insecure') {
+    <div class="gps-state state-warning" role="alert">
+      <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+      <div>
+        <h5>Secure connection required</h5>
+        <p>Location access is available only over <code>https://</code> or on <code>localhost</code>.</p>
+      </div>
+    </div>
+  }
+
+  @if (status === 'unsupported') {
+    <div class="gps-state" role="status">
+      <i class="bi bi-geo-alt" aria-hidden="true"></i>
+      <div class="state-content">
+        <h5>Location service unavailable</h5>
+        <p>This browser does not expose the web location API. Try this page on a current phone or tablet.</p>
+        <div class="input-group url-share">
+          <input type="text" class="form-control font-monospace" [value]="pageUrl" readonly
+            aria-label="Page link">
+          <button class="btn btn-outline-primary" (click)="copyUrl()" title="Copy page link">
+            <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy link
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (status === 'denied') {
+    <div class="gps-state state-danger" role="alert">
+      <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+      <div>
+        <h5>Location access blocked</h5>
+        <p>
+          Allow location access for this site in the browser's address-bar or site permissions,
+          then try again. Device-level Location Services must also be on.
+        </p>
+        <button class="btn btn-primary" (click)="retry()">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (status === 'unavailable' || status === 'timeout' || status === 'error') {
+    <div class="gps-state state-danger" role="alert">
+      <i class="bi" [class.bi-satellite]="status !== 'error'"
+        [class.bi-exclamation-octagon]="status === 'error'" aria-hidden="true"></i>
+      <div>
+        <h5>
+          {{ status === 'timeout' ? 'No fix before timeout' : status === 'unavailable' ? 'GPS signal unavailable' : 'Location could not start' }}
+        </h5>
+        <p>{{ errorDetail }}</p>
+        <button class="btn btn-primary" (click)="retry()">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (status === 'idle') {
+    <section class="gps-launch">
+      <div class="launch-copy">
+        <span class="eyebrow">Live satellite position</span>
+        <h3>Find your fix</h3>
+        <p>
+          High accuracy asks the device to favor GPS hardware. Standard mode uses less power and
+          may return a faster network-assisted position.
+        </p>
+
+        <label class="accuracy-toggle" for="highAccuracy">
+          <span>
+            <strong>High accuracy</strong>
+            <small>Best outdoors; may use more battery</small>
+          </span>
+          <span class="form-check form-switch mb-0">
+            <input id="highAccuracy" class="form-check-input" type="checkbox"
+              [(ngModel)]="highAccuracy" aria-label="Use high accuracy location">
+          </span>
+        </label>
+
+        <button class="btn btn-primary btn-lg" (click)="start()">
+          <i class="bi bi-crosshair2 me-1" aria-hidden="true"></i>Start GPS
+        </button>
+      </div>
+      <div class="launch-radar" aria-hidden="true">
+        <span class="radar-ring ring-a"></span>
+        <span class="radar-ring ring-b"></span>
+        <span class="radar-ring ring-c"></span>
+        <span class="radar-line line-horizontal"></span>
+        <span class="radar-line line-vertical"></span>
+        <i class="bi bi-geo-alt-fill"></i>
+      </div>
+    </section>
+  }
+
+  @if (status === 'locating') {
+    <div class="locating-panel" role="status">
+      <div class="satellite-scan" aria-hidden="true">
+        <i class="bi bi-satellite"></i>
+        <span></span>
+      </div>
+      <div>
+        <strong>Acquiring a position fix</strong>
+        <p>{{ highAccuracy ? 'For the best result, move near a window or step outside.' : 'Checking available location sources.' }}</p>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary ms-auto" (click)="stop()">Cancel</button>
+    </div>
+  }
+
+  @if (status === 'active' || status === 'paused') {
+    <div class="visually-hidden" aria-live="polite" aria-atomic="true">{{ announcement }}</div>
+
+    @if (warning) {
+      <div class="signal-warning" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <span>{{ warning }} Showing the last reliable fix.</span>
+        <button class="btn-close" (click)="dismissWarning()" aria-label="Dismiss warning"></button>
+      </div>
+    }
+
+    <div class="gps-toolbar">
+      <div class="live-status">
+        <span class="status-dot" [class.is-paused]="status === 'paused'"></span>
+        <strong>{{ status === 'active' ? 'Tracking position' : 'Tracking paused' }}</strong>
+        <span>{{ fixCount }} {{ fixCount === 1 ? 'fix' : 'fixes' }}</span>
+      </div>
+
+      <div class="toolbar-controls">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Measurement units">
+          <button class="btn" [class.btn-primary]="units === 'metric'"
+            [class.btn-outline-secondary]="units !== 'metric'" (click)="setUnits('metric')">Metric</button>
+          <button class="btn" [class.btn-primary]="units === 'imperial'"
+            [class.btn-outline-secondary]="units !== 'imperial'" (click)="setUnits('imperial')">Imperial</button>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" (click)="resetTrack()" title="Reset track statistics"
+          aria-label="Reset track statistics">
+          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+        </button>
+        @if (status === 'active') {
+          <button class="btn btn-sm btn-outline-secondary" (click)="stop()" title="Pause GPS" aria-label="Pause GPS">
+            <i class="bi bi-pause-fill" aria-hidden="true"></i>
+          </button>
+        } @else {
+          <button class="btn btn-sm btn-primary" (click)="start()" title="Resume GPS" aria-label="Resume GPS">
+            <i class="bi bi-play-fill" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-stretch">
+      <div class="col-xl-7">
+        <section class="position-board" [class.is-paused]="status === 'paused'">
+          <div class="board-heading">
+            <span>Position fix</span>
+            <span>{{ lastFixText }}</span>
+          </div>
+
+          <div class="fix-visual" aria-hidden="true">
+            <span class="fix-axis horizontal"></span>
+            <span class="fix-axis vertical"></span>
+            <span class="accuracy-disc" [style.width.%]="accuracyDiscSize"
+              [style.height.%]="accuracyDiscSize"></span>
+            <span class="fix-point"><i class="bi bi-crosshair2"></i></span>
+          </div>
+
+          <div class="coordinate-block">
+            <div>
+              <span>Latitude</span>
+              <strong>{{ latitudeText }}</strong>
+            </div>
+            <div>
+              <span>Longitude</span>
+              <strong>{{ longitudeText }}</strong>
+            </div>
+          </div>
+
+          <div class="board-footer">
+            <div class="accuracy-badge" [class]="accuracyClass">
+              <i class="bi bi-bullseye" aria-hidden="true"></i>
+              <span><strong>{{ accuracyLabel }}</strong> &plusmn; {{ accuracyText }}</span>
+            </div>
+            <button class="btn btn-light" (click)="copyCoordinates()">
+              <i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy coordinates
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-5">
+        <section class="gps-telemetry">
+          <div class="telemetry-heading">
+            <div>
+              <span class="eyebrow">Field telemetry</span>
+              <h5>Movement &amp; elevation</h5>
+            </div>
+            @if (heading !== null) {
+              <i class="bi bi-cursor-fill heading-arrow" aria-hidden="true"
+                [style.transform]="'rotate(' + headingRotation + 'deg)'"></i>
+            }
+          </div>
+
+          <div class="primary-reading">
+            <span>Current speed</span>
+            <div><strong>{{ speedText }}</strong><small>{{ speedUnit }}</small></div>
+          </div>
+
+          <div class="telemetry-list">
+            <div>
+              <span><i class="bi bi-triangle-fill" aria-hidden="true"></i>Altitude</span>
+              <strong>{{ altitudeText }}</strong>
+              <small>{{ altitudeAccuracyText || 'accuracy unavailable' }}</small>
+            </div>
+            <div>
+              <span><i class="bi bi-compass" aria-hidden="true"></i>Heading</span>
+              <strong>{{ headingText }}</strong>
+              <small>{{ heading === null ? 'requires movement' : 'course over ground' }}</small>
+            </div>
+            <div>
+              <span><i class="bi bi-signpost-split" aria-hidden="true"></i>Track distance</span>
+              <strong>{{ distanceText }}</strong>
+              <small>filters small GPS drift</small>
+            </div>
+            <div>
+              <span><i class="bi bi-speedometer2" aria-hidden="true"></i>Peak speed</span>
+              <strong>{{ maxSpeedText }} {{ speedUnit }}</strong>
+              <small>this session</small>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+</div>
