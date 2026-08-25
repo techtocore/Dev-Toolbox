@@ -5,7 +5,6 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import "bootstrap";
 import { SidebarMenuComponent } from './sidebar-menu/sidebar-menu.component';
 import { HomeComponent } from './home/home.component';
 import { JsonTreeComponent } from './json-tree/json-tree.component';

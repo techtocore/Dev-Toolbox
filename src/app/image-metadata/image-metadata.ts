@@ -45,6 +45,7 @@ export class ImageMetadata implements OnDestroy {
   errorMessage = '';
 
   private selectedFile: File | null = null;
+  private loadSeq = 0;
 
   constructor(
     public utilityService: UtilityService,
@@ -52,6 +53,7 @@ export class ImageMetadata implements OnDestroy {
   ) {}
 
   ngOnDestroy(): void {
+    this.loadSeq++;
     this.revokePreview();
   }
 
@@ -79,8 +81,18 @@ export class ImageMetadata implements OnDestroy {
 
   private handleFiles(files: FileList): void {
     const file = files[0];
+    const seq = ++this.loadSeq;
+    this.loading = false;
+    this.stripping = false;
+    this.revokePreview();
+    this.selectedFile = null;
+    this.fileName = '';
+    this.fileSizeLabel = '';
     this.resetResults();
 
+    if (!file) {
+      return;
+    }
     if (!ImageMetadata.ACCEPTED.includes(file.type)) {
       this.errorMessage = `Unsupported file type "${file.type || 'unknown'}". Choose a JPEG, PNG, or WebP image.`;
       return;
@@ -101,20 +113,22 @@ export class ImageMetadata implements OnDestroy {
     this.fileName = file.name;
     this.fileSizeLabel = this.formatBytes(file.size);
 
-    this.revokePreview();
     this.previewUrl = URL.createObjectURL(file);
 
-    void this.parseMetadata(file);
+    void this.parseMetadata(file, seq);
   }
 
   // ---- EXIF parsing ------------------------------------------------------
 
-  private async parseMetadata(file: File): Promise<void> {
+  private async parseMetadata(file: File, seq: number): Promise<void> {
     this.loading = true;
     this.errorMessage = '';
     try {
       const exifr = (await import('exifr')).default;
       const tags = await exifr.parse(file, { gps: true, translateValues: true });
+      if (seq !== this.loadSeq) {
+        return;
+      }
 
       if (!tags || Object.keys(tags).length === 0) {
         this.noMetadata = true;
@@ -128,11 +142,15 @@ export class ImageMetadata implements OnDestroy {
         this.noMetadata = true;
       }
     } catch (err) {
-      this.errorMessage =
-        'Could not read metadata from this image. ' +
-        (err instanceof Error ? err.message : 'The file may be corrupt or unsupported.');
+      if (seq === this.loadSeq) {
+        this.errorMessage =
+          'Could not read metadata from this image. ' +
+          (err instanceof Error ? err.message : 'The file may be corrupt or unsupported.');
+      }
     } finally {
-      this.loading = false;
+      if (seq === this.loadSeq) {
+        this.loading = false;
+      }
     }
   }
 
@@ -239,6 +257,7 @@ export class ImageMetadata implements OnDestroy {
 
   async downloadStripped(): Promise<void> {
     if (!this.selectedFile || !this.previewUrl) return;
+    const seq = this.loadSeq;
     this.stripping = true;
     this.errorMessage = '';
     try {
@@ -246,16 +265,23 @@ export class ImageMetadata implements OnDestroy {
       if (!blob) {
         throw new Error('The browser could not re-encode this image.');
       }
+      if (seq !== this.loadSeq) {
+        return;
+      }
       const ext = this.exportFormat === 'png' ? 'png' : 'jpg';
       const base = this.baseName(this.fileName);
       this.utilityService.downloadBlob(blob, `${base}-stripped.${ext}`);
       this.toastService.success('Stripped copy downloaded');
     } catch (err) {
-      this.errorMessage =
-        'Could not create a stripped copy. ' +
-        (err instanceof Error ? err.message : 'The image may be too large or unsupported.');
+      if (seq === this.loadSeq) {
+        this.errorMessage =
+          'Could not create a stripped copy. ' +
+          (err instanceof Error ? err.message : 'The image may be too large or unsupported.');
+      }
     } finally {
-      this.stripping = false;
+      if (seq === this.loadSeq) {
+        this.stripping = false;
+      }
     }
   }
 
@@ -301,6 +327,9 @@ export class ImageMetadata implements OnDestroy {
   // ---- helpers -----------------------------------------------------------
 
   clear(): void {
+    this.loadSeq++;
+    this.loading = false;
+    this.stripping = false;
     this.revokePreview();
     this.selectedFile = null;
     this.fileName = '';

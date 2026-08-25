@@ -1,4 +1,5 @@
 import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import type { PDFDocument as PDFDocumentType } from 'pdf-lib';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -23,14 +24,15 @@ export class PdfOrganize implements OnDestroy {
   pages: PageEntry[] = [];
   /** Name of the loaded file, used to label the UI and the download. */
   fileName: string = '';
-  /** Raw bytes of the loaded PDF, copied for safe lazy re-use on apply. */
-  private sourceBytes: Uint8Array | null = null;
+  /** Parsed source document, reused so applying changes does not reparse the PDF. */
+  private sourceDocument: PDFDocumentType | null = null;
 
   loading: boolean = false;
   errorMessage: string = '';
 
   /** Cap uploads at a sensible size to avoid locking up the browser. */
   private readonly maxBytes = 100 * 1024 * 1024; // 100 MB
+  private loadSeq = 0;
 
   constructor(
     public utilityService: UtilityService,
@@ -38,7 +40,8 @@ export class PdfOrganize implements OnDestroy {
   ) {}
 
   ngOnDestroy(): void {
-    this.sourceBytes = null;
+    this.loadSeq++;
+    this.sourceDocument = null;
   }
 
   // ---- Upload / dropzone --------------------------------------------------
@@ -61,7 +64,10 @@ export class PdfOrganize implements OnDestroy {
 
   private async handleFiles(files: FileList): Promise<void> {
     const file = files[0];
+    const seq = ++this.loadSeq;
     this.errorMessage = '';
+    this.loading = false;
+    this.reset();
 
     if (!file) return;
 
@@ -81,11 +87,16 @@ export class PdfOrganize implements OnDestroy {
     }
 
     this.loading = true;
-    this.reset();
     try {
       const { PDFDocument } = await import('pdf-lib');
       const bytes = new Uint8Array(await file.arrayBuffer());
+      if (seq !== this.loadSeq) {
+        return;
+      }
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      if (seq !== this.loadSeq) {
+        return;
+      }
       // pdf-lib can't decrypt — ignoreEncryption only suppresses the throw, so an
       // encrypted source would rebuild into a corrupt PDF. Refuse it up front.
       if (doc.isEncrypted) {
@@ -98,7 +109,7 @@ export class PdfOrganize implements OnDestroy {
         return;
       }
 
-      this.sourceBytes = bytes;
+      this.sourceDocument = doc;
       this.fileName = file.name;
       this.pages = Array.from({ length: count }, (_, idx) => ({
         srcIndex: idx,
@@ -106,11 +117,15 @@ export class PdfOrganize implements OnDestroy {
         deleted: false
       }));
     } catch (err: unknown) {
-      this.errorMessage =
-        'Could not read that PDF. It may be corrupt or not a valid PDF. ' +
-        (err instanceof Error ? err.message : '');
+      if (seq === this.loadSeq) {
+        this.errorMessage =
+          'Could not read that PDF. It may be corrupt or not a valid PDF. ' +
+          (err instanceof Error ? err.message : '');
+      }
     } finally {
-      this.loading = false;
+      if (seq === this.loadSeq) {
+        this.loading = false;
+      }
     }
   }
 
@@ -198,15 +213,14 @@ export class PdfOrganize implements OnDestroy {
   // ---- Apply & download ---------------------------------------------------
 
   async applyAndDownload(): Promise<void> {
-    if (!this.sourceBytes || !this.canDownload) return;
+    const src = this.sourceDocument;
+    if (!src || !this.canDownload) return;
 
     this.loading = true;
     this.errorMessage = '';
+    const seq = this.loadSeq;
     try {
       const { PDFDocument, degrees } = await import('pdf-lib');
-      const src = await PDFDocument.load(this.sourceBytes, {
-        ignoreEncryption: true
-      });
       const out = await PDFDocument.create();
 
       const kept = this.pages.filter(p => !p.deleted);
@@ -218,6 +232,9 @@ export class PdfOrganize implements OnDestroy {
       });
 
       const bytes = await out.save();
+      if (seq !== this.loadSeq) {
+        return;
+      }
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
       const sourceName = this.fileName.replace(/\.pdf$/i, '');
       const downloadName = this.utilityService.normalizeDownloadName(
@@ -228,17 +245,23 @@ export class PdfOrganize implements OnDestroy {
       this.utilityService.downloadBlob(blob, downloadName);
       this.toastService.success('Organized PDF downloaded');
     } catch (err: unknown) {
-      this.errorMessage =
-        'Failed to build the PDF. ' +
-        (err instanceof Error ? err.message : 'Unknown error.');
+      if (seq === this.loadSeq) {
+        this.errorMessage =
+          'Failed to build the PDF. ' +
+          (err instanceof Error ? err.message : 'Unknown error.');
+      }
     } finally {
-      this.loading = false;
+      if (seq === this.loadSeq) {
+        this.loading = false;
+      }
     }
   }
 
   // ---- Reset --------------------------------------------------------------
 
   clear(): void {
+    this.loadSeq++;
+    this.loading = false;
     this.reset();
     this.errorMessage = '';
   }
@@ -246,6 +269,6 @@ export class PdfOrganize implements OnDestroy {
   private reset(): void {
     this.pages = [];
     this.fileName = '';
-    this.sourceBytes = null;
+    this.sourceDocument = null;
   }
 }

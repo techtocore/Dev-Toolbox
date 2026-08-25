@@ -51,11 +51,15 @@
 - **Color Converter** — HEX ⇄ RGB ⇄ HSL ⇄ HSV ⇄ CMYK with a picker and a WCAG contrast check.
 - **IP & Browser Info** — Your public IP, ISP, location, timezone, and browser/device details.
 - **QR Code Generator** — QR codes from text, URLs, or Wi-Fi credentials; download as PNG or SVG.
+- **Bulk QR Code Generator** — Generate a batch of collision-safe QR images and download them as a ZIP.
+- **GZIP & Deflate Toolkit** — Compress and decompress text or files with GZIP, zlib, and raw DEFLATE formats.
 
 ### 📱 Device & Sensors
 - **Bubble Level** — A spirit level driven by your device's motion sensor, with calibration and haptics.
 - **Compass** — A magnetic compass with a live rotating rose.
 - **Sound Level Meter** — Live microphone loudness meter with peak/average stats (works on desktop too).
+- **Motion Lab** — Inspect live acceleration, rotation, orientation, and sampling data with recording and CSV export.
+- **GPS Field Meter** — Measure position, altitude, speed, heading, accuracy, and distance travelled with a live session log.
 
 ### 📄 PDF Tools *(all in-browser via `pdf-lib` — files never uploaded)*
 - **Merge PDF** — Combine multiple PDFs into one.
@@ -65,6 +69,7 @@
 
 ### 🖼️ Image & Media *(canvas / EXIF — nothing uploaded)*
 - **Image Resizer & Compressor** — Resize, compress, and convert (PNG / JPEG / WebP) with before/after sizes.
+- **Batch Image Format Converter** — Convert up to 100 PNG, JPEG, WebP, GIF, or BMP files and download multi-file results as a ZIP; animated PNG/WebP/GIF inputs are identified before first-frame conversion.
 - **Image Metadata Viewer & Stripper** — Inspect EXIF/GPS metadata and download a stripped, share-safe copy.
 - **Image to Base64 Data URI** — Convert an image to a data URI (with CSS/HTML snippets) and back.
 
@@ -123,7 +128,7 @@ npm run check    # lint + typecheck + tests + production audit + build
 
 ## 📦 Tech Stack
 
-- **Angular 22.2** — standalone-free NgModule app using the modern control-flow syntax (`@if`, `@for`).
+- **Angular 22.1** — NgModule app using the modern control-flow syntax (`@if`, `@for`) and targeted ESM imports to keep the initial bundle lean.
 - **TypeScript 6.0** — type-safe development (pinned `<6.1` to match Angular 22's build toolchain).
 - **Angular Service Worker** — installable, offline-capable PWA.
 - **Bootstrap 5.3** + **Bootstrap Icons** — responsive UI.

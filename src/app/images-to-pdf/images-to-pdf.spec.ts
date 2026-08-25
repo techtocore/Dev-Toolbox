@@ -54,4 +54,28 @@ describe('ImagesToPdf', () => {
     expect(component.images.length).toBe(100);
     expect(component.errorMessage).toContain('100-image limit');
   });
+
+  it('should not allocate an ArrayBuffer for browser-decoded inputs', async () => {
+    const utilityService = new UtilityService({} as ToastService);
+    const downloadSpy = spyOn(utilityService, 'downloadBlob');
+    const jpeg = {
+      name: 'photo.jpg',
+      type: 'image/jpeg',
+      size: 100,
+      arrayBuffer: jasmine.createSpy('arrayBuffer'),
+    } as unknown as File;
+    const builder = new ImagesToPdf(
+      utilityService,
+      jasmine.createSpyObj<ToastService>('ToastService', ['success'])
+    );
+    builder.images = [{ file: jpeg, name: jpeg.name, url: 'blob:photo' }];
+    spyOn<any>(builder, 'toPngDataUrl').and.resolveTo(
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+3MxZ5wAAAABJRU5ErkJggg=='
+    );
+
+    await builder.buildPdf();
+
+    expect(jpeg.arrayBuffer).not.toHaveBeenCalled();
+    expect(downloadSpy).toHaveBeenCalled();
+  });
 });

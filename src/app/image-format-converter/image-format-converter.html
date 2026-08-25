@@ -131,6 +131,12 @@
                 Animated images are converted from their first frame.
               </div>
             }
+            @if (animationDetectionIncomplete) {
+              <div class="alert alert-light border small" role="note">
+                Animation detection was unavailable for one or more files. Animated PNG or WebP
+                inputs may still be converted from their first frame.
+              </div>
+            }
 
             <button type="button" class="btn btn-primary w-100"
                     [disabled]="items.length === 0 || isConverting" (click)="convertAll()">

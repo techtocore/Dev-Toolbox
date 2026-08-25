@@ -116,7 +116,10 @@ export class BubbleLevel implements OnInit, OnDestroy {
     this.status = 'waiting';
     window.addEventListener('deviceorientation', this.onOrientation, true);
     this.noSignalTimer = setTimeout(() => {
-      if (this.status === 'waiting') this.status = 'unsupported';
+      if (this.status === 'waiting') {
+        this.status = 'unsupported';
+        this.stopListening();
+      }
     }, NO_SIGNAL_MS);
   }
 

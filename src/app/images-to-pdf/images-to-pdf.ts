@@ -181,25 +181,21 @@ export class ImagesToPdf implements OnDestroy {
       const failed: string[] = [];
       for (const item of this.images) {
         try {
-          const bytes = new Uint8Array(await item.file.arrayBuffer());
-
           let embedded: Awaited<ReturnType<typeof pdf.embedPng>>;
-          try {
-            if (item.file.type === 'image/png') {
+          if (item.file.type === 'image/png') {
+            try {
+              const bytes = new Uint8Array(await item.file.arrayBuffer());
               embedded = await pdf.embedPng(bytes);
-            } else {
-              // JPEGs (and everything else) go through the browser canvas. Drawing
-              // an <img> to a 2D canvas applies EXIF orientation (CSS
-              // image-orientation defaults to from-image) and decodes CMYK to RGBA,
-              // so toDataURL('image/png') yields an upright DeviceRGB PNG.
-              // embedJpg, by contrast, ignores EXIF orientation and reproduces CMYK
-              // via the DeviceCMYK path, producing sideways or mis-coloured pages.
+            } catch {
+              // Some valid-but-unusual encodings (e.g. interlaced PNG) can still
+              // trip up pdf-lib's parser. The browser decoder handles more of them.
               embedded = await pdf.embedPng(await this.toPngDataUrl(item.url));
             }
-          } catch {
-            // Some valid-but-unusual encodings (e.g. interlaced PNG) can still trip
-            // up pdf-lib's parser. Fall back to a browser canvas rasterisation,
-            // which decodes far more of them.
+          } else {
+            // JPEGs (and everything else) go through the browser canvas. Drawing
+            // an <img> to a 2D canvas applies EXIF orientation and decodes CMYK to
+            // RGBA, so it avoids sideways or mis-coloured pages. It also avoids an
+            // unnecessary full-file ArrayBuffer allocation for non-PNG inputs.
             embedded = await pdf.embedPng(await this.toPngDataUrl(item.url));
           }
 

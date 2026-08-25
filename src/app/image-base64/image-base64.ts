@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -9,7 +9,7 @@ import { ToastService } from '../services/toast.service';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-base64.scss',
 })
-export class ImageBase64 {
+export class ImageBase64 implements OnDestroy {
   /** Cap the upload at 15 MB — a data URI inflates ~33% over the raw bytes. */
   private static readonly MAX_BYTES = 15 * 1024 * 1024;
   /** Warn once a data URI passes ~1 MB, where inlining starts to hurt. */
@@ -42,6 +42,9 @@ export class ImageBase64 {
   /** Softer note shown when the data URI is valid but the browser won't preview it. */
   decodeNote = '';
 
+  private encodeSeq = 0;
+  private encodeReader: FileReader | null = null;
+
   constructor(
     public utilityService: UtilityService,
     private toastService: ToastService
@@ -71,6 +74,7 @@ export class ImageBase64 {
 
   private handleFiles(files: FileList): void {
     const file = files[0];
+    this.cancelPendingEncode();
     this.resetEncode();
 
     if (!file) {
@@ -89,17 +93,28 @@ export class ImageBase64 {
       return;
     }
 
-    void this.encodeFile(file);
+    void this.encodeFile(file, this.encodeSeq);
   }
 
-  private encodeFile(file: File): Promise<void> {
+  private encodeFile(file: File, seq: number): Promise<void> {
     return new Promise((resolve) => {
       const reader = new FileReader();
+      this.encodeReader = reader;
+      const finish = () => {
+        if (this.encodeReader === reader) {
+          this.encodeReader = null;
+        }
+        resolve();
+      };
       reader.onload = () => {
+        if (seq !== this.encodeSeq) {
+          finish();
+          return;
+        }
         const result = typeof reader.result === 'string' ? reader.result : '';
         if (!result.startsWith('data:')) {
           this.encodeError = 'Could not read that image as a data URI.';
-          resolve();
+          finish();
           return;
         }
         this.encodeUri = result;
@@ -107,12 +122,15 @@ export class ImageBase64 {
         this.fileName = file.name;
         this.fileMime = file.type;
         this.toastService.success(`Encoded ${file.name}`);
-        resolve();
+        finish();
       };
       reader.onerror = () => {
-        this.encodeError = 'Could not read that image. It may be corrupt or unsupported.';
-        resolve();
+        if (seq === this.encodeSeq) {
+          this.encodeError = 'Could not read that image. It may be corrupt or unsupported.';
+        }
+        finish();
       };
+      reader.onabort = finish;
       reader.readAsDataURL(file);
     });
   }
@@ -152,7 +170,16 @@ export class ImageBase64 {
   }
 
   clearEncode(): void {
+    this.cancelPendingEncode();
     this.resetEncode();
+  }
+
+  private cancelPendingEncode(): void {
+    this.encodeSeq++;
+    if (this.encodeReader?.readyState === FileReader.LOADING) {
+      this.encodeReader.abort();
+    }
+    this.encodeReader = null;
   }
 
   private resetEncode(): void {
@@ -303,5 +330,9 @@ export class ImageBase64 {
       return `${(bytes / 1024).toFixed(1)} KB`;
     }
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  ngOnDestroy(): void {
+    this.cancelPendingEncode();
   }
 }

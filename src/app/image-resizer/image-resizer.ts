@@ -81,6 +81,7 @@ export class ImageResizer implements OnDestroy {
 
   private handleFiles(files: FileList): void {
     const file = files[0];
+    const seq = ++this.loadSeq;
     this.errorMessage = '';
 
     if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
@@ -92,17 +93,16 @@ export class ImageResizer implements OnDestroy {
       return;
     }
 
-    void this.loadImage(file);
+    void this.loadImage(file, seq);
   }
 
-  private async loadImage(file: File): Promise<void> {
+  private async loadImage(file: File, seq: number): Promise<void> {
     // Replace any previously-loaded preview/result and revoke their URLs.
     this.revokePreview();
     this.revokeResult();
     this.hasResult = false;
     this.sourceImage = null;
 
-    const seq = ++this.loadSeq;
     const url = URL.createObjectURL(file);
     try {
       const img = await this.decode(url);
@@ -322,6 +322,7 @@ export class ImageResizer implements OnDestroy {
   }
 
   clearAll(): void {
+    this.loadSeq++;
     this.revokePreview();
     this.revokeResult();
     this.sourceImage = null;
@@ -353,6 +354,7 @@ export class ImageResizer implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.loadSeq++;
     this.revokePreview();
     this.revokeResult();
   }

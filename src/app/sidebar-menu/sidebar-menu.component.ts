@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef, NgZone
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { Collapse } from 'bootstrap';
+import Collapse from 'bootstrap/js/src/collapse';
 import { ToolsService } from '../services/tools.service';
 import { JsonTreeComponent } from '../json-tree/json-tree.component';
 

@@ -36,4 +36,26 @@ describe('ImageResizer', () => {
 
     expect(component.hasResult).toBeFalse();
   });
+
+  it('should ignore a pending decode after the tool is cleared', async () => {
+    let resolveDecode!: (image: HTMLImageElement) => void;
+    const decode = new Promise<HTMLImageElement>(resolve => resolveDecode = resolve);
+    spyOn<any>(component, 'decode').and.returnValue(decode);
+    spyOn(URL, 'createObjectURL').and.returnValue('blob:pending');
+    spyOn(URL, 'revokeObjectURL');
+    const file = new File(['image'], 'photo.png', { type: 'image/png' });
+    (component as any).loadSeq = 1;
+
+    const pending = (component as any).loadImage(file, 1);
+    component.clearAll();
+    resolveDecode({
+      naturalWidth: 640,
+      naturalHeight: 480,
+    } as HTMLImageElement);
+    await pending;
+
+    expect(component.previewUrl).toBeNull();
+    expect(component.fileName).toBe('');
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:pending');
+  });
 });

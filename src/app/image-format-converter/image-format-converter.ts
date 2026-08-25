@@ -4,6 +4,7 @@ import { UtilityService } from '../services/utility.service';
 
 type OutputFormat = 'png' | 'jpeg' | 'webp';
 type ConversionStatus = 'ready' | 'converting' | 'done' | 'error';
+type AnimationInspection = 'animated' | 'static' | 'unknown';
 
 export interface ConversionItem {
   file: File;
@@ -12,6 +13,8 @@ export interface ConversionItem {
   status: ConversionStatus;
   outputBytes: number;
   error: string;
+  animated?: boolean;
+  animationCheckFailed?: boolean;
 }
 
 interface ConversionOutput {
@@ -40,6 +43,7 @@ export class ImageFormatConverter implements OnDestroy {
   private static readonly MAX_OUTPUT_PIXELS = 40_000_000;
   private static readonly MAX_FILES = 100;
   private static readonly MAX_ARCHIVE_BYTES = 200 * 1024 * 1024;
+  private static readonly ANIMATION_SCAN_BYTES = 1024 * 1024;
 
   items: ConversionItem[] = [];
   format: OutputFormat = 'webp';
@@ -58,7 +62,11 @@ export class ImageFormatConverter implements OnDestroy {
   }
 
   get hasAnimatedInput(): boolean {
-    return this.items.some(item => item.file.type === 'image/gif');
+    return this.items.some(item => item.animated);
+  }
+
+  get animationDetectionIncomplete(): boolean {
+    return this.items.some(item => item.animationCheckFailed);
   }
 
   get completedCount(): number {
@@ -122,14 +130,19 @@ export class ImageFormatConverter implements OnDestroy {
         continue;
       }
 
-      this.items.push({
+      const item: ConversionItem = {
         file,
         name: file.name,
         url: URL.createObjectURL(file),
         status: 'ready',
         outputBytes: 0,
         error: '',
-      });
+        animated: file.type === 'image/gif',
+      };
+      this.items.push(item);
+      if (file.type === 'image/png' || file.type === 'image/webp') {
+        void this.detectAnimation(item);
+      }
     }
 
     if (rejected.length) {
@@ -286,6 +299,7 @@ export class ImageFormatConverter implements OnDestroy {
     if (!width || !height) {
       throw new Error('Image has no usable dimensions.');
     }
+
     if (width * height > ImageFormatConverter.MAX_OUTPUT_PIXELS) {
       throw new Error('Image exceeds the 40-megapixel conversion limit.');
     }
@@ -312,6 +326,98 @@ export class ImageFormatConverter implements OnDestroy {
       throw new Error(`This browser cannot encode ${this.format.toUpperCase()}.`);
     }
     return blob;
+  }
+
+  private async detectAnimation(item: ConversionItem): Promise<void> {
+    try {
+      const bytes = new Uint8Array(
+        await item.file.slice(0, ImageFormatConverter.ANIMATION_SCAN_BYTES).arrayBuffer()
+      );
+      if (!this.items.includes(item)) {
+        return;
+      }
+      const result = item.file.type === 'image/png'
+        ? this.inspectPngAnimation(bytes)
+        : this.inspectWebpAnimation(bytes);
+      item.animated = result === 'animated';
+      item.animationCheckFailed = result === 'unknown';
+    } catch {
+      if (this.items.includes(item)) {
+        item.animationCheckFailed = true;
+      }
+    }
+  }
+
+  private inspectPngAnimation(bytes: Uint8Array): AnimationInspection {
+    const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+    if (bytes.length < signature.length
+      || signature.some((value, index) => bytes[index] !== value)) {
+      return 'unknown';
+    }
+
+    let offset = signature.length;
+    while (offset + 12 <= bytes.length) {
+      const dataLength = this.readUint32(bytes, offset, false);
+      const chunkEnd = offset + 12 + dataLength;
+      if (chunkEnd > bytes.length) {
+        return 'unknown';
+      }
+      const chunkType = this.readAscii(bytes, offset + 4, 4);
+      if (chunkType === 'acTL') {
+        return 'animated';
+      }
+      // APNG requires acTL before the first image-data chunk.
+      if (chunkType === 'IDAT' || chunkType === 'IEND') {
+        return 'static';
+      }
+      offset = chunkEnd;
+    }
+    return 'unknown';
+  }
+
+  private inspectWebpAnimation(bytes: Uint8Array): AnimationInspection {
+    if (bytes.length < 12
+      || this.readAscii(bytes, 0, 4) !== 'RIFF'
+      || this.readAscii(bytes, 8, 4) !== 'WEBP') {
+      return 'unknown';
+    }
+
+    const riffEnd = this.readUint32(bytes, 4, true) + 8;
+    let offset = 12;
+    while (offset + 8 <= bytes.length && offset < riffEnd) {
+      const chunkType = this.readAscii(bytes, offset, 4);
+      const dataLength = this.readUint32(bytes, offset + 4, true);
+      const chunkEnd = offset + 8 + dataLength + (dataLength % 2);
+      if (chunkEnd > bytes.length) {
+        return 'unknown';
+      }
+      if (chunkType === 'VP8X') {
+        if (dataLength < 1) {
+          return 'unknown';
+        }
+        return (bytes[offset + 8] & 0x02) !== 0 ? 'animated' : 'static';
+      }
+      if (chunkType === 'ANIM' || chunkType === 'ANMF') {
+        return 'animated';
+      }
+      if (chunkType === 'VP8 ' || chunkType === 'VP8L') {
+        return 'static';
+      }
+      offset = chunkEnd;
+    }
+    return offset >= riffEnd ? 'static' : 'unknown';
+  }
+
+  private readUint32(bytes: Uint8Array, offset: number, littleEndian: boolean): number {
+    return new DataView(
+      bytes.buffer,
+      bytes.byteOffset + offset,
+      4
+    ).getUint32(0, littleEndian);
+  }
+
+  private readAscii(bytes: Uint8Array, offset: number, length: number): string {
+    return String.fromCharCode(...bytes.subarray(offset, offset + length));
   }
 
   private decode(url: string): Promise<HTMLImageElement> {

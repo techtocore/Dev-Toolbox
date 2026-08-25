@@ -1,4 +1,5 @@
 import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import type { PDFDocument as PDFDocumentType } from 'pdf-lib';
 import { UtilityService } from '../services/utility.service';
 import { ToastService } from '../services/toast.service';
 
@@ -12,8 +13,8 @@ import { ToastService } from '../services/toast.service';
 export class PdfSplit implements OnDestroy {
   /** Currently loaded PDF file. */
   fileName: string = '';
-  /** Raw bytes of the loaded PDF, kept so we can re-run extractions without re-reading. */
-  private pdfBytes: Uint8Array | null = null;
+  /** Parsed source document, reused so repeated extractions do not reparse the PDF. */
+  private sourceDocument: PDFDocumentType | null = null;
   /** Total page count of the loaded document. */
   pageCount: number = 0;
 
@@ -25,6 +26,7 @@ export class PdfSplit implements OnDestroy {
 
   /** Max accepted file size (50 MB) to avoid runaway parses. */
   private readonly maxBytes = 50 * 1024 * 1024;
+  private loadSeq = 0;
 
   constructor(
     public utilityService: UtilityService,
@@ -32,7 +34,8 @@ export class PdfSplit implements OnDestroy {
   ) {}
 
   ngOnDestroy(): void {
-    this.pdfBytes = null;
+    this.loadSeq++;
+    this.sourceDocument = null;
   }
 
   // ---- Upload / dropzone handlers ----
@@ -59,7 +62,9 @@ export class PdfSplit implements OnDestroy {
 
   private async handleFiles(files: FileList): Promise<void> {
     const file = files[0];
+    const seq = ++this.loadSeq;
     this.errorMessage = '';
+    this.isLoading = false;
 
     // Drop any previously loaded document up front so an invalid pick/drop
     // leaves the tool in a clean empty state instead of showing the old
@@ -67,6 +72,9 @@ export class PdfSplit implements OnDestroy {
     this.resetDocument();
     this.fileName = '';
 
+    if (!file) {
+      return;
+    }
     const name = (file.name || '').toLowerCase();
     if (!name.endsWith('.pdf') && file.type !== 'application/pdf') {
       this.errorMessage = 'Please choose a PDF file.';
@@ -86,10 +94,16 @@ export class PdfSplit implements OnDestroy {
 
     try {
       const buffer = await file.arrayBuffer();
+      if (seq !== this.loadSeq) {
+        return;
+      }
       const bytes = new Uint8Array(buffer);
 
       const { PDFDocument } = await import('pdf-lib');
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      if (seq !== this.loadSeq) {
+        return;
+      }
 
       // pdf-lib can't decrypt — ignoreEncryption only suppresses the throw, the
       // content streams stay encrypted. Refuse up front instead of emitting a
@@ -100,7 +114,7 @@ export class PdfSplit implements OnDestroy {
         return;
       }
 
-      this.pdfBytes = bytes;
+      this.sourceDocument = doc;
       this.pageCount = doc.getPageCount();
       this.fileName = file.name;
 
@@ -113,13 +127,17 @@ export class PdfSplit implements OnDestroy {
       // Default to every page so the action is usable immediately.
       this.selectAll();
       this.toastService.info(`Loaded ${file.name} (${this.pageCount} page${this.pageCount === 1 ? '' : 's'})`);
-    } catch (err: any) {
-      this.errorMessage = err?.message
-        ? `Could not read this PDF: ${err.message}`
-        : 'Could not read this PDF. It may be corrupt or not a valid PDF.';
-      this.resetDocument();
+    } catch (err: unknown) {
+      if (seq === this.loadSeq) {
+        this.errorMessage = err instanceof Error
+          ? `Could not read this PDF: ${err.message}`
+          : 'Could not read this PDF. It may be corrupt or not a valid PDF.';
+        this.resetDocument();
+      }
     } finally {
-      this.isLoading = false;
+      if (seq === this.loadSeq) {
+        this.isLoading = false;
+      }
     }
   }
 
@@ -211,7 +229,7 @@ export class PdfSplit implements OnDestroy {
 
   /** Live preview of how many pages will be extracted, for the button label. */
   get selectedCount(): number {
-    if (!this.pdfBytes || this.pageCount === 0) return 0;
+    if (!this.sourceDocument || this.pageCount === 0) return 0;
     try {
       return this.parseSelection(this.selection).length;
     } catch {
@@ -224,7 +242,8 @@ export class PdfSplit implements OnDestroy {
   async extract(): Promise<void> {
     this.errorMessage = '';
 
-    if (!this.pdfBytes || this.pageCount === 0) {
+    const source = this.sourceDocument;
+    if (!source || this.pageCount === 0) {
       this.errorMessage = 'Load a PDF first.';
       return;
     }
@@ -238,15 +257,18 @@ export class PdfSplit implements OnDestroy {
     }
 
     this.isLoading = true;
+    const seq = this.loadSeq;
     try {
       const { PDFDocument } = await import('pdf-lib');
-      const source = await PDFDocument.load(this.pdfBytes, { ignoreEncryption: true });
       const out = await PDFDocument.create();
 
       const copied = await out.copyPages(source, indices);
       copied.forEach(page => out.addPage(page));
 
       const bytes = await out.save();
+      if (seq !== this.loadSeq) {
+        return;
+      }
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
       const sourceName = this.fileName.replace(/\.pdf$/i, '');
       const downloadName = this.utilityService.normalizeDownloadName(
@@ -256,23 +278,29 @@ export class PdfSplit implements OnDestroy {
       );
       this.utilityService.downloadBlob(blob, downloadName);
       this.toastService.success(`Extracted ${indices.length} page${indices.length === 1 ? '' : 's'}`);
-    } catch (err: any) {
-      this.errorMessage = err?.message
-        ? `Extraction failed: ${err.message}`
-        : 'Extraction failed.';
+    } catch (err: unknown) {
+      if (seq === this.loadSeq) {
+        this.errorMessage = err instanceof Error
+          ? `Extraction failed: ${err.message}`
+          : 'Extraction failed.';
+      }
     } finally {
-      this.isLoading = false;
+      if (seq === this.loadSeq) {
+        this.isLoading = false;
+      }
     }
   }
 
   clear(): void {
+    this.loadSeq++;
+    this.isLoading = false;
     this.resetDocument();
     this.fileName = '';
     this.errorMessage = '';
   }
 
   private resetDocument(): void {
-    this.pdfBytes = null;
+    this.sourceDocument = null;
     this.pageCount = 0;
     this.selection = '';
   }
